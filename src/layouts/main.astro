@@ -1,0 +1,21 @@
+---
+import '../styles/global.css';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    {import.meta.env.DEV && (
+      <script
+        is:inline
+        crossorigin="anonymous"
+        src="//unpkg.com/react-scan@0.5.7/dist/auto.global.js"
+      ></script>
+    )}
+    <slot name="head" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
