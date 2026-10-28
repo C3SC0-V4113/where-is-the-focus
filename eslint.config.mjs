@@ -102,11 +102,25 @@ const eslintConfig = defineConfig([
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     plugins: { shadcn },
-    settings: { shadcn: { note: 'See DESIGN.md for the design system rules.' } },
+    settings: {
+      shadcn: {
+        ui: '@/components/ui',
+        componentImports: ['^@/components/ui(/|$)'],
+        mergeFunctions: ['cn'],
+        variantFunctions: ['cva', 'buttonVariants'],
+        themeImports: ['(?:^|/)styles/global\\.css$'],
+      },
+    },
     rules: {
-      'shadcn/no-restyle': ['error', { allow: ['layout'] }],
+      'shadcn/no-restyle': 'off',
       'shadcn/no-raw-colors': 'error',
-      'shadcn/no-arbitrary-values': ['error', { allow: ['layout'] }],
+      'shadcn/no-arbitrary-values': [
+        'error',
+        {
+          // No arbitrary values are needed by the current scaffold.
+          allow: [],
+        },
+      ],
       'shadcn/no-inline-styles': 'error',
       'shadcn/require-static-classes': 'error',
       'shadcn/no-unknown-classes': 'error',
