@@ -21,9 +21,9 @@ This file is the UI/UX source of truth for this app.
 
 The `lint` script enforces these rules with `@shadcn/lint`, and each error points back to this file:
 
-- `shadcn/no-restyle`: do not restyle a component through `className`. Layout classes such as `mt-4` and `w-full` are allowed; use a variant or size for anything else.
+- `shadcn/no-restyle`: disabled because primitives in `src/components/ui/` can be adapted locally when the design requires it; prefer modifying the base over creating one-use variants.
 - `shadcn/no-raw-colors`: use semantic tokens instead of raw palette colors such as `bg-pink-500`.
-- `shadcn/no-arbitrary-values`: stay on the theme scale instead of arbitrary values such as `p-[13px]`; arbitrary layout values are allowed.
+- `shadcn/no-arbitrary-values`: stay on the theme scale instead of arbitrary values such as `p-[13px]`; the rule uses a concrete `allow` list, with a justification for each class.
 - `shadcn/no-inline-styles`: do not use inline styles or `<style>` elements in components.
 - `shadcn/require-static-classes`: keep component classes readable by the linter; do not interpolate them, as in `bg-${color}`.
 - `shadcn/no-unknown-classes`: only use classes Tailwind can generate.
