@@ -33,8 +33,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # CI runs chromium only; the full firefox/webkit matrix stays on the local
-      # `test:e2e` script. Browser binaries are cached keyed by the installed
+      # CI runs desktop and mobile Chromium; the full firefox/webkit matrix stays
+      # on the local `test:e2e` script. Browser binaries are cached keyed by the installed
       # @playwright/test version so a bump invalidates the cache. OS-level deps
       # are not cacheable, so on a hit we still run install-deps.
       - name: Resolve Playwright version
@@ -57,7 +57,7 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: Run Playwright tests
-        run: pnpm exec playwright test --project=chromium
+        run: pnpm exec playwright test --project=chromium --project=mobile-chromium
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v7.0.2
