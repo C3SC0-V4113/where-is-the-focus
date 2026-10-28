@@ -4,7 +4,7 @@ This file is the UI/UX source of truth for this app.
 
 ## Principles
 
-- Treat this as an editorial page for long-form reading, with a column around 66ch and serif Literata prose when the fonts arrive in PR 4.
+- Treat this as an editorial page for long-form reading, with a column around 66ch and serif Literata prose once the font assets are added.
 - Make the labs the product surface: dense, calm, and easy to scan.
 - Treat visible focus as a first-class requirement: use the `focus-ring` double ring with `:focus-visible`, maintain at least 3:1 contrast against its background, and respect `forced-colors`.
 - Use semantic tokens from `src/styles/global.css`; add new tokens in the PR that first uses them.
