@@ -113,12 +113,14 @@ test('keyboard focus uses a system outline in forced colors', async ({ page }) =
       style: computed.outlineStyle,
       width: computed.outlineWidth,
       color: computed.outlineColor,
+      boxShadow: computed.boxShadow,
     };
   });
 
   expect(outline.style).toBe('solid');
   expect(outline.width).toBe('3px');
   expect(outline.color).not.toBe('rgba(0, 0, 0, 0)');
+  expect(outline.boxShadow).toBe('none');
 });
 
 test('focus and muted tokens meet contrast thresholds in light and dark themes', async ({
