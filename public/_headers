@@ -1,0 +1,13 @@
+# This read-only static site has no device, location, payment, or credential APIs.
+# Keep sensor, media, payment, capture, USB, and WebAuthn features disabled.
+# Fullscreen is the only enabled feature and is limited to this same-origin site.
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  Permissions-Policy: accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), usb=()
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=31536000
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 0
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'; base-uri 'none'; object-src 'none'
