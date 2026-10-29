@@ -56,17 +56,25 @@ jobs:
           WRANGLER_SEND_METRICS: 'false'
           CI: 'true'
 
+      - name: Prepare writable ZAP work directory
+        run: |
+          mkdir -p "$RUNNER_TEMP/zap"
+          cp .zap/rules.tsv "$RUNNER_TEMP/zap/rules.tsv"
+          chmod -R a+rwX "$RUNNER_TEMP/zap"
+
       - name: Run passive ZAP Baseline
+        # Keep WARNs in the reports; only rules marked FAIL in rules.tsv block CI.
         run: >-
           docker run --rm --network host
-          -v "$GITHUB_WORKSPACE:/zap/wrk/:rw"
+          -v "$RUNNER_TEMP/zap:/zap/wrk/:rw"
           -w /zap/wrk
           ghcr.io/zaproxy/zaproxy@sha256:030d3df57735dacbb83464854758e674dd9ad01d79d12a129a8e58b1fd384238
           zap-baseline.py
           -t http://127.0.0.1:8787/
-          -c .zap/rules.tsv
+          -c rules.tsv
           -r zap-report.html
           -J zap-report.json
+          -I
 
       - name: Stop Wrangler
         if: ${{ always() }}
@@ -81,7 +89,7 @@ jobs:
         with:
           name: zap-reports
           path: |
-            zap-report.html
-            zap-report.json
+            ${{ runner.temp }}/zap/zap-report.html
+            ${{ runner.temp }}/zap/zap-report.json
           if-no-files-found: ignore
           retention-days: 7

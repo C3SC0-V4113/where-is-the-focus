@@ -5,3 +5,5 @@
 10035	FAIL	(Strict-Transport-Security Header)
 10038	FAIL	(Content Security Policy (CSP) Header Not Set)
 10063	FAIL	(Permissions Policy Header Not Set)
+# FAIL site isolation regressions, including the Francisco-approved COEP header.
+90004	FAIL	(Insufficient Site Isolation Against Spectre Vulnerability)
