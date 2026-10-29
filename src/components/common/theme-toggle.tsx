@@ -55,14 +55,14 @@ export function ThemeToggle({ label, light, dark }: Props) {
     >
       <ToggleGroupItem
         value="light"
-        className="min-h-7 min-w-7 gap-1.5 rounded-sm border border-transparent px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-background aria-pressed:border-border aria-pressed:bg-background aria-pressed:text-foreground not-focus-visible:aria-pressed:shadow-xs sm:w-20 forced-colors:not-focus-visible:aria-pressed:outline-1 forced-colors:not-focus-visible:aria-pressed:outline-current forced-colors:not-focus-visible:aria-pressed:outline-solid"
+        className="min-h-7 min-w-7 gap-1.5 rounded-sm border border-transparent px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-background aria-pressed:border-border aria-pressed:bg-background aria-pressed:text-foreground not-focus-visible:aria-pressed:shadow-xs sm:min-w-24 forced-colors:not-focus-visible:aria-pressed:outline-1 forced-colors:not-focus-visible:aria-pressed:outline-current forced-colors:not-focus-visible:aria-pressed:outline-solid"
       >
         <Sun aria-hidden="true" className="size-3.5" />
         <span className="sr-only sm:not-sr-only">{light}</span>
       </ToggleGroupItem>
       <ToggleGroupItem
         value="dark"
-        className="min-h-7 min-w-7 gap-1.5 rounded-sm border border-transparent px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-background aria-pressed:border-border aria-pressed:bg-background aria-pressed:text-foreground not-focus-visible:aria-pressed:shadow-xs sm:w-20 forced-colors:not-focus-visible:aria-pressed:outline-1 forced-colors:not-focus-visible:aria-pressed:outline-current forced-colors:not-focus-visible:aria-pressed:outline-solid"
+        className="min-h-7 min-w-7 gap-1.5 rounded-sm border border-transparent px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-background aria-pressed:border-border aria-pressed:bg-background aria-pressed:text-foreground not-focus-visible:aria-pressed:shadow-xs sm:min-w-24 forced-colors:not-focus-visible:aria-pressed:outline-1 forced-colors:not-focus-visible:aria-pressed:outline-current forced-colors:not-focus-visible:aria-pressed:outline-solid"
       >
         <Moon aria-hidden="true" className="size-3.5" />
         <span className="sr-only sm:not-sr-only">{dark}</span>
