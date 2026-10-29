@@ -1,0 +1,95 @@
+name: ZAP Baseline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zap-baseline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: 12.14.0
+
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build static site
+        run: pnpm exec astro build
+        env:
+          SITE_URL: https://a.example
+
+      - name: Serve static assets with Wrangler
+        run: |
+          set -euo pipefail
+          nohup pnpm exec wrangler dev --host 0.0.0.0 --port 8787 > "$RUNNER_TEMP/wrangler.log" 2>&1 &
+          echo "$!" > "$RUNNER_TEMP/wrangler.pid"
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error http://127.0.0.1:8787/ --output /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/wrangler.log"
+          exit 1
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+          CI: 'true'
+
+      - name: Prepare writable ZAP work directory
+        run: |
+          mkdir -p "$RUNNER_TEMP/zap"
+          cp .zap/rules.tsv "$RUNNER_TEMP/zap/rules.tsv"
+          chmod -R a+rwX "$RUNNER_TEMP/zap"
+
+      - name: Run passive ZAP Baseline
+        # Keep WARNs in the reports; only rules marked FAIL in rules.tsv block CI.
+        run: >-
+          docker run --rm --network host
+          -v "$RUNNER_TEMP/zap:/zap/wrk/:rw"
+          -w /zap/wrk
+          ghcr.io/zaproxy/zaproxy@sha256:030d3df57735dacbb83464854758e674dd9ad01d79d12a129a8e58b1fd384238
+          zap-baseline.py
+          -t http://127.0.0.1:8787/
+          -c rules.tsv
+          -r zap-report.html
+          -J zap-report.json
+          -I
+
+      - name: Stop Wrangler
+        if: ${{ always() }}
+        run: |
+          if [ -f "$RUNNER_TEMP/wrangler.pid" ]; then
+            kill "$(cat "$RUNNER_TEMP/wrangler.pid")" || true
+          fi
+
+      - name: Upload ZAP reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: zap-reports
+          path: |
+            ${{ runner.temp }}/zap/zap-report.html
+            ${{ runner.temp }}/zap/zap-report.json
+          if-no-files-found: ignore
+          retention-days: 7

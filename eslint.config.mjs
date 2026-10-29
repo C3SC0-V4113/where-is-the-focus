@@ -140,6 +140,7 @@ const eslintConfig = defineConfig([
     '.atl/**',
     '.react-scan/**',
     '.astro/**',
+    '.wrangler/**',
     'src/components/ui/**',
   ]),
 ]);
