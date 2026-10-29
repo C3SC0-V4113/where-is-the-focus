@@ -1,0 +1,7 @@
+# ZAP Baseline rule configuration.
+# FAIL makes regressions of planned H1 response protections fail the CI job.
+10020	FAIL	(Anti-clickjacking Header)
+10021	FAIL	(X-Content-Type-Options Header Missing)
+10035	FAIL	(Strict-Transport-Security Header)
+10038	FAIL	(Content Security Policy (CSP) Header Not Set)
+10063	FAIL	(Permissions Policy Header Not Set)
