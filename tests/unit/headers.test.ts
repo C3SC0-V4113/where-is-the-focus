@@ -44,6 +44,7 @@ describe('Cloudflare static security headers', () => {
     expect(Object.fromEntries(rules.get('/*') ?? [])).toEqual({
       'cross-origin-opener-policy': 'same-origin',
       'cross-origin-resource-policy': 'same-origin',
+      'cross-origin-embedder-policy': 'require-corp',
       'permissions-policy':
         'accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), usb=()',
       'referrer-policy': 'strict-origin-when-cross-origin',
