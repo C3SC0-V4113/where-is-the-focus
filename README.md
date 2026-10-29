@@ -1,81 +1,30 @@
-# Astro with Tailwind
+# Where is the focus
+
+An accessible, bilingual reference for keyboard focus indicators. Spanish is the default language at `/`; English is available at `/en/`.
+
+## Public site URL
+
+`SITE_URL` is a build-time value used for canonical URLs, language alternates, the sitemap, and the robots file. It is required for `astro build` and must be an HTTPS origin without a path, query, fragment, or credentials. The build normalizes an optional trailing slash to the origin. Changing it requires rebuilding the site.
+
+For local builds, copy `.env.example` to `.env` and set `SITE_URL` to the intended HTTPS origin. The value is optional while running `astro dev`, `astro check`, `astro sync`, or `astro preview`; without it, absolute URL metadata is omitted, the sitemap endpoint returns 404, and robots.txt omits its sitemap line. CI and Cloudflare should provide `SITE_URL` as a build environment variable before running the build. No production domain is configured in this repository.
+
+## Development
 
 ```sh
-pnpm create astro@latest -- --template with-tailwindcss
+pnpm install
+pnpm run dev
 ```
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/with-tailwindcss)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/with-tailwindcss)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/with-tailwindcss/devcontainer.json)
+## Quality checks
 
-Astro comes with [Tailwind](https://tailwindcss.com) support out of the box. This example showcases how to style your Astro project with Tailwind.
-
-For complete setup instructions, please see our [Tailwind Styling Guide](https://docs.astro.build/en/guides/styling/#tailwind).
-
-<!-- BEGIN:purrfold-managed -->
-
-## Quality
-
-```bash
+```sh
 pnpm run lint
 pnpm run typecheck
 pnpm run format:check
 pnpm run test
+pnpm run test:e2e
 pnpm run doctor
 pnpm run check
 ```
 
-## Routes and languages
-
-`/` is the unprefixed Spanish default and `/en/` serves English (`astro.config.mjs`). Shared strings live in `src/i18n/messages.ts`, with English matching the Spanish dictionary shape; route chrome uses Astro without client hydration.
-
-## Tooling
-
-- Astro project with TypeScript, Tailwind, and React islands.
-- shadcn UI initialized through the shadcn CLI.
-- ESLint flat config with strict Astro, React, import ordering, and Prettier integration.
-- `@shadcn/lint` enforcing the design system rules in `DESIGN.md`.
-- React Doctor and React Scan.
-- Vitest and React Testing Library.
-- Playwright E2E testing.
-- Conventional commit linting.
-
-## shadcn MCP
-
-purrfold attempted shadcn MCP setup during scaffold.
-
-Manual setup commands for this package manager:
-
-```bash
-pnpm dlx shadcn@latest mcp init --client claude
-pnpm dlx shadcn@latest mcp init --client codex
-pnpm dlx shadcn@latest mcp init --client opencode
-```
-
-Codex may require user-level configuration in `~/.codex/config.toml`:
-
-```toml
-[mcp_servers.shadcn]
-command = "pnpm"
-args = ["dlx", "shadcn@latest", "mcp"]
-```
-
-## shadcn Presets
-
-purrfold forwards additional shadcn CLI arguments, including official presets:
-
-```bash
-npx purrfold@latest my-app --shadcn-args --preset b3REw8vwo --yes
-npx purrfold@latest my-app --shadcn-args --preset b1sSLwZVp --yes
-npx purrfold@latest my-app --shadcn-args --preset b2qMI9ufY --yes
-npx purrfold@latest my-app --shadcn-args --preset b5eH0WVTX --yes
-```
-
-## Agent Docs
-
-- `AGENTS.md`: agent workflow and quality gates.
-- `DESIGN.md`: generic UI/UX guardrails.
-- `.agents/skills`: agent skills downloaded by `skills.sh` from their published sources. If any are missing, rerun `sh skills.sh`.
-- `CLAUDE.md`: Claude Code pointer to `AGENTS.md`.
-
-<!-- END:purrfold-managed -->
+E2E tests build and preview the site using a reserved `.example` hostname.
