@@ -126,7 +126,7 @@ for (const locale of locales) {
     async ({ page }) => {
       const header = page.locator('header');
 
-      for (const width of [320, 375]) {
+      for (const width of [320, 375, 640]) {
         await page.setViewportSize({ width, height: 800 });
         await page.goto(locale.route);
 
@@ -201,12 +201,53 @@ for (const locale of locales) {
       expect(box!.height).toBeLessThanOrEqual(1);
     }
 
-    await page.setViewportSize({ width: 1280, height: 800 });
-    for (const label of [locale.light, locale.dark]) {
-      const box = await page.getByText(label, { exact: true }).boundingBox();
-      expect(box).not.toBeNull();
-      expect(box!.width).toBeGreaterThan(1);
-      expect(box!.height).toBeGreaterThan(1);
+    for (const width of [640, 1280]) {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto(locale.route);
+      await page.evaluate(() => document.fonts.ready);
+
+      for (const label of [locale.light, locale.dark]) {
+        const box = await page.getByText(label, { exact: true }).boundingBox();
+        expect(box).not.toBeNull();
+        expect(box!.width).toBeGreaterThan(1);
+        expect(box!.height).toBeGreaterThan(1);
+      }
+
+      const labelFits = await page.getByRole('group').evaluate((group) =>
+        [...group.querySelectorAll('button')].map((button) => {
+          const label = button.querySelector('span');
+          if (!label || label.getClientRects().length === 0) {
+            return null;
+          }
+
+          const buttonRect = button.getBoundingClientRect();
+          const labelRect = label.getBoundingClientRect();
+          const style = getComputedStyle(button);
+          const contentRight =
+            buttonRect.right -
+            Number.parseFloat(style.borderRightWidth) -
+            Number.parseFloat(style.paddingRight);
+
+          return {
+            label: label.textContent,
+            scrollWidth: button.scrollWidth,
+            clientWidth: button.clientWidth,
+            labelRight: labelRect.right,
+            contentRight,
+          };
+        })
+      );
+
+      for (const fit of labelFits) {
+        expect(fit, 'theme label should be visible').not.toBeNull();
+        expect(fit!.scrollWidth, `${fit!.label} overflows its button`).toBeLessThanOrEqual(
+          fit!.clientWidth
+        );
+        expect(
+          fit!.labelRight,
+          `${fit!.label} extends beyond its button content area`
+        ).toBeLessThanOrEqual(fit!.contentRight + 0.5);
+      }
     }
     const row = await page.locator('header').evaluate((header) => {
       const brand = header.querySelector(':scope > a')!.getBoundingClientRect();
