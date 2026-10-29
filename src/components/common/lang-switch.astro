@@ -8,10 +8,13 @@ interface Props {
 const { locale } = Astro.props;
 const messages = locale === 'en' ? en : es;
 const linkClass =
-  'inline-flex min-h-10 min-w-10 items-center justify-center rounded-md px-2 text-sm font-medium text-foreground hover:bg-accent aria-[current=page]:font-semibold aria-[current=page]:underline aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-4';
+  'inline-flex min-h-7 min-w-7 items-center justify-center rounded-sm border border-transparent px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-background aria-[current=page]:border-border aria-[current=page]:bg-background aria-[current=page]:text-foreground not-focus-visible:aria-[current=page]:shadow-xs forced-colors:not-focus-visible:aria-[current=page]:outline-1 forced-colors:not-focus-visible:aria-[current=page]:outline-solid forced-colors:not-focus-visible:aria-[current=page]:outline-current';
 ---
 
-<nav aria-label={messages.languageLabel} class="flex items-center gap-1">
+<nav
+  aria-label={messages.languageLabel}
+  class="flex items-center gap-0.5 rounded-md border border-border bg-muted p-0.5"
+>
   <a
     href="/"
     hreflang="es"

@@ -13,8 +13,18 @@ function formatCrossTreeSelector(selector: AxeNodeTarget[number]): string {
   return typeof selector === 'string' ? selector : selector.flat(Infinity).join(' >>> ');
 }
 
-async function expectNoViolations(page: Page, route: string) {
+async function expectNoViolations(
+  page: Page,
+  route: string,
+  label: string,
+  theme: 'light' | 'dark'
+) {
+  await page.emulateMedia({ colorScheme: theme });
+  await page.addInitScript((storedTheme: 'light' | 'dark') => {
+    localStorage.setItem('foco-theme', storedTheme);
+  }, theme);
   await page.goto(route);
+  await expect(page.getByRole('group', { name: label })).toBeVisible();
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .analyze();
@@ -33,11 +43,16 @@ async function expectNoViolations(page: Page, route: string) {
   expect(violations, `Axe found accessibility violations at ${route}:\n${details}`).toHaveLength(0);
 }
 
-for (const route of ['/', '/en/']) {
-  test(`home page at ${route} has no automatically detectable tagged accessibility violations`, async ({
-    page,
-  }) => {
-    await expectNoViolations(page, route);
-    await expect(page.getByRole('main')).toBeVisible();
-  });
+for (const locale of [
+  { route: '/', label: 'Tema' },
+  { route: '/en/', label: 'Theme' },
+]) {
+  for (const theme of ['light', 'dark'] as const) {
+    test(`home page at ${locale.route} in ${theme} mode has no automatically detectable tagged accessibility violations`, async ({
+      page,
+    }) => {
+      await expectNoViolations(page, locale.route, locale.label, theme);
+      await expect(page.getByRole('main')).toBeVisible();
+    });
+  }
 }
