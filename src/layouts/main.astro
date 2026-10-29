@@ -10,6 +10,15 @@ interface Props {
 
 const { locale } = Astro.props;
 const messages = locale === 'en' ? en : es;
+const site = Astro.site;
+const canonical = site ? new URL(locale === 'en' ? '/en/' : '/', site).href : undefined;
+const alternateUrls = site
+  ? {
+      es: new URL('/', site).href,
+      en: new URL('/en/', site).href,
+    }
+  : undefined;
+const ogLocale = locale === 'en' ? 'en_US' : 'es_ES';
 ---
 
 <html lang={locale}>
@@ -36,6 +45,22 @@ const messages = locale === 'en' ? en : es;
     <title>{messages.title}</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={messages.description} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    {alternateUrls && (
+      <>
+        <link rel="alternate" hreflang="es" href={alternateUrls.es} />
+        <link rel="alternate" hreflang="en" href={alternateUrls.en} />
+        <link rel="alternate" hreflang="x-default" href={alternateUrls.es} />
+      </>
+    )}
+    <meta property="og:title" content={messages.title} />
+    <meta property="og:description" content={messages.description} />
+    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:locale:alternate" content={locale === 'en' ? 'es_ES' : 'en_US'} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    {canonical && <meta property="og:url" content={canonical} />}
     {import.meta.env.DEV && (
       <script
         is:inline
