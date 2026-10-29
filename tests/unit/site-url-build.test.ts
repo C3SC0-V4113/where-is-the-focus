@@ -42,6 +42,8 @@ describe('SITE_URL build behavior', () => {
     expect(english).toContain('hreflang="x-default" href="https://b.example/"');
     expect(spanish).toContain('<meta property="og:url" content="https://b.example/"');
     expect(english).toContain('<meta property="og:url" content="https://b.example/en/"');
+    expect(spanish).toContain('<meta property="og:image" content="https://b.example/og/og-es.png"');
+    expect(english).toContain('<meta property="og:image" content="https://b.example/og/og-en.png"');
     expect(sitemap).toContain('<loc>https://b.example/</loc>');
     expect(sitemap).toContain('<loc>https://b.example/en/</loc>');
     expect(robots).toContain('Sitemap: https://b.example/sitemap.xml');
