@@ -1,8 +1,12 @@
 ---
-import { es } from '../i18n/messages';
+import Hero from '../components/focus/hero.astro';
+import Toc from '../components/focus/toc.astro';
 import Layout from '../layouts/main.astro';
 ---
 
 <Layout locale="es">
-  <h1>{es.title}</h1>
+  <Fragment slot="before-main">
+    <Hero locale="es" />
+    <Toc locale="es" />
+  </Fragment>
 </Layout>
