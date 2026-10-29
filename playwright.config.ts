@@ -31,7 +31,8 @@ export default defineConfig({
       timeout: 180_000,
     },
     {
-      command: 'pnpm exec wrangler dev --host 127.0.0.1 --port 8787',
+      command:
+        'attempt=0; until curl --fail --silent --max-time 1 http://127.0.0.1:3000/ --output /dev/null; do attempt=$((attempt + 1)); if [ "$attempt" -ge 180 ]; then echo "Astro preview did not become ready" >&2; exit 1; fi; sleep 1; done; exec pnpm exec wrangler dev --host 127.0.0.1 --port 8787',
       env: { WRANGLER_SEND_METRICS: 'false', CI: '1' },
       url: wranglerBaseUrl,
       reuseExistingServer: false,
