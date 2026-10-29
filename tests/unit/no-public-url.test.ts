@@ -9,6 +9,7 @@ const sourceFiles = [
   '.env.example',
   ...filesInDirectory('src/lib'),
   ...filesInDirectory('src/layouts'),
+  ...filesInDirectory('src/i18n'),
   ...filesInDirectory('src/pages', (path) => path.endsWith('.ts')),
 ];
 
