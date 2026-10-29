@@ -19,6 +19,9 @@ const alternateUrls = site
     }
   : undefined;
 const ogLocale = locale === 'en' ? 'en_US' : 'es_ES';
+const ogImage = site
+  ? new URL(locale === 'en' ? '/og/og-en.png' : '/og/og-es.png', site).href
+  : undefined;
 ---
 
 <html lang={locale}>
@@ -45,6 +48,8 @@ const ogLocale = locale === 'en' ? 'en_US' : 'es_ES';
     <title>{messages.title}</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="description" content={messages.description} />
     {canonical && <link rel="canonical" href={canonical} />}
     {alternateUrls && (
@@ -59,8 +64,16 @@ const ogLocale = locale === 'en' ? 'en_US' : 'es_ES';
     <meta property="og:locale" content={ogLocale} />
     <meta property="og:locale:alternate" content={locale === 'en' ? 'es_ES' : 'en_US'} />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     {canonical && <meta property="og:url" content={canonical} />}
+    {ogImage && (
+      <>
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={messages.ogImageAlt} />
+      </>
+    )}
     {import.meta.env.DEV && (
       <script
         is:inline
