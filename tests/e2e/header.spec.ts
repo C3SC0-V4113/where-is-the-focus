@@ -6,7 +6,6 @@ const locales = [
     languageLabel: 'Idioma',
     currentLanguage: 'ES (Español)',
     otherLanguage: 'EN (English)',
-    languageTabOrder: ['ES (Español)'],
     light: 'Claro',
     dark: 'Oscuro',
     skipLink: 'Saltar al contenido',
@@ -16,7 +15,6 @@ const locales = [
     languageLabel: 'Language',
     currentLanguage: 'EN (English)',
     otherLanguage: 'ES (Español)',
-    languageTabOrder: ['ES (Español)', 'EN (English)'],
     light: 'Light',
     dark: 'Dark',
     skipLink: 'Skip to content',
@@ -32,10 +30,33 @@ async function readIndicator(locator: Locator) {
   return locator.evaluate((element) => {
     const style = getComputedStyle(element);
     return {
-      borderWidth: Number.parseFloat(style.borderTopWidth),
+      borderWidths: [
+        Number.parseFloat(style.borderTopWidth),
+        Number.parseFloat(style.borderRightWidth),
+        Number.parseFloat(style.borderBottomWidth),
+        Number.parseFloat(style.borderLeftWidth),
+      ],
       borderStyle: style.borderTopStyle,
+      boxShadow: style.boxShadow,
+      outlineStyle: style.outlineStyle,
+      outlineWidth: Number.parseFloat(style.outlineWidth),
     };
   });
+}
+
+async function readBox(locator: Locator) {
+  const box = await locator.boundingBox();
+  expect(box).not.toBeNull();
+  return { x: box!.x, y: box!.y, width: box!.width, height: box!.height };
+}
+
+function expectBoxesEqual(first: Awaited<ReturnType<typeof readBox>>, second: typeof first) {
+  for (const dimension of ['x', 'y', 'width', 'height'] as const) {
+    expect(
+      Math.abs(first[dimension] - second[dimension]),
+      `${dimension} changed from ${first[dimension]} to ${second[dimension]}`
+    ).toBeLessThanOrEqual(0.5);
+  }
 }
 
 function splitShadowLayers(boxShadow: string) {
@@ -195,6 +216,39 @@ for (const locale of locales) {
     expect(row).toBeLessThanOrEqual(1);
   });
 
+  test('keeps toggle boxes unchanged when selection moves at ' + locale.route, async ({ page }) => {
+    await page.addInitScript(() => localStorage.removeItem('foco-theme'));
+
+    for (const width of [320, 375, 1280]) {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto('/');
+
+      const spanishLink = page.getByRole('link', { name: 'ES (Español)' });
+      const englishLink = page.getByRole('link', { name: 'EN (English)' });
+      const lightButton = page.getByRole('button', { name: 'Claro' });
+      const darkButton = page.getByRole('button', { name: 'Oscuro' });
+      const spanishBox = await readBox(spanishLink);
+      const englishBox = await readBox(englishLink);
+      const lightBox = await readBox(lightButton);
+      const darkBox = await readBox(darkButton);
+      expect(lightBox.width).toBeGreaterThan(0);
+      expect(lightBox.height).toBeGreaterThan(0);
+      expect(darkBox.width).toBeGreaterThan(0);
+      expect(darkBox.height).toBeGreaterThan(0);
+
+      await darkButton.click();
+      expectBoxesEqual(lightBox, await readBox(lightButton));
+      expectBoxesEqual(darkBox, await readBox(darkButton));
+      await lightButton.click();
+      expectBoxesEqual(lightBox, await readBox(lightButton));
+      expectBoxesEqual(darkBox, await readBox(darkButton));
+
+      await page.goto('/en/');
+      expectBoxesEqual(spanishBox, await readBox(page.getByRole('link', { name: 'ES (Español)' })));
+      expectBoxesEqual(englishBox, await readBox(page.getByRole('link', { name: 'EN (English)' })));
+    }
+  });
+
   for (const colorMode of colorModes) {
     test(
       'marks selected language and theme without color alone at ' + locale.route + colorMode.name,
@@ -214,10 +268,28 @@ for (const locale of locales) {
             readIndicator(otherTheme),
           ]);
 
-        expect(selectedLanguageStyle.borderWidth).toBeGreaterThan(otherLanguageStyle.borderWidth);
+        expect(selectedLanguageStyle.borderWidths).toEqual([1, 1, 1, 1]);
+        expect(otherLanguageStyle.borderWidths).toEqual([1, 1, 1, 1]);
         expect(selectedLanguageStyle.borderStyle).toBe('solid');
-        expect(selectedThemeStyle.borderWidth).toBeGreaterThan(otherThemeStyle.borderWidth);
+        expect(selectedThemeStyle.borderWidths).toEqual([1, 1, 1, 1]);
+        expect(otherThemeStyle.borderWidths).toEqual([1, 1, 1, 1]);
         expect(selectedThemeStyle.borderStyle).toBe('solid');
+        expect(selectedLanguageStyle.boxShadow !== 'none' || colorMode.isForcedColors).toBe(true);
+        expect(otherLanguageStyle.boxShadow).toBe('none');
+        expect(selectedThemeStyle.boxShadow !== 'none' || colorMode.isForcedColors).toBe(true);
+        expect(otherThemeStyle.boxShadow).toBe('none');
+        expect(
+          selectedLanguageStyle.outlineStyle !== 'none' && selectedLanguageStyle.outlineWidth > 0
+        ).toBe(colorMode.isForcedColors);
+        expect(
+          otherLanguageStyle.outlineStyle !== 'none' && otherLanguageStyle.outlineWidth > 0
+        ).toBe(false);
+        expect(
+          selectedThemeStyle.outlineStyle !== 'none' && selectedThemeStyle.outlineWidth > 0
+        ).toBe(colorMode.isForcedColors);
+        expect(otherThemeStyle.outlineStyle !== 'none' && otherThemeStyle.outlineWidth > 0).toBe(
+          false
+        );
       }
     );
   }
@@ -232,13 +304,14 @@ for (const locale of locales) {
         await expect(page.getByRole('link', { name: locale.skipLink })).toBeFocused();
         await page.keyboard.press('Tab');
         await expect(page.locator('header').locator(':scope > a')).toBeFocused();
-        for (const languageName of locale.languageTabOrder) {
+        for (const languageName of ['ES (Español)', 'EN (English)']) {
           await page.keyboard.press('Tab');
           await expect(page.getByRole('link', { name: languageName })).toBeFocused();
+          await expectFocusRing(
+            page.getByRole('link', { name: languageName }),
+            colorMode.isForcedColors
+          );
         }
-        const selectedLanguage = page.getByRole('link', { name: locale.currentLanguage });
-        await expect(selectedLanguage).toBeFocused();
-        await expectFocusRing(selectedLanguage, colorMode.isForcedColors);
       }
     );
   }
