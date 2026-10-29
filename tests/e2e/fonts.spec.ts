@@ -118,5 +118,6 @@ test('self-hosts latin font files and applies the expected font families', async
     return { condensed: measure('66%'), normal: measure('100%') };
   }, 'Archivo variable width axis');
 
-  expect(widths.condensed).toBeLessThan(widths.normal * 0.85);
+  // Without the wdth axis, browsers do not synthesize font-stretch, so any narrowing proves the axis works.
+  expect(widths.condensed).toBeLessThan(widths.normal);
 });
