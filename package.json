@@ -66,6 +66,7 @@
     "@shadcn/lint": "0.2.3",
     "@testing-library/dom": "10.4.2",
     "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.8",
     "@types/node": "26.6.5",
     "@vitejs/plugin-react": "6.1.2",
     "@vitest/eslint-plugin": "1.6.27",
