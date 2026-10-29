@@ -3,21 +3,24 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-const trackedScope = [
+const sourceFiles = [
   'astro.config.mjs',
   'playwright.config.ts',
   '.env.example',
-  'README.md',
-  'src/lib',
-  'src/layouts',
-  'src/pages',
+  ...filesInDirectory('src/lib'),
+  ...filesInDirectory('src/layouts'),
+  ...filesInDirectory('src/pages', (path) => path.endsWith('.ts')),
 ];
 
-function sourceFiles(path: string): string[] {
+function filesInDirectory(path: string, include: (path: string) => boolean = () => true): string[] {
   const entries = readdirSync(path, { withFileTypes: true });
   return entries.flatMap((entry) => {
     const entryPath = join(path, entry.name);
-    return entry.isDirectory() ? sourceFiles(entryPath) : [entryPath];
+    return entry.isDirectory()
+      ? filesInDirectory(entryPath, include)
+      : include(entryPath)
+        ? [entryPath]
+        : [];
   });
 }
 
@@ -33,14 +36,7 @@ function hostIsAllowed(host: string) {
 
 describe('public URL hygiene', () => {
   it('contains no public absolute URL outside test and XML namespace hosts', () => {
-    const files = trackedScope.flatMap((path) => {
-      try {
-        return sourceFiles(path);
-      } catch {
-        return [path];
-      }
-    });
-    const violations = files.flatMap((file) => {
+    const violations = sourceFiles.flatMap((file) => {
       const content = readFileSync(file, 'utf8');
       const urls = content.matchAll(/https?:\/\/([^\s"'<>]+)/g);
       return Array.from(urls, ([url, authority]) => {
