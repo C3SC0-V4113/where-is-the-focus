@@ -79,3 +79,9 @@ npx purrfold@latest my-app --shadcn-args --preset b5eH0WVTX --yes
 - `CLAUDE.md`: Claude Code pointer to `AGENTS.md`.
 
 <!-- END:purrfold-managed -->
+
+## Public site URL
+
+`SITE_URL` is a build-time value used for canonical URLs, language alternates, the sitemap, and the robots file. It is required for `astro build` and must be an HTTPS origin without a path, query, fragment, or credentials. The build normalizes an optional trailing slash to the origin. Changing it requires rebuilding the site.
+
+For local builds, copy `.env.example` to `.env` and set `SITE_URL` to the intended HTTPS origin. The value is optional while running `astro dev`, `astro check`, `astro sync`, or `astro preview`; without it, absolute URL metadata is omitted, the sitemap endpoint returns 404, and robots.txt omits its sitemap line. CI and Cloudflare should provide `SITE_URL` as a build environment variable before running the build. E2E uses a reserved `.example` hostname. No production domain is configured in this repository.

@@ -22,7 +22,7 @@ export default defineConfig({
   webServer: {
     command: 'pnpm exec astro build && pnpm exec astro preview --host 127.0.0.1 --port 3000',
     // Keep Astro's agent auto-backgrounding off so Playwright can supervise it.
-    env: { ASTRO_PREVIEW_BACKGROUND: '1' },
+    env: { ASTRO_PREVIEW_BACKGROUND: '1', SITE_URL: 'https://a.example' },
     url: baseUrl,
     // Always start our preview; never reuse an unrelated Astro dev server.
     reuseExistingServer: false,
