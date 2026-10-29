@@ -52,11 +52,11 @@ const messages = locale === 'en' ? en : es;
     >
       {messages.skipLink}
     </a>
-    <header class="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-4 border-b border-border px-4 py-4">
-      <a href="#contenido" class="font-semibold text-foreground hover:underline">
+    <header class="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 border-b border-border px-4 py-4">
+      <a href="#contenido" class="min-w-0 font-semibold text-foreground hover:underline">
         {messages.title}
       </a>
-      <div class="flex flex-wrap items-center justify-end gap-2">
+      <div class="flex shrink-0 items-center gap-1.5">
         <LangSwitch locale={locale} />
         <ThemeToggle
           client:load

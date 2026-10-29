@@ -51,14 +51,21 @@ export function ThemeToggle({ label, light, dark }: Props) {
       multiple={false}
       value={[theme]}
       onValueChange={handleValueChange}
+      className="rounded-md border border-border bg-muted p-0.5"
     >
-      <ToggleGroupItem value="light">
-        <Sun aria-hidden="true" className="size-4" />
-        {light}
+      <ToggleGroupItem
+        value="light"
+        className="min-h-7 min-w-7 gap-1.5 rounded-sm border border-transparent px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-background aria-pressed:border-2 aria-pressed:border-border aria-pressed:bg-background aria-pressed:text-foreground"
+      >
+        <Sun aria-hidden="true" className="size-3.5" />
+        <span className="sr-only sm:not-sr-only">{light}</span>
       </ToggleGroupItem>
-      <ToggleGroupItem value="dark">
-        <Moon aria-hidden="true" className="size-4" />
-        {dark}
+      <ToggleGroupItem
+        value="dark"
+        className="min-h-7 min-w-7 gap-1.5 rounded-sm border border-transparent px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-background aria-pressed:border-2 aria-pressed:border-border aria-pressed:bg-background aria-pressed:text-foreground"
+      >
+        <Moon aria-hidden="true" className="size-3.5" />
+        <span className="sr-only sm:not-sr-only">{dark}</span>
       </ToggleGroupItem>
     </ToggleGroup>
   );
