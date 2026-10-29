@@ -1,8 +1,20 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const locales = [
-  { route: '/', locale: 'es', title: 'Dónde está el foco', nav: 'Idioma' },
-  { route: '/en/', locale: 'en', title: 'Where is the focus', nav: 'Language' },
+  {
+    route: '/',
+    locale: 'es',
+    title: 'Dónde está el foco',
+    heading: 'El foco también es diseño',
+    nav: 'Idioma',
+  },
+  {
+    route: '/en/',
+    locale: 'en',
+    title: 'Where is the focus',
+    heading: 'Focus is design too',
+    nav: 'Language',
+  },
 ] as const;
 
 async function expectLocalePage(
@@ -42,7 +54,7 @@ async function switchLanguages(page: Page) {
 for (const locale of locales) {
   test(`renders ${locale.locale} language metadata and selector state`, async ({ page }) => {
     await expectLocalePage(page, locale);
-    await expect(page.getByRole('heading', { level: 1, name: locale.title })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: locale.heading })).toBeVisible();
   });
 }
 
