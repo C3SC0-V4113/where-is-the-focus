@@ -4,6 +4,9 @@ export const es = {
   title: 'Dónde está el foco',
   skipLink: 'Saltar al contenido',
   languageLabel: 'Idioma',
+  themeLabel: 'Tema',
+  themeLight: 'Claro',
+  themeDark: 'Oscuro',
   footerName: 'Francisco Valle',
   footerRole: 'FrontEnd Web',
 } as const;
@@ -14,6 +17,9 @@ export const en = {
   title: 'Where is the focus',
   skipLink: 'Skip to content',
   languageLabel: 'Language',
+  themeLabel: 'Theme',
+  themeLight: 'Light',
+  themeDark: 'Dark',
   footerName: 'Francisco Valle',
   footerRole: 'FrontEnd Web',
 } satisfies MessageShape;

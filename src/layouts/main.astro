@@ -1,5 +1,6 @@
 ---
 import LangSwitch from '../components/common/lang-switch.astro';
+import { ThemeToggle } from '../components/common/theme-toggle';
 import { en, es, type Locale } from '../i18n/messages';
 import '../styles/global.css';
 
@@ -13,6 +14,25 @@ const messages = locale === 'en' ? en : es;
 
 <html lang={locale}>
   <head>
+    <script is:inline>
+      (() => {
+        let theme = null;
+        try {
+          const storedTheme = localStorage.getItem('foco-theme');
+          if (storedTheme === 'light' || storedTheme === 'dark') {
+            theme = storedTheme;
+          }
+        } catch {
+          // Storage may be disabled or unavailable.
+        }
+
+        if (theme === null) {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+      })();
+    </script>
     <title>{messages.title}</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
@@ -32,11 +52,19 @@ const messages = locale === 'en' ? en : es;
     >
       {messages.skipLink}
     </a>
-    <header class="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 border-b border-border px-4 py-4">
+    <header class="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-4 border-b border-border px-4 py-4">
       <a href="#contenido" class="font-semibold text-foreground hover:underline">
         {messages.title}
       </a>
-      <LangSwitch locale={locale} />
+      <div class="flex flex-wrap items-center justify-end gap-2">
+        <LangSwitch locale={locale} />
+        <ThemeToggle
+          client:load
+          label={messages.themeLabel}
+          light={messages.themeLight}
+          dark={messages.themeDark}
+        />
+      </div>
     </header>
     <main id="contenido" tabindex="-1" class="mx-auto w-full max-w-5xl flex-1 px-4 py-16">
       <slot />
