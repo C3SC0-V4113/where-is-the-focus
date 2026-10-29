@@ -8,10 +8,12 @@ async function insertAndFocusProbe(page: Page) {
     const link = document.createElement('a');
     link.href = '#focus-ring-probe';
     link.textContent = 'Focus ring probe';
-    document.body.prepend(link);
+    document.querySelector('header')?.before(link);
   });
 
   const link = page.getByRole('link', { name: 'Focus ring probe' });
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Saltar al contenido' })).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(link).toBeFocused();
   return link;

@@ -107,6 +107,7 @@ test('self-hosts latin font files and applies the expected font families', async
         fontSize: '32px',
         fontStretch: stretch,
         fontWeight: '400',
+        alignSelf: 'flex-start',
         whiteSpace: 'nowrap',
       });
       document.body.append(heading);
