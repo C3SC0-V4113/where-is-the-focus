@@ -25,6 +25,10 @@ pnpm run doctor
 pnpm run check
 ```
 
+## Routes and languages
+
+`/` is the unprefixed Spanish default and `/en/` serves English (`astro.config.mjs`). Shared strings live in `src/i18n/messages.ts`, with English matching the Spanish dictionary shape; route chrome uses Astro without client hydration.
+
 ## Tooling
 
 - Astro project with TypeScript, Tailwind, and React islands.

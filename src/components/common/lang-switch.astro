@@ -1,0 +1,33 @@
+---
+import { en, es, type Locale } from '../../i18n/messages';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const messages = locale === 'en' ? en : es;
+const linkClass =
+  'inline-flex min-h-10 min-w-10 items-center justify-center rounded-md px-2 text-sm font-medium text-foreground hover:bg-accent aria-[current=page]:font-semibold aria-[current=page]:underline aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-4';
+---
+
+<nav aria-label={messages.languageLabel} class="flex items-center gap-1">
+  <a
+    href="/"
+    hreflang="es"
+    lang="es"
+    aria-current={locale === 'es' ? 'page' : undefined}
+    class={linkClass}
+  >
+    ES<span class="sr-only"> ({messages.languageSpanish})</span>
+  </a>
+  <a
+    href="/en/"
+    hreflang="en"
+    lang="en"
+    aria-current={locale === 'en' ? 'page' : undefined}
+    class={linkClass}
+  >
+    EN<span class="sr-only"> ({messages.languageEnglish})</span>
+  </a>
+</nav>
