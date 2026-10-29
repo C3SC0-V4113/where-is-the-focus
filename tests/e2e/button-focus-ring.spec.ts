@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { cn } from 'cn';
 
 import { buttonVariants } from '../../src/components/ui/button';
 
@@ -24,7 +25,7 @@ async function insertButtons(page: Page) {
       }
       main.prepend(container);
     },
-    variants.map((variant) => ({ variant, className: buttonVariants({ variant }) }))
+    variants.map((variant) => ({ variant, className: cn(buttonVariants({ variant })) }))
   );
 }
 
@@ -41,7 +42,7 @@ async function focusFirstButtonWithTab(page: Page, button: Locator) {
 
 async function expectFocusRing(button: Locator) {
   const styles = await button.evaluate(async (element) => {
-    // Button usa transition-all; medimos el estado final.
+    // Button uses transition-all; measure the final state.
     await Promise.all(element.getAnimations().map((animation) => animation.finished));
     const computed = getComputedStyle(element);
     const colorProbe = document.createElement('span');
@@ -81,7 +82,7 @@ async function expectFocusRing(button: Locator) {
 
 async function expectForcedColorsFocusRing(button: Locator) {
   const styles = await button.evaluate(async (element) => {
-    // Button usa transition-all; medimos el estado final.
+    // Button uses transition-all; measure the final state.
     await Promise.all(element.getAnimations().map((animation) => animation.finished));
     const computed = getComputedStyle(element);
     return {
