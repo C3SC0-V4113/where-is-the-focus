@@ -8,7 +8,7 @@ interface Props {
 const { locale } = Astro.props;
 const messages = locale === 'en' ? en : es;
 const linkClass =
-  'inline-flex min-h-7 min-w-7 items-center justify-center rounded-sm border border-transparent px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-background aria-[current=page]:border-2 aria-[current=page]:border-border aria-[current=page]:bg-background aria-[current=page]:text-foreground';
+  'inline-flex min-h-7 min-w-7 items-center justify-center rounded-sm border border-transparent px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-background aria-[current=page]:border-border aria-[current=page]:bg-background aria-[current=page]:text-foreground not-focus-visible:aria-[current=page]:shadow-xs forced-colors:not-focus-visible:aria-[current=page]:outline-1 forced-colors:not-focus-visible:aria-[current=page]:outline-solid forced-colors:not-focus-visible:aria-[current=page]:outline-current';
 ---
 
 <nav
