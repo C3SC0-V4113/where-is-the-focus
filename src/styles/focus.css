@@ -1,4 +1,46 @@
 @layer components {
+  .arg :not(pre) > code {
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background-color: var(--muted);
+    padding: 0.05em 0.35em;
+    font-size: 0.84em;
+    white-space: nowrap;
+  }
+
+  .arg {
+    padding-block: clamp(48px, 8vw, 96px) 0;
+  }
+
+  .split {
+    border-radius: 4px;
+  }
+  .split > div {
+    padding: clamp(20px, 4vw, 36px);
+  }
+  .split h3 {
+    letter-spacing: 0.01em;
+  }
+  .split ol {
+    counter-reset: item;
+  }
+  .split li {
+    grid-template-columns: 2.2ch minmax(0, 1fr);
+    counter-increment: item;
+    font-size: 17px;
+    line-height: 1.45;
+  }
+  .split li::before {
+    padding-top: 4px;
+    content: counter(item);
+    font: 600 13px var(--font-mono);
+  }
+  .split .good code {
+    border-color: color-mix(in srgb, var(--brand-foreground) 30%, transparent);
+    background: color-mix(in srgb, var(--brand-foreground) 10%, transparent);
+    color: var(--brand-foreground);
+  }
+
   .hero {
     padding-block: clamp(40px, 8vw, 96px) clamp(32px, 6vw, 64px);
   }

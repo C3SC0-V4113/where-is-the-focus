@@ -67,6 +67,14 @@
 
 @theme inline {
   --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-text: var(--brand-text);
+  --color-success-text: var(--success-text);
+  --color-success-muted: var(--success-muted);
+  --color-warning-text: var(--warning-text);
+  --color-warning-muted: var(--warning-muted);
+  --color-destructive-text: var(--destructive-text);
+  --color-destructive-muted: var(--destructive-muted);
   --font-sans: 'Geist Variable', 'Segoe UI', system-ui, sans-serif;
   --font-serif: 'Literata Variable', Georgia, 'Times New Roman', serif;
   --font-display: 'Archivo Variable', 'Arial Narrow', Impact, sans-serif;
@@ -76,6 +84,10 @@
   --text-display--line-height: 1.07;
   --text-display--letter-spacing: -0.005em;
   --text-display--font-weight: 850;
+  --text-section: clamp(40px, 7vw, 84px);
+  --text-section--line-height: 0.96;
+  --text-section--letter-spacing: -0.005em;
+  --text-section--font-weight: 850;
   --text-lede: clamp(20px, 2.3vw, 24px);
   --text-lede--line-height: 1.45;
   --container-lede: 38ch;
@@ -139,6 +151,14 @@
   --input: oklch(0.922 0 0);
   --ring: oklch(0.47 0.25 266);
   --brand: oklch(0.47 0.25 266);
+  --brand-foreground: oklch(0.985 0 0);
+  --brand-text: oklch(0.47 0.25 266);
+  --success-text: oklch(0.43 0.11 155);
+  --success-muted: oklch(0.95 0.04 155);
+  --warning-text: oklch(0.48 0.11 65);
+  --warning-muted: oklch(0.96 0.05 85);
+  --destructive-text: oklch(0.46 0.17 27);
+  --destructive-muted: oklch(0.95 0.03 25);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -175,6 +195,14 @@
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.78 0.11 272);
   --brand: oklch(0.52 0.24 266);
+  --brand-foreground: oklch(0.985 0 0);
+  --brand-text: oklch(0.78 0.11 272);
+  --success-text: oklch(0.82 0.12 155);
+  --success-muted: oklch(0.27 0.05 155);
+  --warning-text: oklch(0.86 0.12 85);
+  --warning-muted: oklch(0.29 0.05 75);
+  --destructive-text: oklch(0.8 0.12 25);
+  --destructive-muted: oklch(0.27 0.06 25);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);

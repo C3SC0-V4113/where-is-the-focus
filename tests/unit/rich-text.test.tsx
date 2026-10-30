@@ -24,6 +24,31 @@ describe('RichText keyboard markers', () => {
     );
   });
 
+  it('renders backtick-delimited text as inline code inside the root span', () => {
+    expect(renderToStaticMarkup(<RichText text="Avoid `outline: none` here." />)).toBe(
+      '<span>Avoid <code>outline: none</code> here.</span>'
+    );
+  });
+
+  it('keeps inline code and keyboard markers in the same inline run', () => {
+    const view = renderToStaticMarkup(<RichText text="Use `:focus-visible` with [[Tab]] now." />);
+
+    expect(view).toMatch(
+      /^<span>Use <code>:focus-visible<\/code> with <kbd\b[^>]*data-slot="kbd"[^>]*>Tab<\/kbd> now\.<\/span>$/
+    );
+
+    const keyClassTokens = view.match(/<kbd\b[^>]*\bclass="([^"]*)"[^>]*>/)?.[1].split(/\s+/) ?? [];
+
+    expect(keyClassTokens).toContain('inline');
+    expect(keyClassTokens).not.toContain('inline-flex');
+  });
+
+  it('leaves unmatched backticks as plain text', () => {
+    expect(renderToStaticMarkup(<RichText text="Unmatched ` stays plain." />)).toBe(
+      '<span>Unmatched ` stays plain.</span>'
+    );
+  });
+
   it('keeps plain text unchanged', () => {
     render(
       <p data-testid="plain-text">

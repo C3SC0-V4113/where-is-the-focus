@@ -1,0 +1,85 @@
+---
+import { Badge } from '@/components/ui/badge';
+
+import { en, es, type Locale } from '../../i18n/messages';
+import { ComplianceBadge } from '../common/compliance-badge';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const text = (locale === 'en' ? en : es).sections.rules;
+const titles = text.criterionTitles.split('|');
+const descriptions = text.criterionText.split('|');
+const labels = text.stateLabels.split('|');
+const stateText = text.stateText.split('|');
+const criteria = [
+  ['2.4.7', 'AA', 'https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html'],
+  ['2.4.11', 'AA', 'https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html'],
+  ['1.4.11', 'AA', 'https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html'],
+  ['2.4.13', 'AAA', 'https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance.html'],
+] as const;
+const states = ['ok', 'warn', 'bad'] as const;
+---
+
+<section class="arg grid gap-6" aria-labelledby="h-reglas" id="reglas">
+  <div class="head grid gap-3.5">
+    <span class="num font-mono text-xs font-medium tracking-wider text-muted-foreground">
+      {text.number}
+    </span>
+    <h2 class="m-0 font-display text-section font-stretch-66% text-balance uppercase" id="h-reglas">
+      {text.title}
+    </h2>
+  </div>
+  <div class="intro grid max-w-prose gap-4 font-serif text-lg leading-relaxed">
+    <p>{text.intro}</p>
+  </div>
+  <div class="criteria grid border-t-2 border-foreground sm:grid-cols-2 lg:grid-cols-4">
+    {criteria.map(([id, level, href], index) => (
+      <div class="crit grid content-start gap-2 border-b border-border pt-4.5 pr-4.5 pb-5.5 sm:even:border-l sm:even:pl-4.5 lg:not-first:border-l lg:not-first:pl-4.5">
+        <div class="id flex items-baseline gap-2.5 font-mono text-sm font-semibold">
+          {id}
+          {level === 'AA' ? (
+            <Badge
+              variant="outline"
+              className="lvl aa h-auto rounded-sm px-1.5 font-semibold text-brand-text border-current"
+            >
+              AA
+            </Badge>
+          ) : (
+            <Badge
+              variant="outline"
+              className="lvl aaa h-auto rounded-sm px-1.5 font-semibold text-muted-foreground border-current"
+            >
+              AAA
+            </Badge>
+          )}
+        </div>
+        <h3 class="m-0 font-sans text-lg leading-tight font-semibold">
+          <a
+            class="text-foreground decoration-border underline-offset-4 hover:decoration-brand-text"
+            href={href}
+          >
+            {titles[index]}
+          </a>
+        </h3>
+        <p class="m-0 max-w-prose text-base leading-normal text-muted-foreground">
+          {descriptions[index]}
+        </p>
+      </div>
+    ))}
+  </div>
+  <div
+    class="legend flex flex-wrap items-center gap-x-5.5 gap-y-2.5 text-sm leading-normal text-muted-foreground"
+    role="group"
+    aria-label={text.legend}
+  >
+    {states.map((state, index) => (
+      <span class="item inline-flex items-center gap-2">
+        <ComplianceBadge state={state}>{labels[index]}</ComplianceBadge>
+        {stateText[index]}
+      </span>
+    ))}
+  </div>
+  <p class="more m-0 max-w-prose text-sm leading-normal text-muted-foreground">{text.more}</p>
+</section>

@@ -27,9 +27,43 @@ export const es = {
   themeDark: 'Oscuro',
   footerName: 'Francisco Valle',
   footerRole: 'FrontEnd Web',
+  sections: {
+    premise: {
+      number: '01 · El planteamiento',
+      title: 'El problema no es el foco.',
+      soft: 'Es el anillo que nadie diseñó.',
+      intro:
+        'Casi todas las quejas sobre el foco tienen el mismo origen: el contorno por defecto del navegador aparece después de cada clic y no combina con nada. La reacción habitual es quitarlo con una línea de CSS. Eso resuelve la queja visual, pero deja sin orientación a quien usa teclado, lector de pantalla o un dispositivo de acceso.',
+      lead: 'Hay una salida mejor, y casi siempre cuesta menos que la discusión: mostrar el foco solo cuando hace falta y diseñarlo como un estado más.',
+      failTitle: 'Lo que suele salir mal',
+      failures:
+        'Se elimina el contorno con `outline: none` y no se pone nada en su lugar.|El indicador es solo un cambio de color suave, por debajo del contraste 3:1.|Una cabecera fija o un banner tapa el elemento enfocado.|Al cerrar un modal o borrar un elemento, el foco se pierde en el inicio de la página.',
+      goodTitle: 'Lo que funciona',
+      good: '`:focus-visible` muestra el indicador con teclado y no después de un clic.|Un doble anillo, claro y oscuro, mantiene el contraste sobre cualquier fondo.|`scroll-padding` reserva el espacio de lo que está fijo.|El foco se mueve a propósito: al título nuevo, al siguiente elemento o al botón de origen.',
+    },
+    rules: {
+      number: '02 · Qué piden las reglas',
+      title: 'Visible, sin tapar y con contraste',
+      intro:
+        'Ningún criterio de WCAG obliga a usar un recuadro azul. Piden tres cosas: que el foco se vea, que nada lo cubra y que se distinga de lo que lo rodea. La forma es una decisión de diseño.',
+      criterionTitles: 'Foco visible|Foco no oculto|Contraste no textual|Apariencia del foco',
+      criterionText:
+        'Todo lo que se opera con teclado tiene un indicador visible. Quitar el contorno sin sustituto es un fallo directo.|Nuevo en 2.2. El elemento enfocado no puede quedar tapado por completo por cabeceras fijas, banners o chats.|El indicador necesita 3:1 frente a los colores que tiene al lado.|Opcional, pero es buena referencia: un área de al menos 2 px de perímetro y 3:1 entre el estado con foco y sin foco.',
+      legend: 'Cómo leer los resultados de los laboratorios',
+      stateLabels: 'Cumple|Parcial|No cumple',
+      stateText:
+        'cumple el criterio|cumple AA pero no AAA, o solo en parte de la superficie|falla un criterio AA',
+      more: 'Las páginas «Understanding» del W3C explican cada criterio con ejemplos y técnicas. Están enlazadas en el título de cada tarjeta.',
+    },
+  },
 } as const;
 
-type MessageShape = { [Key in keyof typeof es]: string };
+type Localized<T> = T extends readonly unknown[]
+  ? { [Key in keyof T]: Localized<T[Key]> }
+  : T extends object
+    ? { [Key in keyof T]: Localized<T[Key]> }
+    : string;
+type MessageShape = Localized<typeof es>;
 
 export const en = {
   title: 'Where is the focus',
@@ -58,4 +92,33 @@ export const en = {
   themeDark: 'Dark',
   footerName: 'Francisco Valle',
   footerRole: 'FrontEnd Web',
+  sections: {
+    premise: {
+      number: '01 · The premise',
+      title: 'The problem isn’t focus.',
+      soft: 'It’s the ring nobody designed.',
+      intro:
+        'Almost every complaint about focus has the same origin: the browser’s default outline appears after every click and matches nothing. The usual reaction is to remove it with one line of CSS. That solves the visual complaint, but leaves people who use a keyboard, a screen reader or an assistive device without orientation.',
+      lead: 'There is a better way out, and it usually costs less than the argument: show focus only when it’s needed and design it as one more state.',
+      failTitle: 'What usually goes wrong',
+      failures:
+        'The outline is removed with `outline: none` and nothing replaces it.|The indicator is only a subtle color change, below 3:1 contrast.|A sticky header or a banner covers the focused element.|When a modal closes or an item is deleted, focus is lost at the top of the page.',
+      goodTitle: 'What works',
+      good: '`:focus-visible` shows the indicator for keyboard users, not after a click.|A double ring, light and dark, keeps contrast on any background.|`scroll-padding` reserves the space taken by fixed elements.|Focus moves on purpose: to the new heading, the next item or the button that opened something.',
+    },
+    rules: {
+      number: '02 · What the rules ask for',
+      title: 'Visible, uncovered and with contrast',
+      intro:
+        'No WCAG criterion requires a blue box. They ask for three things: that focus can be seen, that nothing covers it and that it stands out from what surrounds it. The shape is a design decision.',
+      criterionTitles: 'Focus visible|Focus not obscured|Non-text contrast|Focus appearance',
+      criterionText:
+        'Everything operable by keyboard has a visible indicator. Removing the outline with no replacement is a direct failure.|New in 2.2. The focused element can’t be fully hidden by sticky headers, banners or chat widgets.|The indicator needs 3:1 against the colors next to it.|Optional, but a good benchmark: an area of at least a 2 px perimeter and 3:1 between the focused and unfocused states.',
+      legend: 'How to read the lab results',
+      stateLabels: 'Pass|Partial|Fail',
+      stateText:
+        'meets the criterion|meets AA but not AAA, or only on part of the surface|fails an AA criterion',
+      more: 'The W3C “Understanding” pages explain each criterion with examples and techniques. They’re linked from each card’s title.',
+    },
+  },
 } satisfies MessageShape;
