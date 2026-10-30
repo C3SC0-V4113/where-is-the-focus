@@ -10,14 +10,18 @@ export function RichText({ text }: Props) {
   const parts: ReactNode[] = [];
   let cursor = 0;
 
-  for (const match of text.matchAll(/\[\[([^\[\]]+)\]\]/g)) {
+  for (const match of text.matchAll(/\[\[([^\[\]]+)\]\]|`([^`\n]+)`/g)) {
     const start = match.index;
     const end = start + match[0].length;
     parts.push(text.slice(cursor, start));
     parts.push(
-      <Kbd key={text.slice(0, end)} className="inline">
-        {match[1]}
-      </Kbd>
+      match[1] !== undefined ? (
+        <Kbd key={text.slice(0, end)} className="inline">
+          {match[1]}
+        </Kbd>
+      ) : (
+        <code key={text.slice(0, end)}>{match[2]}</code>
+      )
     );
     cursor = end;
   }

@@ -1,4 +1,19 @@
 @layer components {
+  .arg :not(pre) > code {
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background-color: var(--muted);
+    padding: 0.05em 0.35em;
+    font-size: 0.84em;
+    white-space: nowrap;
+  }
+
+  .split .good code {
+    border-color: color-mix(in srgb, var(--brand-foreground) 30%, transparent);
+    background-color: color-mix(in srgb, var(--brand-foreground) 14%, transparent);
+    color: var(--brand-foreground);
+  }
+
   .hero {
     padding-block: clamp(40px, 8vw, 96px) clamp(32px, 6vw, 64px);
   }
