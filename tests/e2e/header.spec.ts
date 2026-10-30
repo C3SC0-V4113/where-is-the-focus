@@ -8,6 +8,7 @@ const locales = [
     otherLanguage: 'EN (English)',
     light: 'Claro',
     dark: 'Oscuro',
+    theme: 'Tema',
     skipLink: 'Saltar al contenido',
   },
   {
@@ -17,6 +18,7 @@ const locales = [
     otherLanguage: 'ES (Español)',
     light: 'Light',
     dark: 'Dark',
+    theme: 'Theme',
     skipLink: 'Skip to content',
   },
 ] as const;
@@ -213,7 +215,7 @@ for (const locale of locales) {
         expect(box!.height).toBeGreaterThan(1);
       }
 
-      const labelFits = await page.getByRole('group').evaluate((group) =>
+      const labelFits = await page.getByRole('group', { name: locale.theme }).evaluate((group) =>
         [...group.querySelectorAll('button')].map((button) => {
           const label = button.querySelector('span');
           if (!label || label.getClientRects().length === 0) {
