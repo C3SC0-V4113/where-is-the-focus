@@ -56,8 +56,12 @@ for (const { route, text } of copy) {
     await expect(sections.nth(0).locator('.prose p')).toHaveText([text.intro, text.lead]);
     await expect(sections.nth(1).locator('.prose')).toHaveText(text.ruleIntro);
     await expect(sections.locator('.split h3')).toHaveText(split(text.headings));
+    const lists = sections.nth(0).locator('.split').getByRole('list');
+    await expect(lists).toHaveCount(2);
     for (const [index, list] of text.lists.entries()) {
-      const items = sections.nth(0).locator('.split ol').nth(index).locator('li');
+      const column = lists.nth(index);
+      await expect.soft(column).toHaveAttribute('role', 'list');
+      const items = column.getByRole('listitem');
       await expect(items).toHaveCount(4);
       await expect(items).toHaveText(split(list));
     }
