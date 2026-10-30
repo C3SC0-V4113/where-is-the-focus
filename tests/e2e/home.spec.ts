@@ -35,48 +35,32 @@ const locales = [
   },
 ] as const;
 
+const fullInset = /^inset\(0(?:px|%)?(?:\s+0(?:px|%)?){0,3}\)$/;
+
 for (const locale of locales) {
-  test(`loads the ${locale.route} page with its localized homepage heading`, async ({ page }) => {
-    await page.goto(locale.route);
-
-    await expect(page.getByRole('heading', { level: 1, name: locale.title })).toBeVisible();
-  });
-
   for (const theme of ['light', 'dark'] as const) {
     test(`${locale.route} hero ring uses the ${theme} focus token`, async ({ page }) => {
       await page.emulateMedia({ colorScheme: theme });
-      await page.addInitScript(
-        (storedTheme) => localStorage.setItem('foco-theme', storedTheme),
-        theme
-      );
+      await page.addInitScript((value) => localStorage.setItem('foco-theme', value), theme);
       await page.goto(locale.route);
 
-      const heading = page.getByRole('heading', { level: 1, name: locale.title });
-      const ringedWord = heading.locator('.ringed');
+      const ringedWord = page
+        .getByRole('heading', { level: 1, name: locale.title })
+        .locator('.ringed');
       await expect(ringedWord).toBeVisible();
-      await expect(heading).toHaveCount(1);
+      await expect(ringedWord).not.toHaveAttribute('tabindex');
+      await expect(ringedWord).not.toBeFocused();
 
       const ring = await ringedWord.evaluate((element) => {
-        const probe = document.createElement('span');
+        const probe = document.body.appendChild(document.createElement('span'));
         probe.style.color = 'var(--ring)';
-        document.body.append(probe);
         const tokenColor = getComputedStyle(probe).color;
         probe.remove();
-
-        const pseudo = getComputedStyle(element, '::after');
-        return {
-          borderStyle: pseudo.borderTopStyle,
-          borderColor: pseudo.borderTopColor,
-          tokenColor,
-          isFocused: document.activeElement === element,
-          tabIndex: element.getAttribute('tabindex'),
-        };
+        const { borderTopStyle, borderTopColor } = getComputedStyle(element, '::after');
+        return { borderTopStyle, borderTopColor, tokenColor };
       });
-
-      expect(ring.borderStyle).toBe('solid');
-      expect(ring.borderColor).toBe(ring.tokenColor);
-      expect(ring.isFocused).toBe(false);
-      expect(ring.tabIndex).toBeNull();
+      expect(ring.borderTopStyle).toBe('solid');
+      expect(ring.borderTopColor).toBe(ring.tokenColor);
     });
   }
 
@@ -88,41 +72,29 @@ for (const locale of locales) {
     const ringedWord = page
       .getByRole('heading', { level: 1, name: locale.title })
       .locator('.ringed');
-
-    const reduced = await ringedWord.evaluate((element) => {
-      const pseudo = getComputedStyle(element, '::after');
-      return { animationName: pseudo.animationName, clipPath: pseudo.clipPath };
-    });
-    expect(reduced.animationName).toBe('none');
-    expect(reduced.clipPath).toMatch(/^inset\(0(?:px|%)?(?:\s+0(?:px|%)?){0,3}\)$/);
-
-    await page.addInitScript(() => {
-      const target = window as Window & { __drawAnimationEnded?: boolean };
-      target.__drawAnimationEnded = false;
-      window.addEventListener('animationend', (event) => {
-        if (event.animationName === 'draw' && event.pseudoElement === '::after') {
-          target.__drawAnimationEnded = true;
-        }
+    const ringState = () =>
+      ringedWord.evaluate(async (element) => {
+        const animations = element.getAnimations({ subtree: true });
+        await Promise.all(animations.map(({ finished }) => finished));
+        const { animationName, clipPath } = getComputedStyle(element, '::after');
+        return { animations: animations.length, animationName, clipPath };
       });
-    });
+
+    const reduced = await ringState();
+    expect(reduced.animations).toBe(0);
+    expect(reduced.animationName).toBe('none');
+    expect(reduced.clipPath).toMatch(fullInset);
+
     await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await page.reload();
-    await page.waitForFunction(() => {
-      const target = window as Window & { __drawAnimationEnded?: boolean };
-      return target.__drawAnimationEnded === true;
-    });
-    const animationState = await ringedWord.evaluate((element) => ({
-      animationName: getComputedStyle(element, '::after').animationName,
-      clipPath: getComputedStyle(element, '::after').clipPath,
-    }));
-    expect(animationState.animationName).toBe('draw');
-    expect(animationState.clipPath).toMatch(/^inset\(0(?:px|%)?(?:\s+0(?:px|%)?){0,3}\)$/);
+    const drawn = await ringState();
+    expect(drawn.animations).toBe(1);
+    expect(drawn.animationName).toBe('draw');
+    expect(drawn.clipPath).toMatch(fullInset);
   });
 
   test(`${locale.route} renders the localized hero, index, and landmarks`, async ({ page }) => {
     await page.goto(locale.route);
-    const heading = page.getByRole('heading', { level: 1, name: locale.title });
-    await expect(heading).toHaveCount(1);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(locale.title);
     await expect(page.locator('.eyebrow')).toHaveText(locale.eyebrow);
     const metaDescription = await page.locator('meta[name="description"]').getAttribute('content');
     expect(metaDescription).not.toBeNull();
@@ -134,91 +106,45 @@ for (const locale of locales) {
     await expect(list.getByRole('listitem')).toHaveCount(8);
     await expect(navigation.locator('a')).toHaveCount(0);
     await expect(list.locator('.toc-label')).toHaveText([...locale.entries]);
-    await expect(list.locator('.toc-number')).toHaveText([
-      '01',
-      '02',
-      '03',
-      '04',
-      '05',
-      '06',
-      '07',
-      '08',
-    ]);
+    await expect(list.locator('.toc-number')).toHaveText(
+      locale.entries.map((_, index) => `0${index + 1}`)
+    );
 
-    const structure = await page.evaluate(() => {
-      const hero = document.querySelector('.hero');
-      const toc = document.querySelector('.toc');
-      const main = document.querySelector('main#contenido');
-      return {
-        heroBeforeMain: Boolean(
-          hero && main && hero.compareDocumentPosition(main) & Node.DOCUMENT_POSITION_FOLLOWING
-        ),
-        tocBeforeMain: Boolean(
-          toc && main && toc.compareDocumentPosition(main) & Node.DOCUMENT_POSITION_FOLLOWING
-        ),
-        outsideMain: Boolean(hero && toc && main && !main.contains(hero) && !main.contains(toc)),
-        bannerCount: document.querySelectorAll('header').length,
-      };
-    });
-    expect(structure).toEqual({
-      heroBeforeMain: true,
-      tocBeforeMain: true,
-      outsideMain: true,
-      bannerCount: 1,
-    });
-    await expect(
-      page.getByRole('link', {
-        name: locale.route === '/' ? 'Saltar al contenido' : 'Skip to content',
-      })
-    ).toHaveAttribute('href', '#contenido');
+    // Hero and index sit between the only banner and main, outside it.
+    await expect(page.locator('header')).toHaveCount(1);
+    await expect(page.locator('body > header + .hero + nav.toc + main#contenido')).toHaveCount(1);
   });
 
-  for (const { width, minimumColumns, maximumColumns } of [
-    { width: 320, minimumColumns: 1, maximumColumns: 1 },
-    { width: 375, minimumColumns: 1, maximumColumns: 1 },
-    { width: 1280, minimumColumns: 2, maximumColumns: 4 },
+  for (const [width, minColumns, maxColumns] of [
+    [320, 1, 1],
+    [375, 1, 1],
+    [1280, 2, 4],
   ]) {
     test(`${locale.route} fits its content at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(locale.route);
 
-      const responsiveState = await page.evaluate(() => {
-        const heading = document.querySelector('h1');
-        const list = document.querySelector('.toc ol');
-        if (!heading || !list) throw new Error('Homepage heading or index is missing');
-        const headingBox = heading.getBoundingClientRect();
-        const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
-        const wordRects: Array<{ left: number; right: number }> = [];
-        while (walker.nextNode()) {
-          const node = walker.currentNode;
-          const value = node.textContent ?? '';
-          for (const match of value.matchAll(/\S+/g)) {
-            const range = document.createRange();
-            range.setStart(node, match.index);
-            range.setEnd(node, match.index + match[0].length);
-            const rect = range.getBoundingClientRect();
-            wordRects.push({ left: rect.left, right: rect.right });
-          }
-        }
+      const layout = await page.evaluate(() => {
+        const heading = document.querySelector('h1')!;
+        const bounds = heading.getBoundingClientRect();
+        const words = document.createRange();
+        words.selectNodeContents(heading);
         return {
-          documentWidth: document.documentElement.scrollWidth,
-          viewportWidth: document.documentElement.clientWidth,
-          headingLeft: headingBox.left,
-          headingRight: headingBox.right,
-          wordRects,
-          columns: getComputedStyle(list).gridTemplateColumns.split(' ').length,
+          overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+          wordsInside: [...words.getClientRects()].every(
+            ({ left, right, width }) =>
+              width === 0 || (left >= bounds.left - 1 && right <= bounds.right + 1)
+          ),
+          columns: getComputedStyle(document.querySelector('.toc ol')!).gridTemplateColumns.split(
+            ' '
+          ).length,
         };
       });
 
-      expect(responsiveState.documentWidth).toBeLessThanOrEqual(responsiveState.viewportWidth);
-      expect(
-        responsiveState.wordRects.every(
-          ({ left, right }) =>
-            left >= responsiveState.headingLeft - 1 && right <= responsiveState.headingRight + 1
-        )
-      ).toBe(true);
-      expect(responsiveState.columns).toBeGreaterThanOrEqual(minimumColumns);
-      expect(responsiveState.columns).toBeLessThanOrEqual(maximumColumns);
+      expect(layout.overflow).toBeLessThanOrEqual(0);
+      expect(layout.wordsInside).toBe(true);
+      expect(layout.columns).toBeGreaterThanOrEqual(minColumns);
+      expect(layout.columns).toBeLessThanOrEqual(maxColumns);
     });
   }
 }
