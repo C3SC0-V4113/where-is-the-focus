@@ -85,7 +85,7 @@ for (const { route, text } of copy) {
           style.getPropertyValue('font-stretch'),
           style.fontWeight,
           style.textTransform,
-          style.lineHeight,
+          Number((parseFloat(style.lineHeight) / parseFloat(style.fontSize)).toFixed(2)),
           Number((parseFloat(style.letterSpacing) / parseFloat(style.fontSize)).toFixed(3)),
           style.textWrap,
         ];
@@ -93,7 +93,7 @@ for (const { route, text } of copy) {
     );
     expect
       .soft(display)
-      .toEqual(Array(2).fill([true, '66%', '850', 'uppercase', '0.96', -0.005, 'balance']));
+      .toEqual(Array(2).fill([true, '66%', '850', 'uppercase', 0.96, -0.005, 'balance']));
     await expect.soft(sections.locator('.split li').first()).toHaveCSS('display', 'grid');
     await expect.soft(sections.locator('.split h3').first()).toHaveCSS('font-stretch', '75%');
     await expect.soft(sections.locator('.prose').first()).toHaveCSS('font-size', '18px');
