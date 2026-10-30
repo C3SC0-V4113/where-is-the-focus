@@ -11,6 +11,11 @@ describe('RichText keyboard markers', () => {
     expect(view).toMatch(
       /^<span>Before <kbd\b[^>]*data-slot="kbd"[^>]*>Tab<\/kbd> after\.<\/span>$/
     );
+
+    const keyClassTokens = view.match(/<kbd\b[^>]*\bclass="([^"]*)"[^>]*>/)?.[1].split(/\s+/) ?? [];
+
+    expect(keyClassTokens).toContain('inline');
+    expect(keyClassTokens).not.toContain('inline-flex');
   });
 
   it('returns one inline span containing unchanged plain text', () => {
