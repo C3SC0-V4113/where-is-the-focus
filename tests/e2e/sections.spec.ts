@@ -54,8 +54,8 @@ for (const { route, text } of copy) {
     await expect(sections.nth(0).locator('h2')).toHaveText(`${text.title} ${text.soft}`);
     await expect(sections.nth(0).locator('.soft')).toHaveText(text.soft);
     await expect(sections.nth(1).locator('h2')).toHaveText(text.rule);
-    await expect(sections.nth(0).locator('.prose p')).toHaveText([text.intro, text.lead]);
-    await expect(sections.nth(1).locator('.prose')).toHaveText(text.ruleIntro);
+    await expect(sections.nth(0).locator('.intro p')).toHaveText([text.intro, text.lead]);
+    await expect(sections.nth(1).locator('.intro')).toHaveText(text.ruleIntro);
     await expect(sections.locator('.split h3')).toHaveText(split(text.headings));
     const lists = sections.nth(0).locator('.split').getByRole('list');
     await expect(lists).toHaveCount(2);
@@ -103,7 +103,7 @@ for (const { route, text } of copy) {
       .toEqual(Array(2).fill([true, '66%', '850', 'uppercase', 0.96, -0.005, 'balance']));
     await expect.soft(sections.locator('.split li').first()).toHaveCSS('display', 'grid');
     await expect.soft(sections.locator('.split h3').first()).toHaveCSS('font-stretch', '75%');
-    await expect.soft(sections.locator('.prose').first()).toHaveCSS('font-size', '18px');
+    await expect.soft(sections.locator('.intro').first()).toHaveCSS('font-size', '18px');
     await expect.soft(sections.locator('.crit p').first()).toHaveCSS('font-size', '16px');
     await expect
       .soft(legend.locator('[data-slot="badge"]').first())
@@ -129,9 +129,41 @@ for (const { route, text } of copy) {
           border: getComputedStyle(document.querySelector('.crit + .crit')!).borderLeftWidth,
           overflow: document.documentElement.scrollWidth - innerWidth,
         }));
-      expect(layout.columns).toBe(width >= 760 ? 2 : 1);
-      expect(layout.border).toBe(width >= 540 ? '1px' : '0px');
+      expect(layout.columns).toBe(width >= 768 ? 2 : 1);
+      expect(layout.border).toBe(width >= 640 ? '1px' : '0px');
       expect(layout.overflow).toBeLessThanOrEqual(0);
+    });
+  }
+
+  test(`${route} level badges share the state badge shape`, async ({ page }) => {
+    await page.goto(route);
+    const shapes = await page
+      .locator('.lvl, [role="group"] [data-slot="badge"]')
+      .evaluateAll((badges) =>
+        badges.map((badge) => {
+          const { fontFamily, fontWeight, borderTopLeftRadius } = getComputedStyle(badge);
+          return [fontFamily, fontWeight, borderTopLeftRadius];
+        })
+      );
+    expect(shapes).toEqual(Array(7).fill(shapes[0]));
+  });
+
+  for (const width of [600, 760, 900]) {
+    test(`${route} criteria separators follow the wrapped grid at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(route);
+      const cards = await page.locator('.criteria').evaluate((grid) =>
+        [...grid.children].map((card) => {
+          const box = card.getBoundingClientRect();
+          const rowStart = Math.round(box.left - grid.getBoundingClientRect().left) === 0;
+          const inset = card.querySelector('h3')!.getBoundingClientRect().left - box.left;
+          return [rowStart, getComputedStyle(card).borderLeftWidth, Math.round(inset)];
+        })
+      );
+      expect(cards.filter(([rowStart]) => rowStart).length).toBeGreaterThanOrEqual(2);
+      expect(cards).toEqual(
+        cards.map(([rowStart]) => (rowStart ? [true, '0px', 0] : [false, '1px', 19]))
+      );
     });
   }
 
