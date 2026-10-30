@@ -5,6 +5,8 @@ export const es = {
   description:
     'Quien navega con teclado no tiene puntero. Lo que le dice dónde está es el indicador de foco, así que merece el mismo cuidado que cualquier otro estado de un componente.',
   heroEyebrow: 'Foco visible · WCAG 2.2 · CSS y Tailwind',
+  heroTabHint: 'Esta página se recorre con [[Tab]]. Pruébalo.',
+  heroMeta: '8 argumentos · 6 laboratorios · ejemplos en CSS y Tailwind v4',
   heroTitleBefore: 'El ',
   heroTitleRinged: 'foco',
   heroTitleAfter: ' también es diseño',
@@ -34,6 +36,8 @@ export const en = {
   description:
     'Keyboard users have no pointer. What tells them where they are is the focus indicator, so it deserves the same care as any other component state.',
   heroEyebrow: 'Visible focus · WCAG 2.2 · CSS and Tailwind',
+  heroTabHint: 'This page can be navigated with [[Tab]]. Try it.',
+  heroMeta: '8 arguments · 6 labs · examples in CSS and Tailwind v4',
   heroTitleBefore: '',
   heroTitleRinged: 'Focus',
   heroTitleAfter: ' is design too',

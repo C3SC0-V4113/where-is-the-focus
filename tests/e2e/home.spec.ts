@@ -5,6 +5,8 @@ const locales = [
     route: '/',
     title: 'El foco también es diseño',
     eyebrow: 'Foco visible · WCAG 2.2 · CSS y Tailwind',
+    hint: 'Esta página se recorre con Tab. Pruébalo.',
+    meta: '8 argumentos · 6 laboratorios · ejemplos en CSS y Tailwind v4',
     indexName: 'Contenido',
     entries: [
       'El planteamiento',
@@ -21,6 +23,8 @@ const locales = [
     route: '/en/',
     title: 'Focus is design too',
     eyebrow: 'Visible focus · WCAG 2.2 · CSS and Tailwind',
+    hint: 'This page can be navigated with Tab. Try it.',
+    meta: '8 arguments · 6 labs · examples in CSS and Tailwind v4',
     indexName: 'Contents',
     entries: [
       'The premise',
@@ -113,6 +117,25 @@ for (const locale of locales) {
     // Hero and index sit between the only banner and main, outside it.
     await expect(page.locator('header')).toHaveCount(1);
     await expect(page.locator('body > header + .hero + nav.toc + main#contenido')).toHaveCount(1);
+  });
+
+  test(`${locale.route} exposes the keyboard hint and meta line`, async ({ page }) => {
+    await page.goto(locale.route);
+
+    const hint = page.locator('.tab-hint');
+    await expect(hint).toBeVisible();
+    await expect(hint).toHaveText(locale.hint);
+    await expect(hint.locator('kbd')).toHaveCount(1);
+    await expect(hint.locator('kbd')).toHaveText('Tab');
+
+    const dot = hint.locator('[aria-hidden="true"]');
+    await expect(dot).toHaveCount(1);
+    await expect(dot).toHaveCSS('animation-name', 'none');
+    await expect(page.locator('.hero-meta-line')).toHaveText(locale.meta);
+
+    const accessibleHint = await hint.ariaSnapshot();
+    const normalizedAccessibleHint = accessibleHint.replace(/\s+([.,!?])/g, '$1');
+    expect(normalizedAccessibleHint).toBe(`- text: ${locale.hint}`);
   });
 
   test(`${locale.route} uses the approved Tailwind type scale`, async ({ page }) => {
