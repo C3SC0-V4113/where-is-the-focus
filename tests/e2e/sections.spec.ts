@@ -3,12 +3,13 @@ import { expect, test } from '@playwright/test';
 import { en, es } from '../../src/i18n/messages';
 
 const criteria = [
-  ['2.4.7', 'https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html'],
-  ['2.4.11', 'https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html'],
-  ['1.4.11', 'https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html'],
-  ['2.4.13', 'https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance.html'],
+  ['2.4.7', 'AA', 'https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html'],
+  ['2.4.11', 'AA', 'https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html'],
+  ['1.4.11', 'AA', 'https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html'],
+  ['2.4.13', 'AAA', 'https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance.html'],
 ] as const;
 const split = (text: string) => text.split('|');
+const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const code = 'outline: none|:focus-visible|scroll-padding';
 const copy = [
   { route: '/', messages: es },
@@ -67,10 +68,12 @@ for (const { route, text } of copy) {
     }
     await expect(sections.nth(0).locator('.split ol code')).toHaveText(split(text.code));
     await expect(sections.locator('.crit')).toHaveCount(4);
-    for (const [index, [id, href]] of criteria.entries()) {
+    for (const [index, [id, level, href]] of criteria.entries()) {
       const card = sections.locator('.crit').nth(index);
-      await expect(card.locator('.id')).toContainText(id);
-      await expect(card.locator('.lvl')).toHaveText(index === 3 ? 'AAA' : 'AA');
+      await expect(card.locator('.id')).toHaveText(new RegExp(`^${escape(id)}\\s*${level}$`), {
+        useInnerText: true,
+      });
+      await expect(card.locator('.lvl')).toHaveText(level);
       await expect(card.locator('h3')).toHaveText(split(text.titles)[index]);
       await expect(card.locator('a')).toHaveAttribute('href', href);
       await expect(card.locator('p')).toHaveText(split(text.descriptions)[index]);
