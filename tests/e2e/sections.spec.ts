@@ -82,7 +82,7 @@ for (const { route, text } of copy) {
         const style = getComputedStyle(heading);
         return [
           style.fontFamily.includes('Archivo Variable'),
-          style.fontStretch,
+          style.getPropertyValue('font-stretch'),
           style.fontWeight,
           style.textTransform,
           style.lineHeight,
