@@ -37,5 +37,6 @@ describe('ComplianceBadge', () => {
     expect(glyph.getAttribute('aria-hidden')).toBe('true');
     expect(classTokens).toContain(state.classes[0]);
     expect(classTokens).toContain(state.classes[1]);
+    expect(classTokens).toContain('uppercase');
   });
 });

@@ -76,6 +76,36 @@ for (const { route, text } of copy) {
     await expect(legend.locator('[data-slot="badge"]')).toContainText(split(text.states));
     await expect(legend.locator('.item')).toContainText(split(text.stateText));
     await expect(sections.locator('.more')).toHaveText(text.more);
+
+    const display = await sections.locator('h2').evaluateAll((headings) =>
+      headings.map((heading) => {
+        const style = getComputedStyle(heading);
+        return [
+          style.fontFamily.includes('Archivo Variable'),
+          style.fontStretch,
+          style.fontWeight,
+          style.textTransform,
+          style.lineHeight,
+          Number((parseFloat(style.letterSpacing) / parseFloat(style.fontSize)).toFixed(3)),
+          style.textWrap,
+        ];
+      })
+    );
+    expect
+      .soft(display)
+      .toEqual(Array(2).fill([true, '66%', '850', 'uppercase', '0.96', -0.005, 'balance']));
+    await expect.soft(sections.locator('.split li').first()).toHaveCSS('display', 'grid');
+    await expect.soft(sections.locator('.split h3').first()).toHaveCSS('font-stretch', '75%');
+    await expect.soft(sections.locator('.prose').first()).toHaveCSS('font-size', '18px');
+    await expect.soft(sections.locator('.crit p').first()).toHaveCSS('font-size', '16px');
+    await expect
+      .soft(legend.locator('[data-slot="badge"]').first())
+      .toHaveCSS('text-transform', 'uppercase');
+    expect(
+      await legend
+        .getByText('◐', { exact: true })
+        .evaluate((glyph) => glyph.getBoundingClientRect().width)
+    ).toBeGreaterThan(0);
   });
 
   for (const width of [320, 375, 768, 1280]) {
