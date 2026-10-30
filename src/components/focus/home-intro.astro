@@ -1,5 +1,6 @@
 ---
 import { en, es, type Locale } from '../../i18n/messages';
+import { RichText } from '../common/rich-text';
 
 interface Props {
   locale: Locale;
@@ -20,6 +21,13 @@ const numbers = ['01', '02', '03', '04', '05', '06', '07', '08'] as const;
     {messages.heroTitleAfter}
   </h1>
   <p class="hero-lede max-w-lede font-serif text-lede">{messages.description}</p>
+  <div class="hero-meta flex flex-wrap items-center gap-x-5.5 gap-y-2.5 font-sans text-sm text-muted-foreground">
+    <span class="tab-hint inline-flex items-center gap-2 text-sm font-medium text-foreground">
+      <span aria-hidden="true" class="size-2 rounded-full bg-brand"></span>
+      <RichText text={messages.heroTabHint} />
+    </span>
+    <span class="hero-meta-line">{messages.heroMeta}</span>
+  </div>
 </div>
 
 <nav

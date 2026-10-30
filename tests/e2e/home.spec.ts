@@ -5,6 +5,8 @@ const locales = [
     route: '/',
     title: 'El foco también es diseño',
     eyebrow: 'Foco visible · WCAG 2.2 · CSS y Tailwind',
+    hint: 'Esta página se recorre con Tab. Pruébalo.',
+    meta: '8 argumentos · 6 laboratorios · ejemplos en CSS y Tailwind v4',
     indexName: 'Contenido',
     entries: [
       'El planteamiento',
@@ -21,6 +23,8 @@ const locales = [
     route: '/en/',
     title: 'Focus is design too',
     eyebrow: 'Visible focus · WCAG 2.2 · CSS and Tailwind',
+    hint: 'This page can be navigated with Tab. Try it.',
+    meta: '8 arguments · 6 labs · examples in CSS and Tailwind v4',
     indexName: 'Contents',
     entries: [
       'The premise',
@@ -113,6 +117,107 @@ for (const locale of locales) {
     // Hero and index sit between the only banner and main, outside it.
     await expect(page.locator('header')).toHaveCount(1);
     await expect(page.locator('body > header + .hero + nav.toc + main#contenido')).toHaveCount(1);
+  });
+
+  test(`${locale.route} exposes the keyboard hint and meta line`, async ({ page }) => {
+    await page.goto(locale.route);
+
+    const hint = page.locator('.tab-hint');
+    await expect(hint).toBeVisible();
+    await expect(hint).toHaveText(locale.hint);
+    await expect(hint.locator('kbd')).toHaveCount(1);
+    await expect(hint.locator('kbd')).toHaveText('Tab');
+
+    const dot = hint.locator('[aria-hidden="true"]');
+    await expect(dot).toHaveCount(1);
+    await expect(dot).toHaveCSS('animation-name', 'none');
+    await expect(page.locator('.hero-meta-line')).toHaveText(locale.meta);
+
+    const accessibleHint = await hint.ariaSnapshot();
+    expect(accessibleHint).toBe(`- text: ${locale.hint}`);
+  });
+
+  for (const width of [320, 375]) {
+    test(`${locale.route} keyboard hint flows inline at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(locale.route);
+
+      const hint = page.locator('.tab-hint');
+      const layout = await hint.evaluate((element) => {
+        const inlineText = element.children[1] as HTMLSpanElement | undefined;
+        const key = element.querySelector('kbd');
+        const afterKey = key?.nextSibling;
+        const punctuationRange = document.createRange();
+        if (key && afterKey?.nodeType === Node.TEXT_NODE) {
+          punctuationRange.setStart(afterKey, 0);
+          punctuationRange.setEnd(afterKey, 1);
+        }
+        const punctuation = punctuationRange.getBoundingClientRect();
+        const keyBounds = key?.getBoundingClientRect();
+
+        return {
+          directChildNodes: [...element.childNodes].map(({ nodeName }) => nodeName),
+          directElementCount: element.childElementCount,
+          inlineTextTag: inlineText?.tagName ?? null,
+          pointAriaHidden: element.children[0]?.getAttribute('aria-hidden'),
+          punctuationGap: keyBounds ? punctuation.left - keyBounds.right : null,
+          punctuationSharesKeyLine: Boolean(
+            keyBounds && punctuation.top < keyBounds.bottom && punctuation.bottom > keyBounds.top
+          ),
+          horizontalOverflow:
+            document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        };
+      });
+
+      expect(layout.directChildNodes).toEqual(['SPAN', 'SPAN']);
+      expect(layout.directElementCount).toBe(2);
+      expect(layout.inlineTextTag).toBe('SPAN');
+      expect(layout.pointAriaHidden).toBe('true');
+      expect(layout.punctuationGap).not.toBeNull();
+      expect(layout.punctuationGap).toBeLessThanOrEqual(1);
+      expect(layout.punctuationSharesKeyLine).toBe(true);
+      expect(layout.horizontalOverflow).toBeLessThanOrEqual(0);
+    });
+  }
+
+  test(`${locale.route} keyboard hint wraps as inline text at 320px`, async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 900 });
+    await page.goto(locale.route);
+
+    const wrapping = await page.locator('.tab-hint').evaluate((element) => {
+      const inlineText = element.children[1] as HTMLSpanElement | undefined;
+      const key = element.querySelector('kbd');
+      const keyBounds = key?.getBoundingClientRect();
+      const textRects: DOMRect[] = [];
+      const textWalker = document.createTreeWalker(inlineText ?? element, NodeFilter.SHOW_TEXT);
+      let textNode: Node | null;
+      while ((textNode = textWalker.nextNode())) {
+        if (!textNode.textContent || textNode.parentElement?.closest('kbd')) continue;
+        const textRange = document.createRange();
+        textRange.selectNodeContents(textNode);
+        textRects.push(...textRange.getClientRects());
+      }
+      const lineTops = new Set(textRects.map(({ top }) => Math.round(top)));
+
+      return {
+        inlineTextTag: inlineText?.tagName ?? null,
+        inlineTextWidth: inlineText?.getBoundingClientRect().width ?? 0,
+        hintWidth: element.getBoundingClientRect().width,
+        textLineCount: lineTops.size,
+        keySharesTextLine: Boolean(
+          keyBounds &&
+          textRects.some(({ top, bottom }) => top < keyBounds.bottom && bottom > keyBounds.top)
+        ),
+        horizontalOverflow:
+          document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+
+    expect(wrapping.inlineTextTag).toBe('SPAN');
+    expect(wrapping.inlineTextWidth).toBeGreaterThanOrEqual(wrapping.hintWidth - 24);
+    expect(wrapping.textLineCount).toBeGreaterThanOrEqual(2);
+    expect(wrapping.keySharesTextLine).toBe(true);
+    expect(wrapping.horizontalOverflow).toBeLessThanOrEqual(0);
   });
 
   test(`${locale.route} uses the approved Tailwind type scale`, async ({ page }) => {
