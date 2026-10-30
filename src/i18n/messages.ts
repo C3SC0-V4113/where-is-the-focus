@@ -55,6 +55,26 @@ export const es = {
         'cumple el criterio|cumple AA pero no AAA, o solo en parte de la superficie|falla un criterio AA',
       more: 'Las páginas «Understanding» del W3C explican cada criterio con ejemplos y técnicas. Están enlazadas en el título de cada tarjeta.',
     },
+    focusVisible: {
+      number: '03 · Teclado sí, clic no',
+      title: 'Mostrarlo solo cuando hace falta',
+      paragraphs: [
+        '`:focus` se activa cada vez que un elemento recibe el foco, también con un clic. `:focus-visible` se activa solo cuando el navegador entiende que la persona necesita verlo: al usar el teclado, o cuando un script mueve el foco después de usarlo. Funciona en todos los navegadores actuales desde 2022.',
+        'Este cambio de selector resuelve la mayoría de las quejas: quien usa el ratón deja de ver anillos tras cada clic, y quien usa teclado los sigue teniendo.',
+      ],
+      more: {
+        label: 'Más: ',
+        separator: ' · ',
+        links: [
+          {
+            text: ':focus-visible en MDN',
+          },
+          {
+            text: 'Vercel, «Clear focus» en las Web Interface Guidelines',
+          },
+        ],
+      },
+    },
   },
 } as const;
 
@@ -119,6 +139,26 @@ export const en = {
       stateText:
         'meets the criterion|meets AA but not AAA, or only on part of the surface|fails an AA criterion',
       more: 'The W3C “Understanding” pages explain each criterion with examples and techniques. They’re linked from each card’s title.',
+    },
+    focusVisible: {
+      number: '03 · Keyboard yes, click no',
+      title: 'Show it only when it’s needed',
+      paragraphs: [
+        '`:focus` matches whenever an element receives focus, including on click. `:focus-visible` matches only when the browser decides the person needs to see it: when using the keyboard, or when a script moves focus after keyboard use. It works in every current browser since 2022.',
+        'This selector change solves most complaints: mouse users stop seeing rings after every click, and keyboard users keep them.',
+      ],
+      more: {
+        label: 'More: ',
+        separator: ' · ',
+        links: [
+          {
+            text: ':focus-visible on MDN',
+          },
+          {
+            text: 'Vercel, “Clear focus” in the Web Interface Guidelines',
+          },
+        ],
+      },
     },
   },
 } satisfies MessageShape;
