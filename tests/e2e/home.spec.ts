@@ -115,6 +115,22 @@ for (const locale of locales) {
     await expect(page.locator('body > header + .hero + nav.toc + main#contenido')).toHaveCount(1);
   });
 
+  test(`${locale.route} uses the approved Tailwind type scale`, async ({ page }) => {
+    await page.goto(locale.route);
+    const type = (selector: string) =>
+      page
+        .locator(selector)
+        .first()
+        .evaluate((element) => {
+          const { fontSize, lineHeight, letterSpacing } = getComputedStyle(element);
+          return `${fontSize}/${lineHeight} ${letterSpacing}`;
+        });
+
+    expect(await type('.eyebrow')).toBe('12px/16px 0.6px');
+    expect(await type('.toc li')).toBe('16px/22px normal');
+    expect(await type('.toc-number')).toBe('12px/20px normal');
+  });
+
   for (const [width, minColumns, maxColumns] of [
     [320, 1, 1],
     [375, 1, 1],
