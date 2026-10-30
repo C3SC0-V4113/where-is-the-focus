@@ -14,10 +14,14 @@ export function RichText({ text }: Props) {
     const start = match.index;
     const end = start + match[0].length;
     parts.push(text.slice(cursor, start));
-    parts.push(<Kbd key={text.slice(0, end)}>{match[1]}</Kbd>);
+    parts.push(
+      <Kbd key={text.slice(0, end)} className="inline">
+        {match[1]}
+      </Kbd>
+    );
     cursor = end;
   }
 
   parts.push(text.slice(cursor));
-  return parts;
+  return <span>{parts}</span>;
 }
