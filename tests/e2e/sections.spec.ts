@@ -43,14 +43,15 @@ for (const { route, text } of copy) {
   test(`${route} renders localized sections, lists, criteria, and legend`, async ({ page }) => {
     await page.goto(route);
     const sections = page.locator('main > section');
-    await expect(sections).toHaveCount(2);
+    await expect(sections).toHaveCount(3);
     await expect(sections.nth(0)).toHaveAttribute('id', 'planteamiento');
     await expect(sections.nth(1)).toHaveAttribute('id', 'reglas');
     await expect(sections.nth(0)).toHaveAttribute('aria-labelledby', 'h-plan');
     await expect(sections.nth(1)).toHaveAttribute('aria-labelledby', 'h-reglas');
     await expect(sections.nth(0).locator('h2')).toHaveAttribute('id', 'h-plan');
     await expect(sections.nth(1).locator('h2')).toHaveAttribute('id', 'h-reglas');
-    await expect(sections.locator('.num')).toHaveText(split(text.nums));
+    await expect(sections.nth(0).locator('.num')).toHaveText(split(text.nums)[0]!);
+    await expect(sections.nth(1).locator('.num')).toHaveText(split(text.nums)[1]!);
     await expect(sections.nth(0).locator('h2')).toHaveText(`${text.title} ${text.soft}`);
     await expect(sections.nth(0).locator('.soft')).toHaveText(text.soft);
     await expect(sections.nth(1).locator('h2')).toHaveText(text.rule);
@@ -82,7 +83,7 @@ for (const { route, text } of copy) {
     await expect(legend.locator('[data-slot="badge"]')).toHaveCount(3);
     await expect(legend.locator('[data-slot="badge"]')).toContainText(split(text.states));
     await expect(legend.locator('.item')).toContainText(split(text.stateText));
-    await expect(sections.locator('.more')).toHaveText(text.more);
+    await expect(sections.nth(1).locator('.more')).toHaveText(text.more);
 
     const display = await sections.locator('h2').evaluateAll((headings) =>
       headings.map((heading) => {
@@ -100,7 +101,7 @@ for (const { route, text } of copy) {
     );
     expect
       .soft(display)
-      .toEqual(Array(2).fill([true, '66%', '850', 'uppercase', 0.96, -0.005, 'balance']));
+      .toEqual(Array(3).fill([true, '66%', '850', 'uppercase', 0.96, -0.005, 'balance']));
     await expect.soft(sections.locator('.split li').first()).toHaveCSS('display', 'grid');
     await expect.soft(sections.locator('.split h3').first()).toHaveCSS('font-stretch', '75%');
     await expect.soft(sections.locator('.intro').first()).toHaveCSS('font-size', '18px');
