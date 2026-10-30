@@ -11,15 +11,15 @@ const numbers = ['01', '02', '03', '04', '05', '06', '07', '08'] as const;
 ---
 
 <div class="hero mx-auto grid w-full max-w-5xl gap-7 px-4">
-  <span class="eyebrow font-mono font-medium text-muted-foreground uppercase">
+  <span class="eyebrow font-mono text-xs font-medium tracking-wider text-muted-foreground uppercase">
     {messages.heroEyebrow}
   </span>
-  <h1 class="display font-display text-balance uppercase">
+  <h1 class="font-display text-display font-stretch-66% text-balance uppercase">
     {messages.heroTitleBefore}
     <span class="ringed relative inline-block">{messages.heroTitleRinged}</span>
     {messages.heroTitleAfter}
   </h1>
-  <p class="hero-lede font-serif">{messages.description}</p>
+  <p class="hero-lede max-w-lede font-serif text-lede">{messages.description}</p>
 </div>
 
 <nav
@@ -28,8 +28,11 @@ const numbers = ['01', '02', '03', '04', '05', '06', '07', '08'] as const;
 >
   <ol role="list" class="grid gap-x-7 gap-y-0.5">
     {numbers.map((number) => (
-      <li class="grid gap-2 py-2 font-sans font-medium text-foreground">
-        <span class="toc-number font-mono font-medium text-muted-foreground" aria-hidden="true">
+      <li class="grid items-start gap-2 py-2 font-sans text-base leading-snug font-medium text-foreground">
+        <span
+          class="toc-number font-mono text-xs leading-5 font-medium text-muted-foreground"
+          aria-hidden="true"
+        >
           {number}
         </span>
         <span class="toc-label">{messages[`tocEntry${number}`]}</span>
