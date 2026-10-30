@@ -1,8 +1,8 @@
 ---
-import { es } from '../i18n/messages';
+import HomeIntro from '../components/focus/home-intro.astro';
 import Layout from '../layouts/main.astro';
 ---
 
 <Layout locale="es">
-  <h1>{es.title}</h1>
+  <HomeIntro slot="before-main" locale="es" />
 </Layout>

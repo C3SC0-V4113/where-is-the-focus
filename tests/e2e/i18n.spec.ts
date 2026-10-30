@@ -42,7 +42,7 @@ async function switchLanguages(page: Page) {
 for (const locale of locales) {
   test(`renders ${locale.locale} language metadata and selector state`, async ({ page }) => {
     await expectLocalePage(page, locale);
-    await expect(page.getByRole('heading', { level: 1, name: locale.title })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 }
 

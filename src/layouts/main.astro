@@ -3,6 +3,7 @@ import LangSwitch from '../components/common/lang-switch.astro';
 import { ThemeToggle } from '../components/common/theme-toggle';
 import { en, es, type Locale } from '../i18n/messages';
 import '../styles/global.css';
+import '../styles/focus.css';
 
 interface Props {
   locale: Locale;
@@ -104,6 +105,7 @@ const ogImage = site
         />
       </div>
     </header>
+    <slot name="before-main" />
     <main id="contenido" tabindex="-1" class="mx-auto w-full max-w-5xl flex-1 px-4 py-16">
       <slot />
     </main>

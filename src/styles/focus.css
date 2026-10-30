@@ -1,0 +1,38 @@
+@layer components {
+  .hero {
+    padding-block: clamp(40px, 8vw, 96px) clamp(32px, 6vw, 64px);
+  }
+
+  .ringed {
+    padding-inline: 0.06em;
+  }
+
+  .ringed::after {
+    position: absolute;
+    inset: 0.05em -0.03em 0.04em;
+    border: 0.05em solid var(--ring);
+    border-radius: 0.06em;
+    content: '';
+    clip-path: inset(0);
+  }
+
+  .toc ol {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  }
+
+  .toc li {
+    grid-template-columns: 3ch minmax(0, 1fr);
+  }
+
+  @keyframes draw {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ringed::after {
+      animation: draw 1.2s 0.35s cubic-bezier(0.6, 0, 0.2, 1) both;
+    }
+  }
+}
