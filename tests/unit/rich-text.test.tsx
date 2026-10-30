@@ -1,9 +1,24 @@
 import { render, screen, within } from '@testing-library/react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import { RichText } from '../../src/components/common/rich-text';
 
 describe('RichText keyboard markers', () => {
+  it('returns one inline span around marked text and its Kbd', () => {
+    const view = renderToStaticMarkup(<RichText text="Before [[Tab]] after." />);
+
+    expect(view).toMatch(
+      /^<span>Before <kbd\b[^>]*data-slot="kbd"[^>]*>Tab<\/kbd> after\.<\/span>$/
+    );
+  });
+
+  it('returns one inline span containing unchanged plain text', () => {
+    expect(renderToStaticMarkup(<RichText text="Plain text only." />)).toBe(
+      '<span>Plain text only.</span>'
+    );
+  });
+
   it('keeps plain text unchanged', () => {
     render(
       <p data-testid="plain-text">
