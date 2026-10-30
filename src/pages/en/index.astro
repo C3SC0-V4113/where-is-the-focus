@@ -1,12 +1,8 @@
 ---
-import Hero from '../../components/focus/hero.astro';
-import Toc from '../../components/focus/toc.astro';
+import HomeIntro from '../../components/focus/home-intro.astro';
 import Layout from '../../layouts/main.astro';
 ---
 
 <Layout locale="en">
-  <Fragment slot="before-main">
-    <Hero locale="en" />
-    <Toc locale="en" />
-  </Fragment>
+  <HomeIntro slot="before-main" locale="en" />
 </Layout>
