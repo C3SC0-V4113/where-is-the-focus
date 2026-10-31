@@ -8,7 +8,15 @@ interface Props {
   locale: Locale;
 }
 const { locale } = Astro.props;
-const text = (locale === 'en' ? en : es).sections.beyondRing;
+const messages = locale === 'en' ? en : es;
+const text = messages.sections.beyondRing;
+const criterionTitles = messages.sections.rules.criterionTitles.split('|');
+const criterionTitleById = {
+  '2.4.7': criterionTitles[0],
+  '2.4.11': criterionTitles[1],
+  '1.4.11': criterionTitles[2],
+  '2.4.13': criterionTitles[3],
+};
 const href = 'https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance.html';
 const gallery = text.gallery;
 const criteria = [
@@ -72,6 +80,7 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
               href={`${criteriaBase}${page}`}
             >
               <ComplianceBadge state="ok">{id}</ComplianceBadge>
+              <span class="sr-only"> {criterionTitleById[id]}</span>
             </a>
           ))}
         </div>
@@ -103,6 +112,7 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
               href={`${criteriaBase}${page}`}
             >
               <ComplianceBadge state="ok">{id}</ComplianceBadge>
+              <span class="sr-only"> {criterionTitleById[id]}</span>
             </a>
           ))}
         </div>
@@ -140,6 +150,7 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
               href={`${criteriaBase}${page}`}
             >
               <ComplianceBadge state="ok">{id}</ComplianceBadge>
+              <span class="sr-only"> {criterionTitleById[id]}</span>
             </a>
           ))}
         </div>

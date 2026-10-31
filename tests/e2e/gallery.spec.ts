@@ -14,6 +14,12 @@ const cases = [
       'Subrayado parcial y completo',
       'Con el ratón aparece un trazo corto. Con teclado el subrayado cubre la palabra entera y el texto cambia de color, así hover y foco nunca se confunden.',
     ],
+    criterionTitles: [
+      'Foco visible',
+      'Foco no oculto',
+      'Contraste no textual',
+      'Apariencia del foco',
+    ],
     highlight: [
       'Consulta los ',
       'términos de envío',
@@ -42,6 +48,12 @@ const cases = [
       'Partial and full underline',
       'With the mouse a short stroke appears. With the keyboard the underline covers the whole word and the text changes color, so hover and focus are never confused.',
     ],
+    criterionTitles: [
+      'Focus visible',
+      'Focus not obscured',
+      'Non-text contrast',
+      'Focus appearance',
+    ],
     highlight: [
       'Check the ',
       'shipping terms',
@@ -62,6 +74,12 @@ const urls: Record<string, string> = {
   '2.4.7': 'https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html',
   '2.4.13': 'https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance.html',
   '1.4.11': 'https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html',
+};
+const criterionTitleIndexes: Record<string, number> = {
+  '2.4.7': 0,
+  '2.4.11': 1,
+  '1.4.11': 2,
+  '2.4.13': 3,
 };
 const demoSelectors = ['button', 'nav a', '.hl'] as const;
 
@@ -116,7 +134,7 @@ async function contrast(page: Page, ink: string, paper: string) {
   );
 }
 
-async function expectDemoFocus(locator: Locator) {
+async function expectTransparentOutline(locator: Locator) {
   await waitForMotion(locator);
   const style = await locator.evaluate((node) => {
     const css = getComputedStyle(node);
@@ -136,7 +154,7 @@ async function expectChipFocus(locator: Locator) {
 }
 
 async function expectButtonFocus(page: Page, locator: Locator) {
-  await expectDemoFocus(locator);
+  await expectTransparentOutline(locator);
   const actual = await colors(locator);
   const expected = await page.evaluate(() => {
     const css = getComputedStyle(document.documentElement);
@@ -149,7 +167,7 @@ async function expectButtonFocus(page: Page, locator: Locator) {
 }
 
 async function expectNavFocus(page: Page, locator: Locator) {
-  await expectDemoFocus(locator);
+  await expectTransparentOutline(locator);
   const [color, underline] = await locator.evaluate((node) => [
     getComputedStyle(node).color,
     getComputedStyle(node, '::after').transform,
@@ -164,7 +182,7 @@ async function expectNavFocus(page: Page, locator: Locator) {
 }
 
 async function expectHighlighterFocus(page: Page, locator: Locator) {
-  await expectDemoFocus(locator);
+  await expectTransparentOutline(locator);
   const [color, size] = await locator.evaluate((node) => [
     getComputedStyle(node).color,
     getComputedStyle(node).backgroundSize,
@@ -221,6 +239,9 @@ for (const item of cases) {
       for (const [position, criterion] of item.chips[index]!.entries()) {
         const chip = chips.nth(position);
         await expect(chip).toHaveAttribute('href', urls[criterion]!);
+        await expect(chip).toHaveAccessibleName(
+          `${criterion} ${item.criterionTitles[criterionTitleIndexes[criterion]!]}`
+        );
         await expect(chip.locator('[data-slot="badge"]')).toContainText(criterion);
         await expect(chip.locator('[data-slot="badge"]')).toHaveClass(/bg-success-muted/);
       }
@@ -318,8 +339,19 @@ for (const item of cases) {
       expect(await contrast(page, ...focused)).toBeGreaterThanOrEqual(4.5);
       expect(await contrast(page, focused[1], surfaces[0]!)).toBeGreaterThanOrEqual(3);
       const highlighter = cards.nth(2).locator('.hl').first();
-      for (let i = 0; i < 9; i += 1) await page.keyboard.press('Tab');
-      await expect(highlighter).toBeFocused();
+      const focusOrder = [
+        button,
+        ...(await cards.nth(0).locator('.chips a').all()),
+        ...(await cards.nth(1).locator('nav a').all()),
+        ...(await cards.nth(1).locator('.chips a').all()),
+        highlighter,
+      ];
+      await page.locator('#sin-anillo .more a').last().focus();
+      for (const target of focusOrder) {
+        await page.keyboard.press('Tab');
+        await expect(target).toBeFocused();
+      }
+      expect(await highlighter.evaluate((node) => node.matches(':focus-visible'))).toBe(true);
       expect(await contrast(page, surfaces[2]!, surfaces[1]!)).toBeGreaterThanOrEqual(4.5);
       expect(await contrast(page, surfaces[1]!, surfaces[0]!)).toBeGreaterThanOrEqual(3);
     }
@@ -327,9 +359,15 @@ for (const item of cases) {
 
   test(`${item.route} click does not activate focus-visible`, async ({ page }) => {
     await page.goto(item.route);
-    const button = page.locator('#sin-anillo .gallery button');
-    await button.click();
-    expect(await button.evaluate((node) => node.matches(':focus-visible'))).toBe(false);
+    const targets = [
+      page.locator('#sin-anillo .gallery button'),
+      page.locator('#sin-anillo .gallery-nav a').first(),
+      page.locator('#sin-anillo .hl').first(),
+    ];
+    for (const target of targets) {
+      await target.click();
+      expect(await target.evaluate((node) => node.matches(':focus-visible'))).toBe(false);
+    }
   });
 
   test(`${item.route} hover differs from keyboard focus`, async ({ page }) => {
@@ -341,8 +379,10 @@ for (const item of cases) {
   test(`${item.route} reduced motion removes gallery transitions`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto(item.route);
+    const button = page.locator('#sin-anillo .gallery button');
     const nav = page.locator('#sin-anillo .gallery-nav a').first();
     const hl = page.locator('#sin-anillo .hl').first();
+    await expect(button).toHaveCSS('transition-duration', '0s');
     await expect(nav).toHaveCSS('transition-duration', '0s');
     await expect(hl).toHaveCSS('transition-duration', '0s');
   });
