@@ -8,6 +8,11 @@
     white-space: nowrap;
   }
 
+  .pull {
+    max-width: 28ch;
+    margin: 6px 0;
+  }
+
   .arg {
     padding-block: clamp(48px, 8vw, 96px) 0;
   }

@@ -75,6 +75,30 @@ export const es = {
         ],
       },
     },
+    ring: {
+      number: '04 · Diseñar el indicador',
+      title: 'Un anillo pensado para el fondo donde vive',
+      paragraphs: [
+        'Un anillo de un solo color funciona sobre un fondo y desaparece sobre otro. Sobre el color de marca su contraste puede bajar a 1:1. El doble anillo lleva un aro claro y uno oscuro, así que siempre hay uno que contrasta.',
+        'El estilo discontinuo o punteado también es válido sobre colores planos. Sobre una foto, sus huecos dejan pasar la imagen y el contorno se fragmenta. Prueba las combinaciones y copia el resultado.',
+      ],
+      more: {
+        label: 'Más: ',
+        links: [
+          {
+            text: 'Sara Soueidan, «A guide to designing accessible, WCAG-conformant focus indicators»',
+          },
+        ],
+        after: ', con el indicador blanco y negro probado sobre varios fondos.',
+      },
+      pull: 'Si usas shadcn/ui, revisa el token `--ring`.',
+      pullParagraph:
+        'Los componentes de shadcn dibujan el foco con `--ring`, y en el tema neutral es un gris claro (`oklch(0.708 0 0)`) que sobre blanco da unos 2,6:1. Por debajo del 3:1 de 1.4.11. Además, varios componentes lo aplican con transparencia (`ring-ring/50`), lo que baja aún más el contraste. Basta con cambiar el token y añadir los estados que usa esta página.',
+      pullMore: {
+        label: 'Más: ',
+        links: [{ text: 'tokens y temas en shadcn/ui' }],
+      },
+    },
   },
 } as const;
 
@@ -158,6 +182,30 @@ export const en = {
             text: 'Vercel, “Clear focus” in the Web Interface Guidelines',
           },
         ],
+      },
+    },
+    ring: {
+      number: '04 · Designing the indicator',
+      title: 'A ring designed for the background it lives on',
+      paragraphs: [
+        'A single-color ring works on one background and disappears on another. On the brand color its contrast can drop to 1:1. The double ring has a light band and a dark band, so one of them always contrasts.',
+        'Dashed or dotted styles are also valid on flat colors. On a photo, their gaps let the image through and the outline breaks up. Try the combinations and copy the result.',
+      ],
+      more: {
+        label: 'More: ',
+        links: [
+          {
+            text: 'Sara Soueidan, “A guide to designing accessible, WCAG-conformant focus indicators”',
+          },
+        ],
+        after: ', with the black-and-white indicator tested on several backgrounds.',
+      },
+      pull: 'If you use shadcn/ui, check the `--ring` token.',
+      pullParagraph:
+        'shadcn components draw focus with `--ring`, and in the neutral theme it’s a light gray (`oklch(0.708 0 0)`) that gives about 2.6:1 on white. That’s below the 3:1 required by 1.4.11. Several components also apply it with transparency (`ring-ring/50`), which lowers contrast further. Changing the token and adding the states this page uses is enough.',
+      pullMore: {
+        label: 'More: ',
+        links: [{ text: 'tokens and theming in shadcn/ui' }],
       },
     },
   },
