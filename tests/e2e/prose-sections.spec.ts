@@ -29,7 +29,7 @@ for (const [route, messages, hrefs] of routes) {
     await page.setViewportSize({ width: 320, height: 900 });
     await page.goto(route);
     const sections = page.locator('main > section');
-    await expect(sections).toHaveCount(3);
+    await expect(sections).toHaveCount(4);
     const section = sections.nth(2);
     await expect(section).toHaveAttribute('id', 'focus-visible');
     await expect(section).toHaveAttribute('aria-labelledby', 'h-fv');
@@ -87,7 +87,7 @@ for (const [route, messages, hrefs] of routes) {
         ].join('|');
       })
     );
-    expect(headingStyles[2]).toBe(headingStyles[0]);
+    expect(headingStyles.slice(2)).toEqual([headingStyles[0], headingStyles[0]]);
 
     await page.locator('#reglas .crit a').last().focus();
     for (const [index] of copy.more.links.entries()) {
@@ -109,6 +109,75 @@ for (const [route, messages, hrefs] of routes) {
       );
     }
   });
+
+  const ring = messages.sections.ring;
+
+  const ringHref = 'https://www.sarasoueidan.com/blog/focus-indicators/';
+
+  test(`${route} renders the ring section intro`, async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 900 });
+    await page.goto(route);
+    const sections = page.locator('main > section');
+    await expect(sections).toHaveCount(4);
+    const section = sections.nth(3);
+    await expect(section).toHaveAttribute('id', 'anillo');
+    await expect(section).toHaveAttribute('aria-labelledby', 'h-anillo');
+    await expect(section.locator('h2')).toHaveAttribute('id', 'h-anillo');
+    await expect(section.locator('.num')).toHaveText(ring.number);
+    await expect(section.locator('h2')).toHaveText(ring.title);
+    const childKinds = await section
+      .locator(':scope > *')
+      .evaluateAll((nodes) =>
+        nodes.map((node) => ['head', 'intro', 'more'].find((name) => node.classList.contains(name)))
+      );
+    expect(childKinds).toEqual(['head', 'intro', 'more']);
+    await expect(section.locator('.intro p')).toHaveText(ring.paragraphs);
+    const line = section.locator('.more');
+    await expect(line).toHaveText(ring.more.label + ring.more.links[0]!.text + ring.more.after);
+    const link = line.getByRole('link');
+    await expect(link).toHaveCount(1);
+    await expect(link).toHaveAccessibleName(ring.more.links[0]!.text);
+    await expect(link).toHaveAttribute('href', ringHref);
+    await expect(link).toHaveCSS('text-decoration-line', 'underline');
+    await expect(link).toHaveCSS('font-weight', '500');
+    const [linkColor, lineColor] = await link.evaluate((node) => [
+      getComputedStyle(node).color,
+      getComputedStyle(node.parentElement!).color,
+    ]);
+    expect(linkColor).not.toBe(lineColor);
+
+    const headingStyles = await page.locator('main > section h2').evaluateAll((nodes) =>
+      nodes.map((node) => {
+        const style = getComputedStyle(node);
+        return [
+          style.fontFamily,
+          style.getPropertyValue('font-stretch'),
+          style.fontWeight,
+          style.textTransform,
+          style.textWrap,
+        ].join('|');
+      })
+    );
+    expect(headingStyles[3]).toBe(headingStyles[0]);
+
+    await page.locator('#focus-visible .more a').last().focus();
+    await page.keyboard.press('Tab');
+    await expect(link).toBeFocused();
+    const ringStyle = await link.evaluate((node) => {
+      const style = getComputedStyle(node);
+      return [style.outlineStyle, style.outlineWidth, style.boxShadow];
+    });
+    expect(ringStyle.slice(0, 2)).toEqual(['solid', '2px']);
+    expect(ringStyle[2]).toContain('2px');
+    expect(ringStyle[2]).toContain('5px');
+    for (const width of [320, 375, 768, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(route);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true
+      );
+    }
+  });
 }
 
 for (const [route] of routes)
@@ -118,7 +187,9 @@ for (const [route] of routes)
       await page.addInitScript((value) => localStorage.setItem('foco-theme', value), theme);
       await page.goto(route);
       const ratios = await page
-        .locator('#focus-visible p, #focus-visible .more, #focus-visible .more a')
+        .locator(
+          '#focus-visible p, #focus-visible .more, #focus-visible .more a, #anillo p, #anillo .more, #anillo .more a'
+        )
         .evaluateAll((nodes) => {
           const luminance = (color: string) => {
             const canvas = document.createElement('canvas');
