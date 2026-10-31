@@ -43,7 +43,7 @@ for (const { route, text } of copy) {
   test(`${route} renders localized sections, lists, criteria, and legend`, async ({ page }) => {
     await page.goto(route);
     const sections = page.locator('main > section');
-    await expect(sections).toHaveCount(4);
+    await expect(sections).toHaveCount(5);
     await expect(sections.nth(0)).toHaveAttribute('id', 'planteamiento');
     await expect(sections.nth(1)).toHaveAttribute('id', 'reglas');
     await expect(sections.nth(0)).toHaveAttribute('aria-labelledby', 'h-plan');
@@ -101,7 +101,7 @@ for (const { route, text } of copy) {
     );
     expect
       .soft(display)
-      .toEqual(Array(4).fill([true, '66%', '850', 'uppercase', 0.96, -0.005, 'balance']));
+      .toEqual(Array(5).fill([true, '66%', '850', 'uppercase', 0.96, -0.005, 'balance']));
     await expect.soft(sections.locator('.split li').first()).toHaveCSS('display', 'grid');
     await expect.soft(sections.locator('.split h3').first()).toHaveCSS('font-stretch', '75%');
     await expect.soft(sections.locator('.intro').first()).toHaveCSS('font-size', '18px');
