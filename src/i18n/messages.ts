@@ -91,6 +91,13 @@ export const es = {
         ],
         after: ', con el indicador blanco y negro probado sobre varios fondos.',
       },
+      pull: 'Si usas shadcn/ui, revisa el token `--ring`.',
+      pullParagraph:
+        'Los componentes de shadcn dibujan el foco con `--ring`, y en el tema neutral es un gris claro (`oklch(0.708 0 0)`) que sobre blanco da unos 2,6:1. Por debajo del 3:1 de 1.4.11. Además, varios componentes lo aplican con transparencia (`ring-ring/50`), lo que baja aún más el contraste. Basta con cambiar el token y añadir los estados que usa esta página.',
+      pullMore: {
+        label: 'Más: ',
+        links: [{ text: 'tokens y temas en shadcn/ui' }],
+      },
     },
   },
 } as const;
@@ -192,6 +199,13 @@ export const en = {
           },
         ],
         after: ', with the black-and-white indicator tested on several backgrounds.',
+      },
+      pull: 'If you use shadcn/ui, check the `--ring` token.',
+      pullParagraph:
+        'shadcn components draw focus with `--ring`, and in the neutral theme it’s a light gray (`oklch(0.708 0 0)`) that gives about 2.6:1 on white. That’s below the 3:1 required by 1.4.11. Several components also apply it with transparency (`ring-ring/50`), which lowers contrast further. Changing the token and adding the states this page uses is enough.',
+      pullMore: {
+        label: 'More: ',
+        links: [{ text: 'tokens and theming in shadcn/ui' }],
       },
     },
   },

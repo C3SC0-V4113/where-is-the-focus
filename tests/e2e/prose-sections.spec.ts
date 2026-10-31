@@ -111,8 +111,10 @@ for (const [route, messages, hrefs] of routes) {
   });
 
   const ring = messages.sections.ring;
-
-  const ringHref = 'https://www.sarasoueidan.com/blog/focus-indicators/';
+  const ringHrefs = [
+    'https://www.sarasoueidan.com/blog/focus-indicators/',
+    'https://ui.shadcn.com/docs/theming',
+  ];
 
   test(`${route} renders the ring section intro`, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 900 });
@@ -130,21 +132,93 @@ for (const [route, messages, hrefs] of routes) {
       .evaluateAll((nodes) =>
         nodes.map((node) => ['head', 'intro', 'more'].find((name) => node.classList.contains(name)))
       );
-    expect(childKinds).toEqual(['head', 'intro', 'more']);
-    await expect(section.locator('.intro p')).toHaveText(ring.paragraphs);
-    const line = section.locator('.more');
-    await expect(line).toHaveText(ring.more.label + ring.more.links[0]!.text + ring.more.after);
-    const link = line.getByRole('link');
-    await expect(link).toHaveCount(1);
-    await expect(link).toHaveAccessibleName(ring.more.links[0]!.text);
-    await expect(link).toHaveAttribute('href', ringHref);
-    await expect(link).toHaveCSS('text-decoration-line', 'underline');
-    await expect(link).toHaveCSS('font-weight', '500');
-    const [linkColor, lineColor] = await link.evaluate((node) => [
-      getComputedStyle(node).color,
-      getComputedStyle(node.parentElement!).color,
+    expect(childKinds).toEqual(['head', 'intro', 'more', 'intro', 'more']);
+    const prose = section.locator(':scope > .intro');
+    await expect(prose.nth(0).locator('p')).toHaveText(ring.paragraphs.map(plain));
+    await expect(prose.nth(1).locator('p')).toHaveText([
+      plain(ring.pull),
+      plain(ring.pullParagraph),
     ]);
-    expect(linkColor).not.toBe(lineColor);
+    await expect(section.locator('.pull code')).toHaveText('--ring');
+    await expect(prose.nth(1).locator('p').nth(1).locator('code')).toHaveText([
+      '--ring',
+      'oklch(0.708 0 0)',
+      'ring-ring/50',
+    ]);
+    const codeFlow = await section.locator('.intro code').evaluateAll((nodes) =>
+      nodes.map((node) => {
+        const box = node.getBoundingClientRect();
+        const sharesLine = [node.previousSibling, node.nextSibling].some((sibling) => {
+          if (sibling?.nodeType !== Node.TEXT_NODE || !sibling.textContent?.trim()) return false;
+          const range = document.createRange();
+          range.selectNodeContents(sibling);
+          return [...range.getClientRects()].some(
+            (rect) => rect.top < box.bottom && rect.bottom > box.top
+          );
+        });
+        return [getComputedStyle(node).display, getComputedStyle(node).marginInline, sharesLine];
+      })
+    );
+    expect(codeFlow).toEqual(Array(4).fill(['inline', '0px', true]));
+
+    const lines = section.locator(':scope > .more');
+    const more = [ring.more, ring.pullMore];
+    await expect(lines).toHaveText(
+      more.map((copy) => copy.label + copy.links[0]!.text + ('after' in copy ? copy.after : ''))
+    );
+    for (const [index, copy] of more.entries()) {
+      const link = lines.nth(index).getByRole('link');
+      await expect(link).toHaveCount(1);
+      await expect(link).toHaveAccessibleName(copy.links[0]!.text);
+      await expect(link).toHaveAttribute('href', ringHrefs[index]);
+      await expect(link).toHaveCSS('text-decoration-line', 'underline');
+      await expect(link).toHaveCSS('font-weight', '500');
+      const [linkColor, lineColor] = await link.evaluate((node) => [
+        getComputedStyle(node).color,
+        getComputedStyle(node.parentElement!).color,
+      ]);
+      expect(linkColor).not.toBe(lineColor);
+    }
+
+    const pull = prose.nth(1).locator('.pull');
+    const pullStyle = await pull.evaluate((node) => {
+      const style = getComputedStyle(node);
+      const measure = document.createElement('span');
+      measure.textContent = '0'.repeat(28);
+      Object.assign(measure.style, {
+        position: 'fixed',
+        visibility: 'hidden',
+        whiteSpace: 'nowrap',
+        fontFamily: style.fontFamily,
+        fontSize: style.fontSize,
+        fontWeight: style.fontWeight,
+      });
+      measure.style.setProperty('font-stretch', style.getPropertyValue('font-stretch'));
+      document.body.append(measure);
+      const ch = measure.getBoundingClientRect().width;
+      measure.remove();
+      return {
+        family: style.fontFamily,
+        stretch: style.getPropertyValue('font-stretch'),
+        weight: style.fontWeight,
+        transform: style.textTransform,
+        size: style.fontSize,
+        max: parseFloat(style.maxWidth),
+        ch,
+        marginStart: style.marginBlockStart,
+        marginEnd: style.marginBlockEnd,
+      };
+    });
+    expect(pullStyle).toMatchObject({
+      family: await section.locator('h2').evaluate((node) => getComputedStyle(node).fontFamily),
+      stretch: '75%',
+      weight: '700',
+      transform: 'none',
+      size: '24px',
+      marginStart: '6px',
+      marginEnd: '6px',
+    });
+    expect(Math.abs(pullStyle.max - pullStyle.ch)).toBeLessThanOrEqual(0.5);
 
     const headingStyles = await page.locator('main > section h2').evaluateAll((nodes) =>
       nodes.map((node) => {
@@ -160,16 +234,22 @@ for (const [route, messages, hrefs] of routes) {
     );
     expect(headingStyles[3]).toBe(headingStyles[0]);
 
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto(route);
+    await expect(page.locator('#anillo .pull')).toHaveCSS('font-size', '32px');
     await page.locator('#focus-visible .more a').last().focus();
-    await page.keyboard.press('Tab');
-    await expect(link).toBeFocused();
-    const ringStyle = await link.evaluate((node) => {
-      const style = getComputedStyle(node);
-      return [style.outlineStyle, style.outlineWidth, style.boxShadow];
-    });
-    expect(ringStyle.slice(0, 2)).toEqual(['solid', '2px']);
-    expect(ringStyle[2]).toContain('2px');
-    expect(ringStyle[2]).toContain('5px');
+    for (const index of [0, 1]) {
+      await page.keyboard.press('Tab');
+      const link = lines.nth(index).getByRole('link');
+      await expect(link).toBeFocused();
+      const ringStyle = await link.evaluate((node) => {
+        const style = getComputedStyle(node);
+        return [style.outlineStyle, style.outlineWidth, style.boxShadow];
+      });
+      expect(ringStyle.slice(0, 2)).toEqual(['solid', '2px']);
+      expect(ringStyle[2]).toContain('2px');
+      expect(ringStyle[2]).toContain('5px');
+    }
     for (const width of [320, 375, 768, 1280]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(route);
@@ -188,7 +268,7 @@ for (const [route] of routes)
       await page.goto(route);
       const ratios = await page
         .locator(
-          '#focus-visible p, #focus-visible .more, #focus-visible .more a, #anillo p, #anillo .more, #anillo .more a'
+          '#focus-visible p, #focus-visible .more, #focus-visible .more a, #anillo p, #anillo p code, #anillo .more, #anillo .more a'
         )
         .evaluateAll((nodes) => {
           const luminance = (color: string) => {

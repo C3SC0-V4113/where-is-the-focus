@@ -88,6 +88,9 @@
   --text-section--line-height: 0.96;
   --text-section--letter-spacing: -0.005em;
   --text-section--font-weight: 850;
+  --text-pull: clamp(24px, 3vw, 32px);
+  --text-pull--line-height: 1.12;
+  --text-pull--font-weight: 700;
   --text-lede: clamp(20px, 2.3vw, 24px);
   --text-lede--line-height: 1.45;
   --container-lede: 38ch;
