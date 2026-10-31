@@ -1,6 +1,8 @@
 ---
 import { en, es, type Locale } from '../../i18n/messages';
+import { ComplianceBadge } from '../common/compliance-badge';
 import { RichText } from '../common/rich-text';
+import { Button } from '../ui/button';
 
 interface Props {
   locale: Locale;
@@ -8,6 +10,22 @@ interface Props {
 const { locale } = Astro.props;
 const text = (locale === 'en' ? en : es).sections.beyondRing;
 const href = 'https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance.html';
+const gallery = text.gallery;
+const criteria = [
+  [
+    ['2.4.7', 'focus-visible.html'],
+    ['2.4.13', 'focus-appearance.html'],
+  ],
+  [
+    ['2.4.7', 'focus-visible.html'],
+    ['1.4.11', 'non-text-contrast.html'],
+  ],
+  [
+    ['2.4.7', 'focus-visible.html'],
+    ['2.4.13', 'focus-appearance.html'],
+  ],
+] as const;
+const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
 ---
 
 <section class="arg grid gap-6" aria-labelledby="h-sin" id="sin-anillo">
@@ -32,4 +50,100 @@ const href = 'https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance.html'
       {text.more.links[0]!.text}
     </a>
   </p>
+  <div class="gallery grid gap-4">
+    <article class="pat grid min-w-0 overflow-hidden rounded-sm border border-border bg-card">
+      <div class="pat-demo grid min-h-42.5 place-items-center border-b border-border bg-background px-4.5 py-7.5">
+        <Button
+          className="gallery-invert h-auto min-h-0 cursor-pointer rounded-full border-2 border-foreground bg-transparent px-5.5 py-3 font-sans text-base font-semibold text-foreground hover:bg-foreground/10 focus-visible:border-foreground focus-visible:bg-foreground focus-visible:text-background transition-none motion-safe:transition-colors motion-safe:duration-150"
+          type="button"
+        >
+          {gallery.button.label}
+        </Button>
+      </div>
+      <div class="pat-info grid min-w-0 content-start gap-2 px-4.5 pt-4 pb-1.5 font-sans">
+        <h3 class="m-0 text-lg leading-tight font-semibold text-foreground">
+          {gallery.button.title}
+        </h3>
+        <p class="gallery-description text-muted-foreground">{gallery.button.description}</p>
+        <div class="chips flex flex-wrap gap-1.5 pb-2.5">
+          {criteria[0].map(([id, page]) => (
+            <a
+              class="no-underline hover:underline hover:underline-offset-3"
+              href={`${criteriaBase}${page}`}
+            >
+              <ComplianceBadge state="ok">{id}</ComplianceBadge>
+            </a>
+          ))}
+        </div>
+      </div>
+    </article>
+    <article class="pat grid min-w-0 overflow-hidden rounded-sm border border-border bg-card">
+      <div class="pat-demo grid min-h-42.5 place-items-center border-b border-border bg-background px-4.5 py-7.5">
+        <nav
+          class="gallery-nav flex flex-wrap justify-center gap-x-5 gap-y-1.5 font-sans text-base font-medium"
+          aria-label={gallery.nav.label}
+        >
+          {gallery.nav.links.map((label) => (
+            <a
+              class="relative py-1.5 text-foreground no-underline focus-visible:text-brand-text"
+              href="#sin-anillo"
+            >
+              {label}
+            </a>
+          ))}
+        </nav>
+      </div>
+      <div class="pat-info grid min-w-0 content-start gap-2 px-4.5 pt-4 pb-1.5 font-sans">
+        <h3 class="m-0 text-lg leading-tight font-semibold text-foreground">{gallery.nav.title}</h3>
+        <p class="gallery-description text-muted-foreground">{gallery.nav.description}</p>
+        <div class="chips flex flex-wrap gap-1.5 pb-2.5">
+          {criteria[1].map(([id, page]) => (
+            <a
+              class="no-underline hover:underline hover:underline-offset-3"
+              href={`${criteriaBase}${page}`}
+            >
+              <ComplianceBadge state="ok">{id}</ComplianceBadge>
+            </a>
+          ))}
+        </div>
+      </div>
+    </article>
+    <article class="pat grid min-w-0 overflow-hidden rounded-sm border border-border bg-card">
+      <div class="pat-demo grid min-h-42.5 place-items-center border-b border-border bg-background px-4.5 py-7.5">
+        <p class="hl-p gallery-highlight m-0 font-serif text-foreground">
+          {gallery.highlight.lead}
+          <a
+            class="hl rounded-sm text-foreground underline decoration-brand-text underline-offset-3 focus-visible:text-brand-foreground focus-visible:decoration-transparent"
+            href="#sin-anillo"
+          >
+            {gallery.highlight.first}
+          </a>
+          {gallery.highlight.between}
+          <a
+            class="hl rounded-sm text-foreground underline decoration-brand-text underline-offset-3 focus-visible:text-brand-foreground focus-visible:decoration-transparent"
+            href="#sin-anillo"
+          >
+            {gallery.highlight.second}
+          </a>
+          {gallery.highlight.end}
+        </p>
+      </div>
+      <div class="pat-info grid min-w-0 content-start gap-2 px-4.5 pt-4 pb-1.5 font-sans">
+        <h3 class="m-0 text-lg leading-tight font-semibold text-foreground">
+          {gallery.highlight.title}
+        </h3>
+        <p class="gallery-description text-muted-foreground">{gallery.highlight.description}</p>
+        <div class="chips flex flex-wrap gap-1.5 pb-2.5">
+          {criteria[2].map(([id, page]) => (
+            <a
+              class="no-underline hover:underline hover:underline-offset-3"
+              href={`${criteriaBase}${page}`}
+            >
+              <ComplianceBadge state="ok">{id}</ComplianceBadge>
+            </a>
+          ))}
+        </div>
+      </div>
+    </article>
+  </div>
 </section>
