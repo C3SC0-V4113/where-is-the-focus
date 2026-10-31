@@ -99,6 +99,18 @@ export const es = {
         links: [{ text: 'tokens y temas en shadcn/ui' }],
       },
     },
+    beyondRing: {
+      number: '05 · Más allá del anillo',
+      title: 'Cualquier cambio claro sirve',
+      paragraphs: [
+        'WCAG pide que se vea dónde está el foco, no que haya un anillo. Una línea, un relleno o un marco valen si cumplen cuatro condiciones: 3:1 de contraste entre estados, algo más que un cambio de tono, un aspecto distinto del hover y nada que lo recorte.',
+        'Recorre las seis piezas con [[Tab]] y compáralas con el ratón. Todas dejan un contorno transparente debajo para el modo de alto contraste.',
+      ],
+      more: {
+        label: 'Más: ',
+        links: [{ text: 'cómo medir el área y el contraste en 2.4.13' }],
+      },
+    },
   },
 } as const;
 
@@ -206,6 +218,18 @@ export const en = {
       pullMore: {
         label: 'More: ',
         links: [{ text: 'tokens and theming in shadcn/ui' }],
+      },
+    },
+    beyondRing: {
+      number: '05 · Beyond the ring',
+      title: 'Any clear change works',
+      paragraphs: [
+        'WCAG asks that you can see where focus is, not that there’s a ring. A line, a fill or a frame are fine if they meet four conditions: 3:1 contrast between states, more than a change of hue, a look different from hover, and nothing clipping it.',
+        'Move through the six pieces with [[Tab]] and compare them with the mouse. All of them keep a transparent outline underneath for high contrast mode.',
+      ],
+      more: {
+        label: 'More: ',
+        links: [{ text: 'how to measure area and contrast in 2.4.13' }],
       },
     },
   },

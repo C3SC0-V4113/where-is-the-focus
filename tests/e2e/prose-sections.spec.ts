@@ -20,7 +20,7 @@ const routes = [
     ],
   ],
 ] as const;
-const plain = (text: string) => text.replace(/`([^`]+)`/g, '$1');
+const plain = (text: string) => text.replace(/`([^`]+)`/g, '$1').replace(/\[\[([^\]]+)\]\]/g, '$1');
 
 async function expectPrettyWrap(page: Page, pull: Locator) {
   const supportsPretty = await page.evaluate(() => CSS.supports('text-wrap-style', 'pretty'));
@@ -42,7 +42,7 @@ for (const [route, messages, hrefs] of routes) {
     await page.setViewportSize({ width: 320, height: 900 });
     await page.goto(route);
     const sections = page.locator('main > section');
-    await expect(sections).toHaveCount(4);
+    await expect(sections).toHaveCount(5);
     const section = sections.nth(2);
     await expect(section).toHaveAttribute('id', 'focus-visible');
     await expect(section).toHaveAttribute('aria-labelledby', 'h-fv');
@@ -100,7 +100,7 @@ for (const [route, messages, hrefs] of routes) {
         ].join('|');
       })
     );
-    expect(headingStyles.slice(2)).toEqual([headingStyles[0], headingStyles[0]]);
+    expect(headingStyles.slice(2)).toEqual(Array(3).fill(headingStyles[0]));
 
     await page.locator('#reglas .crit a').last().focus();
     for (const [index] of copy.more.links.entries()) {
@@ -133,7 +133,7 @@ for (const [route, messages, hrefs] of routes) {
     await page.setViewportSize({ width: 320, height: 900 });
     await page.goto(route);
     const sections = page.locator('main > section');
-    await expect(sections).toHaveCount(4);
+    await expect(sections).toHaveCount(5);
     const section = sections.nth(3);
     await expect(section).toHaveAttribute('id', 'anillo');
     await expect(section).toHaveAttribute('aria-labelledby', 'h-anillo');
@@ -272,6 +272,107 @@ for (const [route, messages, hrefs] of routes) {
       );
     }
   });
+
+  const beyondRing = messages.sections.beyondRing;
+  const beyondRingHref = 'https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance.html';
+
+  test(`${route} renders the beyond-the-ring prose with an inline Tab key`, async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 900 });
+    await page.goto(route);
+    const sections = page.locator('main > section');
+    await expect(sections).toHaveCount(5);
+    const section = sections.nth(4);
+    await expect(section).toHaveAttribute('id', 'sin-anillo');
+    await expect(section).toHaveAttribute('aria-labelledby', 'h-sin');
+    await expect(section.locator('h2')).toHaveAttribute('id', 'h-sin');
+    await expect(page.locator('#anillo + #sin-anillo')).toHaveCount(1);
+    await expect(section.locator('.num')).toHaveText(beyondRing.number);
+    await expect(section.locator('h2')).toHaveText(beyondRing.title);
+    const paragraphs = section.locator('.intro p');
+    await expect(paragraphs).toHaveText(beyondRing.paragraphs.map(plain));
+
+    const key = paragraphs.nth(1).locator('kbd');
+    await expect(key).toHaveCount(1);
+    await expect(key).toHaveText('Tab');
+    const keyFlow = await key.evaluate((node) => {
+      const box = node.getBoundingClientRect();
+      const adjacentText = [node.previousSibling, node.nextSibling].filter(
+        (sibling): sibling is Text => sibling?.nodeType === Node.TEXT_NODE
+      );
+      const sharesLine = adjacentText.map((sibling) => {
+        const range = document.createRange();
+        range.selectNodeContents(sibling);
+        return [...range.getClientRects()].some(
+          (rect) => rect.top < box.bottom && rect.bottom > box.top
+        );
+      });
+      const range = document.createRange();
+      range.selectNodeContents(node.closest('p')!);
+      const tops = [...range.getClientRects()]
+        .map((rect) => rect.top)
+        .sort((first, second) => first - second);
+      const lineTops = tops.filter((top, index) => index === 0 || top - tops[index - 1]! > 2);
+      return {
+        display: getComputedStyle(node).display,
+        marginInline: getComputedStyle(node).marginInline,
+        sharesLine,
+        lineCount: lineTops.length,
+      };
+    });
+    expect(keyFlow.display).toBe('inline');
+    expect(keyFlow.marginInline).toBe('0px');
+    expect(keyFlow.sharesLine).toContain(true);
+    expect(keyFlow.lineCount).toBeGreaterThan(1);
+
+    const more = section.locator('.more');
+    await expect(more).toHaveText(
+      beyondRing.more.label + beyondRing.more.links.map(({ text }) => text).join('')
+    );
+    const link = more.getByRole('link');
+    await expect(link).toHaveCount(1);
+    await expect(link).toHaveAccessibleName(beyondRing.more.links[0]!.text);
+    await expect(link).toHaveAttribute('href', beyondRingHref);
+    await expect(link).toHaveCSS('text-decoration-line', 'underline');
+    await expect(link).toHaveCSS('font-weight', '500');
+    const [linkColor, lineColor] = await link.evaluate((node) => [
+      getComputedStyle(node).color,
+      getComputedStyle(node.parentElement!).color,
+    ]);
+    expect(linkColor).not.toBe(lineColor);
+
+    const headingStyles = await page.locator('main > section h2').evaluateAll((nodes) =>
+      nodes.map((node) => {
+        const style = getComputedStyle(node);
+        return [
+          style.fontFamily,
+          style.getPropertyValue('font-stretch'),
+          style.fontWeight,
+          style.textTransform,
+          style.textWrap,
+        ].join('|');
+      })
+    );
+    expect(headingStyles[4]).toBe(headingStyles[0]);
+
+    await page.locator('#anillo .more a').last().focus();
+    await page.keyboard.press('Tab');
+    await expect(link).toBeFocused();
+    const focusRing = await link.evaluate((node) => {
+      const style = getComputedStyle(node);
+      return [style.outlineStyle, style.outlineWidth, style.boxShadow];
+    });
+    expect(focusRing.slice(0, 2)).toEqual(['solid', '2px']);
+    expect(focusRing[2]).toContain('2px');
+    expect(focusRing[2]).toContain('5px');
+
+    for (const width of [320, 375, 768, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(route);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true
+      );
+    }
+  });
 }
 
 for (const [route] of routes)
@@ -282,7 +383,7 @@ for (const [route] of routes)
       await page.goto(route);
       const ratios = await page
         .locator(
-          '#focus-visible p, #focus-visible .more, #focus-visible .more a, #anillo p, #anillo p code, #anillo .more, #anillo .more a'
+          '#focus-visible p, #focus-visible .more, #focus-visible .more a, #anillo p, #anillo p code, #anillo .more, #anillo .more a, #sin-anillo p, #sin-anillo .more, #sin-anillo .more a'
         )
         .evaluateAll((nodes) => {
           const luminance = (color: string) => {
