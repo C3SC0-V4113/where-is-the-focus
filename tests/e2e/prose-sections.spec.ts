@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
 import { en, es } from '../../src/i18n/messages';
 
@@ -21,6 +21,19 @@ const routes = [
   ],
 ] as const;
 const plain = (text: string) => text.replace(/`([^`]+)`/g, '$1');
+
+async function expectPrettyWrap(page: Page, pull: Locator) {
+  const supportsPretty = await page.evaluate(() => CSS.supports('text-wrap-style', 'pretty'));
+  if (supportsPretty) {
+    await expect(pull).toHaveCSS('text-wrap-style', 'pretty');
+    return;
+  }
+  const browser = page.context().browser();
+  test.info().annotations.push({
+    type: 'unsupported',
+    description: `text-wrap-style: pretty is unsupported in ${browser?.browserType().name()} ${browser?.version()}`,
+  });
+}
 
 for (const [route, messages, hrefs] of routes) {
   const copy = messages.sections.focusVisible;
@@ -219,6 +232,7 @@ for (const [route, messages, hrefs] of routes) {
       marginEnd: '6px',
     });
     expect(Math.abs(pullStyle.max - pullStyle.ch)).toBeLessThanOrEqual(0.5);
+    await expectPrettyWrap(page, pull);
 
     const headingStyles = await page.locator('main > section h2').evaluateAll((nodes) =>
       nodes.map((node) => {
