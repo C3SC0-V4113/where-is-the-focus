@@ -11,6 +11,7 @@ const { locale } = Astro.props;
 const messages = locale === 'en' ? en : es;
 const text = messages.sections.beyondRing;
 const criterionTitles = messages.sections.rules.criterionTitles.split('|');
+const criterionStatus = messages.sections.rules.stateText.split('|')[0]!;
 const criterionTitleById = {
   '2.4.7': criterionTitles[0],
   '2.4.11': criterionTitles[1],
@@ -80,7 +81,10 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
               href={`${criteriaBase}${page}`}
             >
               <ComplianceBadge state="ok">{id}</ComplianceBadge>
-              <span class="sr-only"> {criterionTitleById[id]}</span>
+              <span class="sr-only">
+                {' '}
+                {criterionTitleById[id]}, {criterionStatus}
+              </span>
             </a>
           ))}
         </div>
@@ -112,7 +116,10 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
               href={`${criteriaBase}${page}`}
             >
               <ComplianceBadge state="ok">{id}</ComplianceBadge>
-              <span class="sr-only"> {criterionTitleById[id]}</span>
+              <span class="sr-only">
+                {' '}
+                {criterionTitleById[id]}, {criterionStatus}
+              </span>
             </a>
           ))}
         </div>
@@ -150,7 +157,10 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
               href={`${criteriaBase}${page}`}
             >
               <ComplianceBadge state="ok">{id}</ComplianceBadge>
-              <span class="sr-only"> {criterionTitleById[id]}</span>
+              <span class="sr-only">
+                {' '}
+                {criterionTitleById[id]}, {criterionStatus}
+              </span>
             </a>
           ))}
         </div>

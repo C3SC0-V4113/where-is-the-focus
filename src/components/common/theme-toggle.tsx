@@ -27,12 +27,21 @@ function getServerThemeSnapshot(): Theme {
   return 'light';
 }
 
+const subscribeToHydration = () => () => undefined;
+const getClientHydrationSnapshot = () => true;
+const getServerHydrationSnapshot = () => false;
+
 function isTheme(value: string | undefined): value is Theme {
   return value === 'light' || value === 'dark';
 }
 
 export function ThemeToggle({ label, light, dark }: Props) {
   const theme = useSyncExternalStore(subscribeToTheme, getThemeSnapshot, getServerThemeSnapshot);
+  const isHydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getClientHydrationSnapshot,
+    getServerHydrationSnapshot
+  );
 
   function handleValueChange(groupValue: string[]) {
     const selectedTheme = groupValue[0];
@@ -55,6 +64,7 @@ export function ThemeToggle({ label, light, dark }: Props) {
     >
       <ToggleGroupItem
         value="light"
+        {...(!isHydrated ? { tabIndex: 0 } : {})}
         className="min-h-7 min-w-7 gap-1.5 rounded-sm border border-transparent px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-background aria-pressed:border-border aria-pressed:bg-background aria-pressed:text-foreground not-focus-visible:aria-pressed:shadow-xs sm:min-w-24 forced-colors:not-focus-visible:aria-pressed:outline-1 forced-colors:not-focus-visible:aria-pressed:outline-current forced-colors:not-focus-visible:aria-pressed:outline-solid"
       >
         <Sun aria-hidden="true" className="size-3.5" />

@@ -62,7 +62,7 @@
   }
 
   @media (hover: hover) {
-    .gallery-nav a:hover::after {
+    .gallery-nav a:hover:not(:focus-visible)::after {
       transform: scaleX(0.35);
     }
   }

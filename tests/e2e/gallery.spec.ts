@@ -20,6 +20,7 @@ const cases = [
       'Contraste no textual',
       'Apariencia del foco',
     ],
+    criterionStatus: 'cumple el criterio',
     highlight: [
       'Consulta los ',
       'términos de envío',
@@ -54,6 +55,7 @@ const cases = [
       'Non-text contrast',
       'Focus appearance',
     ],
+    criterionStatus: 'meets the criterion',
     highlight: [
       'Check the ',
       'shipping terms',
@@ -222,6 +224,26 @@ async function expectHoverState(page: Page) {
   await checks[Number(supportsHover)]();
 }
 
+test('navigation focus keeps the full underline while hovered', async ({ page }) => {
+  await page.goto('/');
+  const firstCard = page.locator('#sin-anillo .gallery article').first();
+  const button = firstCard.getByRole('button');
+  const buttonChips = await firstCard.locator('.chips a').all();
+  const navLink = page.locator('#sin-anillo .gallery-nav a').first();
+
+  await page.locator('#sin-anillo .more a').last().focus();
+  for (const target of [button, ...buttonChips, navLink]) {
+    await page.keyboard.press('Tab');
+    await expect(target).toBeFocused();
+  }
+  expect(await navLink.evaluate((node) => node.matches(':focus-visible'))).toBe(true);
+
+  await navLink.hover();
+  await expect
+    .poll(() => navLink.evaluate((node) => getComputedStyle(node, '::after').transform))
+    .toBe('matrix(1, 0, 0, 1, 0, 0)');
+});
+
 for (const item of cases) {
   test(`${item.route} gallery renders exact copy, order and criteria`, async ({ page }) => {
     await page.goto(item.route);
@@ -240,7 +262,7 @@ for (const item of cases) {
         const chip = chips.nth(position);
         await expect(chip).toHaveAttribute('href', urls[criterion]!);
         await expect(chip).toHaveAccessibleName(
-          `${criterion} ${item.criterionTitles[criterionTitleIndexes[criterion]!]}`
+          `${criterion} ${item.criterionTitles[criterionTitleIndexes[criterion]!]}, ${item.criterionStatus}`
         );
         await expect(chip.locator('[data-slot="badge"]')).toContainText(criterion);
         await expect(chip.locator('[data-slot="badge"]')).toHaveClass(/bg-success-muted/);
@@ -299,11 +321,16 @@ for (const item of cases) {
     }
   });
 
-  test(`${item.route} gallery text and focus states meet contrast`, async ({ page }) => {
-    for (const theme of ['light', 'dark'] as const) {
+  for (const theme of ['light', 'dark'] as const) {
+    test(`${item.route} gallery text and focus states meet contrast in ${theme} mode`, async ({
+      page,
+    }) => {
       await page.emulateMedia({ colorScheme: theme });
       await page.addInitScript((value) => localStorage.setItem('foco-theme', value), theme);
       await page.goto(item.route);
+      expect(await page.locator('html').evaluate((node) => node.classList.contains('dark'))).toBe(
+        theme === 'dark'
+      );
       const cards = page.locator('#sin-anillo .gallery article');
       const surfaces = await page.evaluate(() => {
         const css = getComputedStyle(document.documentElement);
@@ -354,8 +381,8 @@ for (const item of cases) {
       expect(await highlighter.evaluate((node) => node.matches(':focus-visible'))).toBe(true);
       expect(await contrast(page, surfaces[2]!, surfaces[1]!)).toBeGreaterThanOrEqual(4.5);
       expect(await contrast(page, surfaces[1]!, surfaces[0]!)).toBeGreaterThanOrEqual(3);
-    }
-  });
+    });
+  }
 
   test(`${item.route} click does not activate focus-visible`, async ({ page }) => {
     await page.goto(item.route);
@@ -383,8 +410,18 @@ for (const item of cases) {
     const nav = page.locator('#sin-anillo .gallery-nav a').first();
     const hl = page.locator('#sin-anillo .hl').first();
     await expect(button).toHaveCSS('transition-duration', '0s');
-    await expect(nav).toHaveCSS('transition-duration', '0s');
+    expect(await nav.evaluate((node) => getComputedStyle(node, '::after').transitionDuration)).toBe(
+      '0s'
+    );
     await expect(hl).toHaveCSS('transition-duration', '0s');
+
+    const normalPage = await page.context().newPage();
+    await normalPage.emulateMedia({ reducedMotion: 'no-preference' });
+    await normalPage.goto(item.route);
+    const normalNav = normalPage.locator('#sin-anillo .gallery-nav a').first();
+    expect(
+      await normalNav.evaluate((node) => getComputedStyle(node, '::after').transitionDuration)
+    ).toBe('0.2s');
   });
 
   test(`${item.route} gallery fits narrow and wide viewports`, async ({ page }) => {
