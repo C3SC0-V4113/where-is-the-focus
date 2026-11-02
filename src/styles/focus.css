@@ -61,9 +61,103 @@
     background-size: 0% 100%;
   }
 
+  .vis {
+    position: relative;
+    display: grid;
+    gap: 4px;
+    width: min(100%, 250px);
+    padding: 16px 20px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--foreground);
+    text-decoration: none;
+    font-family: var(--font-sans);
+  }
+
+  .vis strong {
+    font-size: 17px;
+  }
+
+  .vis span {
+    color: var(--muted-foreground);
+    font-size: 14px;
+  }
+
+  .vis::before {
+    position: absolute;
+    inset: -8px;
+    background:
+      linear-gradient(var(--brand-text) 0 0) top left / 18px 3px,
+      linear-gradient(var(--brand-text) 0 0) top left / 3px 18px,
+      linear-gradient(var(--brand-text) 0 0) top right / 18px 3px,
+      linear-gradient(var(--brand-text) 0 0) top right / 3px 18px,
+      linear-gradient(var(--brand-text) 0 0) bottom left / 18px 3px,
+      linear-gradient(var(--brand-text) 0 0) bottom left / 3px 18px,
+      linear-gradient(var(--brand-text) 0 0) bottom right / 18px 3px,
+      linear-gradient(var(--brand-text) 0 0) bottom right / 3px 18px;
+    background-repeat: no-repeat;
+    content: '';
+    opacity: 0;
+    transform: scale(1.08);
+    pointer-events: none;
+  }
+
+  .vis:focus-visible,
+  .thumb:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+
+  .vis:focus-visible::before {
+    opacity: 1;
+    transform: none;
+  }
+
+  .thumb {
+    position: relative;
+    display: block;
+    width: min(100%, 260px);
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 8px;
+    color: var(--thumb-veil-text);
+    text-decoration: none;
+    background:
+      radial-gradient(circle at 70% 30%, var(--thumb-sun) 0 14%, transparent 15%),
+      linear-gradient(
+        170deg,
+        var(--thumb-sky) 0%,
+        var(--thumb-cloud) 45%,
+        var(--thumb-foothill) 46%,
+        var(--thumb-peak) 100%
+      );
+  }
+
+  .thumb .veil {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: var(--thumb-veil);
+    color: var(--thumb-veil-text);
+    font: 600 17px var(--font-sans);
+    opacity: 0;
+  }
+
+  .thumb:focus-visible .veil {
+    opacity: 1;
+    box-shadow: inset 0 0 0 3px var(--thumb-veil-border);
+  }
+
   @media (hover: hover) {
     .gallery-nav a:hover:not(:focus-visible)::after {
       transform: scaleX(0.35);
+    }
+
+    .thumb:hover .veil {
+      opacity: 1;
     }
   }
 
@@ -76,6 +170,16 @@
       transition:
         background-size 250ms ease,
         color 250ms ease;
+    }
+
+    .vis::before {
+      transition:
+        opacity 180ms ease,
+        transform 220ms ease;
+    }
+
+    .thumb .veil {
+      transition: opacity 200ms ease;
     }
   }
 

@@ -33,6 +33,14 @@ const criteria = [
     ['2.4.7', 'focus-visible.html'],
     ['2.4.13', 'focus-appearance.html'],
   ],
+  [
+    ['2.4.7', 'focus-visible.html'],
+    ['1.4.11', 'non-text-contrast.html'],
+  ],
+  [
+    ['2.4.7', 'focus-visible.html'],
+    ['2.4.13', 'focus-appearance.html'],
+  ],
 ] as const;
 const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
 ---
@@ -152,6 +160,63 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
         <p class="gallery-description text-muted-foreground">{gallery.highlight.description}</p>
         <div class="chips flex flex-wrap gap-1.5 pb-2.5">
           {criteria[2].map(([id, page]) => (
+            <a
+              class="no-underline hover:underline hover:underline-offset-3"
+              href={`${criteriaBase}${page}`}
+            >
+              <ComplianceBadge state="ok">{id}</ComplianceBadge>
+              <span class="sr-only">
+                {' '}
+                {criterionTitleById[id]}, {criterionStatus}
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </article>
+    <article class="pat grid min-w-0 overflow-hidden rounded-sm border border-border bg-card">
+      <div class="pat-demo grid min-h-42.5 place-items-center border-b border-border bg-background px-4.5 py-7.5">
+        <a class="vis" href="#sin-anillo">
+          <strong>{gallery.viewfinder.plan}</strong>
+          <span>{gallery.viewfinder.details}</span>
+        </a>
+      </div>
+      <div class="pat-info grid min-w-0 content-start gap-2 px-4.5 pt-4 pb-1.5 font-sans">
+        <h3 class="m-0 text-lg leading-tight font-semibold text-foreground">
+          {gallery.viewfinder.title}
+        </h3>
+        <p class="gallery-description text-muted-foreground">{gallery.viewfinder.description}</p>
+        <div class="chips flex flex-wrap gap-1.5 pb-2.5">
+          {criteria[3].map(([id, page]) => (
+            <a
+              class="no-underline hover:underline hover:underline-offset-3"
+              href={`${criteriaBase}${page}`}
+            >
+              <ComplianceBadge state="ok">{id}</ComplianceBadge>
+              <span class="sr-only">
+                {' '}
+                {criterionTitleById[id]}, {criterionStatus}
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </article>
+    <article class="pat grid min-w-0 overflow-hidden rounded-sm border border-border bg-card">
+      <div class="pat-demo grid min-h-42.5 place-items-center border-b border-border bg-background px-4.5 py-7.5">
+        <a class="thumb" href="#sin-anillo" aria-label={gallery.overlay.ariaLabel}>
+          <span class="veil" aria-hidden="true">
+            {gallery.overlay.action}
+          </span>
+        </a>
+      </div>
+      <div class="pat-info grid min-w-0 content-start gap-2 px-4.5 pt-4 pb-1.5 font-sans">
+        <h3 class="m-0 text-lg leading-tight font-semibold text-foreground">
+          {gallery.overlay.title}
+        </h3>
+        <p class="gallery-description text-muted-foreground">{gallery.overlay.description}</p>
+        <div class="chips flex flex-wrap gap-1.5 pb-2.5">
+          {criteria[4].map(([id, page]) => (
             <a
               class="no-underline hover:underline hover:underline-offset-3"
               href={`${criteriaBase}${page}`}
