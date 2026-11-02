@@ -16,11 +16,6 @@
     grid-template-rows: auto 1fr;
   }
 
-  .gallery-description {
-    font-size: 15px;
-    line-height: 1.5;
-  }
-
   .gallery-nav a::after {
     position: absolute;
     right: 0;
@@ -39,7 +34,9 @@
 
   .gallery-invert:focus-visible,
   .gallery-nav a:focus-visible,
-  .gallery-highlight a:focus-visible {
+  .gallery-highlight a:focus-visible,
+  .vis:focus-visible,
+  .thumb:focus-visible {
     outline: 2px solid transparent;
     outline-offset: 2px;
     box-shadow: none;
@@ -49,16 +46,34 @@
     background-size: 100% 100%;
   }
 
-  .gallery-highlight {
-    max-width: 32ch;
-    font-size: 17px;
-    line-height: 1.6;
-  }
-
   .gallery-highlight a {
     background-image: linear-gradient(var(--brand), var(--brand));
     background-repeat: no-repeat;
     background-size: 0% 100%;
+  }
+
+  .vis::before {
+    position: absolute;
+    inset: -8px;
+    background:
+      linear-gradient(var(--brand-text) 0 0) top left / 18px 3px,
+      linear-gradient(var(--brand-text) 0 0) top left / 3px 18px,
+      linear-gradient(var(--brand-text) 0 0) top right / 18px 3px,
+      linear-gradient(var(--brand-text) 0 0) top right / 3px 18px,
+      linear-gradient(var(--brand-text) 0 0) bottom left / 18px 3px,
+      linear-gradient(var(--brand-text) 0 0) bottom left / 3px 18px,
+      linear-gradient(var(--brand-text) 0 0) bottom right / 18px 3px,
+      linear-gradient(var(--brand-text) 0 0) bottom right / 3px 18px;
+    background-repeat: no-repeat;
+    content: '';
+    opacity: 0;
+    transform: scale(1.08);
+    pointer-events: none;
+  }
+
+  .vis:focus-visible::before {
+    opacity: 1;
+    transform: none;
   }
 
   @media (hover: hover) {
@@ -77,11 +92,16 @@
         background-size 250ms ease,
         color 250ms ease;
     }
+
+    .vis::before {
+      transition:
+        opacity 150ms ease,
+        transform 150ms ease;
+    }
   }
 
   .pull {
     max-width: 28ch;
-    margin: 6px 0;
   }
 
   .arg {
@@ -103,8 +123,6 @@
   .split li {
     grid-template-columns: 2.2ch minmax(0, 1fr);
     counter-increment: item;
-    font-size: 17px;
-    line-height: 1.45;
   }
   .split li::before {
     padding-top: 4px;

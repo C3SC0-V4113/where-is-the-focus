@@ -134,6 +134,20 @@ export const es = {
           description:
             'Un fondo de color barre el enlace y el texto pasa a blanco para conservar el contraste. Se lee como un rotulador.',
         },
+        viewfinder: {
+          plan: 'Plan Equipo',
+          details: 'Hasta 25 personas · anual',
+          title: 'Esquinas de visor',
+          description:
+            'Cuatro escuadras, como el enfoque de una cámara, se cierran sobre la tarjeta. Marcan la posición con menos peso que un marco completo.',
+        },
+        overlay: {
+          ariaLabel: 'Ver ruta Valle Nevado',
+          action: 'Ver ruta →',
+          title: 'Capa sobre la imagen',
+          description:
+            'La imagen se cubre con un velo de color y la acción escrita. Con teclado suma un borde interior blanco para distinguirse del hover.',
+        },
       },
     },
   },
@@ -279,6 +293,20 @@ export const en = {
           title: 'Highlighter on text links',
           description:
             'A color fill sweeps across the link and the text turns white to keep contrast. It reads like a marker pen.',
+        },
+        viewfinder: {
+          plan: 'Team plan',
+          details: 'Up to 25 people · yearly',
+          title: 'Viewfinder corners',
+          description:
+            'Four brackets, like a camera’s focus, close in on the card. They mark the position with less weight than a full frame.',
+        },
+        overlay: {
+          ariaLabel: 'View route: Valle Nevado',
+          action: 'View route →',
+          title: 'Overlay on the image',
+          description:
+            'The image is covered by a color veil with the action written on it. With the keyboard it adds a white inner border to stand apart from hover.',
         },
       },
     },

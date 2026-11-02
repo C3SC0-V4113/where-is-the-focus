@@ -29,7 +29,7 @@ const text = (locale === 'en' ? en : es).sections.premise;
       </h3>
       <ol role="list" class="m-0 grid list-none gap-3 p-0">
         {text.failures.split('|').map((item) => (
-          <li class="grid gap-2.5">
+          <li class="grid gap-2.5 text-base leading-normal">
             <RichText text={item} />
           </li>
         ))}
@@ -41,7 +41,7 @@ const text = (locale === 'en' ? en : es).sections.premise;
       </h3>
       <ol role="list" class="m-0 grid list-none gap-3 p-0">
         {text.good.split('|').map((item) => (
-          <li class="grid gap-2.5">
+          <li class="grid gap-2.5 text-base leading-normal">
             <RichText text={item} />
           </li>
         ))}

@@ -1,4 +1,5 @@
 ---
+import ValleNevadoArtwork from '../../assets/focus/valle-nevado.svg';
 import { en, es, type Locale } from '../../i18n/messages';
 import { ComplianceBadge } from '../common/compliance-badge';
 import { RichText } from '../common/rich-text';
@@ -21,6 +22,14 @@ const criterionTitleById = {
 const href = 'https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance.html';
 const gallery = text.gallery;
 const criteria = [
+  [
+    ['2.4.7', 'focus-visible.html'],
+    ['2.4.13', 'focus-appearance.html'],
+  ],
+  [
+    ['2.4.7', 'focus-visible.html'],
+    ['1.4.11', 'non-text-contrast.html'],
+  ],
   [
     ['2.4.7', 'focus-visible.html'],
     ['2.4.13', 'focus-appearance.html'],
@@ -73,7 +82,7 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
         <h3 class="m-0 text-lg leading-tight font-semibold text-foreground">
           {gallery.button.title}
         </h3>
-        <p class="gallery-description text-muted-foreground">{gallery.button.description}</p>
+        <p class="text-sm leading-normal text-muted-foreground">{gallery.button.description}</p>
         <div class="chips flex flex-wrap gap-1.5 pb-2.5">
           {criteria[0].map(([id, page]) => (
             <a
@@ -108,7 +117,7 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
       </div>
       <div class="pat-info grid min-w-0 content-start gap-2 px-4.5 pt-4 pb-1.5 font-sans">
         <h3 class="m-0 text-lg leading-tight font-semibold text-foreground">{gallery.nav.title}</h3>
-        <p class="gallery-description text-muted-foreground">{gallery.nav.description}</p>
+        <p class="text-sm leading-normal text-muted-foreground">{gallery.nav.description}</p>
         <div class="chips flex flex-wrap gap-1.5 pb-2.5">
           {criteria[1].map(([id, page]) => (
             <a
@@ -127,7 +136,7 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
     </article>
     <article class="pat grid min-w-0 overflow-hidden rounded-sm border border-border bg-card">
       <div class="pat-demo grid min-h-42.5 place-items-center border-b border-border bg-background px-4.5 py-7.5">
-        <p class="hl-p gallery-highlight m-0 font-serif text-foreground">
+        <p class="hl-p gallery-highlight m-0 max-w-80 font-serif text-base leading-relaxed text-foreground">
           {gallery.highlight.lead}
           <a
             class="hl rounded-sm text-foreground underline decoration-brand-text underline-offset-3 focus-visible:text-brand-foreground focus-visible:decoration-transparent"
@@ -149,9 +158,81 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
         <h3 class="m-0 text-lg leading-tight font-semibold text-foreground">
           {gallery.highlight.title}
         </h3>
-        <p class="gallery-description text-muted-foreground">{gallery.highlight.description}</p>
+        <p class="text-sm leading-normal text-muted-foreground">{gallery.highlight.description}</p>
         <div class="chips flex flex-wrap gap-1.5 pb-2.5">
           {criteria[2].map(([id, page]) => (
+            <a
+              class="no-underline hover:underline hover:underline-offset-3"
+              href={`${criteriaBase}${page}`}
+            >
+              <ComplianceBadge state="ok">{id}</ComplianceBadge>
+              <span class="sr-only">
+                {' '}
+                {criterionTitleById[id]}, {criterionStatus}
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </article>
+    <article class="pat grid min-w-0 overflow-hidden rounded-sm border border-border bg-card">
+      <div class="pat-demo grid min-h-42.5 place-items-center border-b border-border bg-background px-4.5 py-7.5">
+        <a
+          class="vis relative grid w-full max-w-62.5 gap-1 rounded-md border border-border bg-card px-5 py-4 font-sans text-foreground no-underline"
+          href="#sin-anillo"
+        >
+          <strong class="text-base">{gallery.viewfinder.plan}</strong>
+          <span class="text-sm text-muted-foreground">{gallery.viewfinder.details}</span>
+        </a>
+      </div>
+      <div class="pat-info grid min-w-0 content-start gap-2 px-4.5 pt-4 pb-1.5 font-sans">
+        <h3 class="m-0 text-lg leading-tight font-semibold text-foreground">
+          {gallery.viewfinder.title}
+        </h3>
+        <p class="text-sm leading-normal text-muted-foreground">{gallery.viewfinder.description}</p>
+        <div class="chips flex flex-wrap gap-1.5 pb-2.5">
+          {criteria[3].map(([id, page]) => (
+            <a
+              class="no-underline hover:underline hover:underline-offset-3"
+              href={`${criteriaBase}${page}`}
+            >
+              <ComplianceBadge state="ok">{id}</ComplianceBadge>
+              <span class="sr-only">
+                {' '}
+                {criterionTitleById[id]}, {criterionStatus}
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </article>
+    <article class="pat grid min-w-0 overflow-hidden rounded-sm border border-border bg-card">
+      <div class="pat-demo grid min-h-42.5 place-items-center border-b border-border bg-background px-4.5 py-7.5">
+        <a
+          class="thumb group relative block aspect-4/3 w-full max-w-65 overflow-hidden rounded-md bg-muted no-underline"
+          href="#sin-anillo"
+          aria-label={gallery.overlay.ariaLabel}
+        >
+          <ValleNevadoArtwork
+            class="absolute inset-0 block size-full"
+            aria-hidden="true"
+            focusable="false"
+          />
+          <span
+            class="veil absolute inset-0 grid place-items-center bg-brand/88 font-sans text-base font-semibold text-brand-foreground opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 group-focus-visible:inset-ring-3 group-focus-visible:inset-ring-brand-foreground motion-safe:transition-opacity"
+            aria-hidden="true"
+          >
+            {gallery.overlay.action}
+          </span>
+        </a>
+      </div>
+      <div class="pat-info grid min-w-0 content-start gap-2 px-4.5 pt-4 pb-1.5 font-sans">
+        <h3 class="m-0 text-lg leading-tight font-semibold text-foreground">
+          {gallery.overlay.title}
+        </h3>
+        <p class="text-sm leading-normal text-muted-foreground">{gallery.overlay.description}</p>
+        <div class="chips flex flex-wrap gap-1.5 pb-2.5">
+          {criteria[4].map(([id, page]) => (
             <a
               class="no-underline hover:underline hover:underline-offset-3"
               href={`${criteriaBase}${page}`}
