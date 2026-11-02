@@ -2,6 +2,7 @@ import { Moon, Sun } from 'lucide-react';
 import { useSyncExternalStore } from 'react';
 
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { useHydrated } from '@/hooks/use-hydrated';
 import { getStoredTheme, setStoredTheme, type Theme } from '@/lib/storage';
 
 interface Props {
@@ -27,21 +28,13 @@ function getServerThemeSnapshot(): Theme {
   return 'light';
 }
 
-const subscribeToHydration = () => () => undefined;
-const getClientHydrationSnapshot = () => true;
-const getServerHydrationSnapshot = () => false;
-
 function isTheme(value: string | undefined): value is Theme {
   return value === 'light' || value === 'dark';
 }
 
 export function ThemeToggle({ label, light, dark }: Props) {
   const theme = useSyncExternalStore(subscribeToTheme, getThemeSnapshot, getServerThemeSnapshot);
-  const isHydrated = useSyncExternalStore(
-    subscribeToHydration,
-    getClientHydrationSnapshot,
-    getServerHydrationSnapshot
-  );
+  const isHydrated = useHydrated();
 
   function handleValueChange(groupValue: string[]) {
     const selectedTheme = groupValue[0];
