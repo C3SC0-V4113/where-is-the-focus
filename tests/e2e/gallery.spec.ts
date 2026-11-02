@@ -164,19 +164,59 @@ async function contrast(page: Page, ink: string, paper: string) {
   );
 }
 
-async function compositeColor(page: Page, layer: string, base: string) {
-  return page.evaluate(
-    ([foreground, background]) => {
-      const context = document.createElement('canvas').getContext('2d');
-      if (!context) throw new Error('Canvas 2D context is unavailable.');
-      context.fillStyle = background;
-      context.fillRect(0, 0, 1, 1);
-      context.fillStyle = foreground;
-      context.fillRect(0, 0, 1, 1);
-      const [red, green, blue] = context.getImageData(0, 0, 1, 1).data;
-      return `rgb(${red}, ${green}, ${blue})`;
+async function renderedOverlayContrasts(overlay: Locator, textInk: number[], focusInk: number[]) {
+  return overlay.evaluate<readonly [number, number, number], number[][]>(
+    async (link, inks) => {
+      const textColor = inks[0]!;
+      const focusColor = inks[1]!;
+      const svg = link.querySelector('svg') as SVGSVGElement;
+      const veil = link.querySelector('.veil') as HTMLElement;
+      const bounds = link.getBoundingClientRect();
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.ceil(bounds.width);
+      canvas.height = Math.ceil(bounds.height);
+      const context = canvas.getContext('2d')!;
+      const clone = svg.cloneNode(true) as SVGSVGElement;
+      clone.setAttribute('width', `${bounds.width}`);
+      clone.setAttribute('height', `${bounds.height}`);
+      const properties = ['fill', 'fill-opacity', 'opacity', 'stop-color', 'stop-opacity'];
+      const sourceNodes = [svg, ...svg.querySelectorAll('*')];
+      const cloneNodes = [clone, ...clone.querySelectorAll('*')];
+      sourceNodes.forEach((source, index) => {
+        const style = getComputedStyle(source);
+        properties.forEach((property) =>
+          cloneNodes[index]!.setAttribute(property, style.getPropertyValue(property))
+        );
+      });
+      const image = new Image();
+      image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(clone))}`;
+      await image.decode();
+      context.fillStyle = getComputedStyle(link).backgroundColor;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      context.fillStyle = getComputedStyle(veil).backgroundColor;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+      const luminance = (channels: number[]) => {
+        const linear = channels.map((channel) => {
+          const value = channel / 255;
+          return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+        });
+        return 0.2126 * linear[0]! + 0.7152 * linear[1]! + 0.0722 * linear[2]!;
+      };
+      const ratio = (foreground: number, background: number) =>
+        (Math.max(foreground, background) + 0.05) / (Math.min(foreground, background) + 0.05);
+      const [textLuminance, focusLuminance] = [luminance(textColor!), luminance(focusColor!)];
+      let minimumTextContrast = Infinity,
+        minimumBorderContrast = Infinity;
+      for (let index = 0; index < pixels.length; index += 4) {
+        const background = luminance([pixels[index]!, pixels[index + 1]!, pixels[index + 2]!]);
+        minimumTextContrast = Math.min(minimumTextContrast, ratio(textLuminance, background));
+        minimumBorderContrast = Math.min(minimumBorderContrast, ratio(focusLuminance, background));
+      }
+      return [minimumTextContrast, minimumBorderContrast, pixels.length / 4] as const;
     },
-    [layer, base]
+    [textInk, focusInk]
   );
 }
 
@@ -267,10 +307,20 @@ async function expectOverlayFocus(locator: Locator) {
     const css = getComputedStyle(node);
     return [css.opacity, css.boxShadow];
   });
+  const borderColor = await locator.evaluate(() => {
+    const probe = document.createElement('span');
+    probe.style.color = getComputedStyle(document.documentElement)
+      .getPropertyValue('--brand-foreground')
+      .trim();
+    document.body.append(probe);
+    const color = getComputedStyle(probe).color;
+    probe.remove();
+    return color;
+  });
   expect(styles[0]).toBe('1');
   expect(styles[1]).toContain('inset');
   expect(styles[1]).toContain('3px');
-  expect(styles[1]).toContain('rgb(255, 255, 255)');
+  expect(styles[1]).toContain(borderColor);
 }
 
 async function expectHoverState(page: Page) {
@@ -389,6 +439,10 @@ for (const item of cases) {
     await expect(overlayLink).toHaveAttribute('href', '#sin-anillo');
     await expect(overlayLink).toHaveAttribute('aria-label', item.overlay[0]);
     await expect(overlayLink).toHaveAccessibleName(item.overlay[0]);
+    const artwork = overlayLink.locator('svg');
+    await expect(artwork).toHaveCount(1);
+    await expect(artwork).toBeVisible();
+    await expect(artwork).toHaveAttribute('aria-hidden', 'true');
     await expect(overlayLink.locator('.veil')).toHaveText(item.overlay[1]);
     await expect(overlayLink.locator('.veil')).toHaveAttribute('aria-hidden', 'true');
     await expect(cards.locator('details')).toHaveCount(0);
@@ -510,33 +564,45 @@ for (const item of cases) {
       expect(await contrast(page, planText, viewfinderSurface)).toBeGreaterThanOrEqual(4.5);
       expect(await contrast(page, planDetails, viewfinderSurface)).toBeGreaterThanOrEqual(4.5);
       expect(await contrast(page, surfaces[3]!, surfaces[0]!)).toBeGreaterThanOrEqual(3);
-      const veil = cards.nth(4).locator('.veil');
-      const veilLayer = await veil.evaluate((node) => getComputedStyle(node).backgroundColor);
-      const veilText = await veil.evaluate((node) => getComputedStyle(node).color);
-      const imageTokens = await page.locator('html').evaluate((root) => {
-        const css = getComputedStyle(root);
-        return [
-          css.getPropertyValue('--thumb-cloud').trim(),
-          css.getPropertyValue('--thumb-veil-border').trim(),
-        ];
-      });
-      const veilSurface = await compositeColor(page, veilLayer, imageTokens[0]!);
-      expect(await contrast(page, veilText, veilSurface)).toBeGreaterThanOrEqual(4.5);
-      expect(await contrast(page, imageTokens[1]!, veilSurface)).toBeGreaterThanOrEqual(3);
-      const highlighter = cards.nth(2).locator('.hl').first();
+      const overlayLink = cards.nth(4).locator('.thumb');
       const focusOrder = [
         button,
         ...(await cards.nth(0).locator('.chips a').all()),
         ...(await cards.nth(1).locator('nav a').all()),
         ...(await cards.nth(1).locator('.chips a').all()),
-        highlighter,
+        ...(await cards.nth(2).locator('.hl').all()),
+        ...(await cards.nth(2).locator('.chips a').all()),
+        cards.nth(3).locator('.vis'),
+        ...(await cards.nth(3).locator('.chips a').all()),
+        overlayLink,
       ];
       await page.locator('#sin-anillo .more a').last().focus();
       for (const target of focusOrder) {
         await page.keyboard.press('Tab');
         await expect(target).toBeFocused();
       }
-      expect(await highlighter.evaluate((node) => node.matches(':focus-visible'))).toBe(true);
+      expect(await overlayLink.evaluate((node) => node.matches(':focus-visible'))).toBe(true);
+      await waitForMotion(overlayLink);
+      const veil = overlayLink.locator('.veil');
+      expect(await veil.evaluate((node) => getComputedStyle(node).opacity)).toBe('1');
+      const borderColor = await page.locator('html').evaluate((root) => {
+        const probe = document.createElement('span');
+        probe.style.color = getComputedStyle(root).getPropertyValue('--brand-foreground').trim();
+        document.body.append(probe);
+        const color = getComputedStyle(probe).color;
+        probe.remove();
+        return color;
+      });
+      const veilText = await veil.evaluate((node) => getComputedStyle(node).color);
+      const [textInk, borderInk] = await colorPixels(page, [veilText, borderColor]);
+      const [textContrast, borderContrast, sampledPixels] = await renderedOverlayContrasts(
+        overlayLink,
+        textInk!,
+        borderInk!
+      );
+      expect(sampledPixels).toBeGreaterThan(0);
+      expect(textContrast).toBeGreaterThanOrEqual(4.5);
+      expect(borderContrast).toBeGreaterThanOrEqual(3);
       expect(await contrast(page, surfaces[2]!, surfaces[1]!)).toBeGreaterThanOrEqual(4.5);
       expect(await contrast(page, surfaces[1]!, surfaces[0]!)).toBeGreaterThanOrEqual(3);
     });

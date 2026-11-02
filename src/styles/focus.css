@@ -122,17 +122,16 @@
     aspect-ratio: 4 / 3;
     overflow: hidden;
     border-radius: 8px;
-    color: var(--thumb-veil-text);
     text-decoration: none;
-    background:
-      radial-gradient(circle at 70% 30%, var(--thumb-sun) 0 14%, transparent 15%),
-      linear-gradient(
-        170deg,
-        var(--thumb-sky) 0%,
-        var(--thumb-cloud) 45%,
-        var(--thumb-foothill) 46%,
-        var(--thumb-peak) 100%
-      );
+    background: var(--muted);
+  }
+
+  .thumb-art {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 
   .thumb .veil {
@@ -140,15 +139,15 @@
     inset: 0;
     display: grid;
     place-items: center;
-    background: var(--thumb-veil);
-    color: var(--thumb-veil-text);
+    background: color-mix(in srgb, var(--brand) 88%, transparent);
+    color: var(--brand-foreground);
     font: 600 17px var(--font-sans);
     opacity: 0;
   }
 
   .thumb:focus-visible .veil {
     opacity: 1;
-    box-shadow: inset 0 0 0 3px var(--thumb-veil-border);
+    box-shadow: inset 0 0 0 3px var(--brand-foreground);
   }
 
   @media (hover: hover) {

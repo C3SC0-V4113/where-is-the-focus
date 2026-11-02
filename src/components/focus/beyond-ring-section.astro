@@ -1,4 +1,5 @@
 ---
+import ValleNevadoArtwork from '../../assets/focus/valle-nevado.svg';
 import { en, es, type Locale } from '../../i18n/messages';
 import { ComplianceBadge } from '../common/compliance-badge';
 import { RichText } from '../common/rich-text';
@@ -205,6 +206,7 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
     <article class="pat grid min-w-0 overflow-hidden rounded-sm border border-border bg-card">
       <div class="pat-demo grid min-h-42.5 place-items-center border-b border-border bg-background px-4.5 py-7.5">
         <a class="thumb" href="#sin-anillo" aria-label={gallery.overlay.ariaLabel}>
+          <ValleNevadoArtwork class="thumb-art" aria-hidden="true" focusable="false" />
           <span class="veil" aria-hidden="true">
             {gallery.overlay.action}
           </span>
