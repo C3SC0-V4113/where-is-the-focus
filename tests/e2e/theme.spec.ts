@@ -119,6 +119,22 @@ for (const scenario of firstFrameCases) {
 }
 
 for (const locale of locales) {
+  test(`theme toggle is the next tab stop in server-rendered HTML at ${locale.route}`, async ({
+    page,
+  }) => {
+    await page.route('**/_astro/*.js', (route) => route.abort());
+    await page.goto(locale.route);
+
+    const languageLink = page.getByRole('link', { name: locale.finalLanguageLink });
+    const light = page.getByRole('button', { name: locale.light });
+
+    await expect(light).toHaveAttribute('aria-pressed', 'true');
+    await expect(light).toHaveAttribute('tabindex', '0');
+    await languageLink.focus();
+    await page.keyboard.press('Tab');
+    await expect(light).toBeFocused();
+  });
+
   test(`theme toggle persists choices at ${locale.route}`, async ({ page }) => {
     const errors = await watchHydrationErrors(page);
     await page.emulateMedia({ colorScheme: 'light' });

@@ -110,6 +110,31 @@ export const es = {
         label: 'Más: ',
         links: [{ text: 'cómo medir el área y el contraste en 2.4.13' }],
       },
+      gallery: {
+        button: {
+          label: 'Descargar informe',
+          title: 'Botón que se invierte',
+          description:
+            'El botón de contorno se rellena con el color del texto. El cambio ocupa toda la superficie y supera el criterio AAA sin añadir nada alrededor.',
+        },
+        nav: {
+          label: 'Ejemplo de navegación',
+          links: ['Inicio', 'Productos', 'Precios', 'Ayuda'],
+          title: 'Subrayado parcial y completo',
+          description:
+            'Con el ratón aparece un trazo corto. Con teclado el subrayado cubre la palabra entera y el texto cambia de color, así hover y foco nunca se confunden.',
+        },
+        highlight: {
+          lead: 'Consulta los ',
+          first: 'términos de envío',
+          between: ' o escribe a ',
+          second: 'soporte',
+          end: ' si tu pedido no llega.',
+          title: 'Subrayador en enlaces de texto',
+          description:
+            'Un fondo de color barre el enlace y el texto pasa a blanco para conservar el contraste. Se lee como un rotulador.',
+        },
+      },
     },
   },
 } as const;
@@ -230,6 +255,31 @@ export const en = {
       more: {
         label: 'More: ',
         links: [{ text: 'how to measure area and contrast in 2.4.13' }],
+      },
+      gallery: {
+        button: {
+          label: 'Download report',
+          title: 'Button that inverts',
+          description:
+            'The outline button fills with the text color. The change covers the whole surface and exceeds the AAA criterion without adding anything around it.',
+        },
+        nav: {
+          label: 'Navigation example',
+          links: ['Home', 'Products', 'Pricing', 'Help'],
+          title: 'Partial and full underline',
+          description:
+            'With the mouse a short stroke appears. With the keyboard the underline covers the whole word and the text changes color, so hover and focus are never confused.',
+        },
+        highlight: {
+          lead: 'Check the ',
+          first: 'shipping terms',
+          between: ' or contact ',
+          second: 'support',
+          end: ' if your order doesn’t arrive.',
+          title: 'Highlighter on text links',
+          description:
+            'A color fill sweeps across the link and the text turns white to keep contrast. It reads like a marker pen.',
+        },
       },
     },
   },
