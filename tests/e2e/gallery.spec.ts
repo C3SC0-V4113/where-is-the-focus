@@ -588,16 +588,26 @@ for (const item of cases) {
     expect(
       await normalNav.evaluate((node) => getComputedStyle(node, '::after').transitionDuration)
     ).toBe('0.2s');
-    expect(
-      await normalPage
-        .locator('#sin-anillo .vis')
-        .evaluate((node) => getComputedStyle(node, '::before').transitionDuration)
-    ).not.toBe('0s');
-    expect(
-      await normalPage
-        .locator('#sin-anillo .thumb .veil')
-        .evaluate((node) => getComputedStyle(node).transitionDuration)
-    ).not.toBe('0s');
+    const viewfinderDuration = await normalPage
+      .locator('#sin-anillo .vis')
+      .evaluate((node) => getComputedStyle(node, '::before').transitionDuration);
+    expect(viewfinderDuration).not.toBe('0s');
+    for (const seconds of viewfinderDuration
+      .split(',')
+      .map((duration) => Number.parseFloat(duration))) {
+      expect(seconds).toBeGreaterThan(0);
+      expect(seconds).toBeLessThanOrEqual(0.15);
+    }
+    const overlayDuration = await normalPage
+      .locator('#sin-anillo .thumb .veil')
+      .evaluate((node) => getComputedStyle(node).transitionDuration);
+    expect(overlayDuration).not.toBe('0s');
+    for (const seconds of overlayDuration
+      .split(',')
+      .map((duration) => Number.parseFloat(duration))) {
+      expect(seconds).toBeGreaterThan(0);
+      expect(seconds).toBeLessThanOrEqual(0.15);
+    }
   });
 
   test(`${item.route} gallery fits narrow and wide viewports`, async ({ page }) => {

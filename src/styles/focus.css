@@ -174,12 +174,12 @@
 
     .vis::before {
       transition:
-        opacity 180ms ease,
-        transform 220ms ease;
+        opacity 150ms ease,
+        transform 150ms ease;
     }
 
     .thumb .veil {
-      transition: opacity 200ms ease;
+      transition: opacity 150ms ease;
     }
   }
 
