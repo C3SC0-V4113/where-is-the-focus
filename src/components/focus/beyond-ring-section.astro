@@ -4,6 +4,8 @@ import { en, es, type Locale } from '../../i18n/messages';
 import { ComplianceBadge } from '../common/compliance-badge';
 import { RichText } from '../common/rich-text';
 import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 
 interface Props {
   locale: Locale;
@@ -12,7 +14,8 @@ const { locale } = Astro.props;
 const messages = locale === 'en' ? en : es;
 const text = messages.sections.beyondRing;
 const criterionTitles = messages.sections.rules.criterionTitles.split('|');
-const criterionStatus = messages.sections.rules.stateText.split('|')[0]!;
+const criterionStates = messages.sections.rules.stateText.split('|');
+const criterionStatus = { ok: criterionStates[0]!, warn: criterionStates[1]! };
 const criterionTitleById = {
   '2.4.7': criterionTitles[0],
   '2.4.11': criterionTitles[1],
@@ -23,24 +26,29 @@ const href = 'https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance.html'
 const gallery = text.gallery;
 const criteria = [
   [
-    ['2.4.7', 'focus-visible.html'],
-    ['2.4.13', 'focus-appearance.html'],
+    ['2.4.7', 'focus-visible.html', 'ok'],
+    ['1.4.11', 'non-text-contrast.html', 'ok'],
+    ['2.4.13', 'focus-appearance.html', 'warn'],
   ],
   [
-    ['2.4.7', 'focus-visible.html'],
-    ['1.4.11', 'non-text-contrast.html'],
+    ['2.4.7', 'focus-visible.html', 'ok'],
+    ['2.4.13', 'focus-appearance.html', 'ok'],
   ],
   [
-    ['2.4.7', 'focus-visible.html'],
-    ['2.4.13', 'focus-appearance.html'],
+    ['2.4.7', 'focus-visible.html', 'ok'],
+    ['1.4.11', 'non-text-contrast.html', 'ok'],
   ],
   [
-    ['2.4.7', 'focus-visible.html'],
-    ['1.4.11', 'non-text-contrast.html'],
+    ['2.4.7', 'focus-visible.html', 'ok'],
+    ['2.4.13', 'focus-appearance.html', 'ok'],
   ],
   [
-    ['2.4.7', 'focus-visible.html'],
-    ['2.4.13', 'focus-appearance.html'],
+    ['2.4.7', 'focus-visible.html', 'ok'],
+    ['1.4.11', 'non-text-contrast.html', 'ok'],
+  ],
+  [
+    ['2.4.7', 'focus-visible.html', 'ok'],
+    ['2.4.13', 'focus-appearance.html', 'ok'],
   ],
 ] as const;
 const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
@@ -71,6 +79,45 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
   <div class="gallery grid gap-4">
     <article class="pat grid min-w-0 overflow-hidden rounded-sm border border-border bg-card">
       <div class="pat-demo grid min-h-42.5 place-items-center border-b border-border bg-background px-4.5 py-7.5">
+        <div class="fld group relative grid w-full max-w-65 gap-1 font-sans">
+          <Label htmlFor="g-mail" className="text-muted-foreground">
+            {gallery.field.label}
+          </Label>
+          <Input
+            id="g-mail"
+            type="email"
+            placeholder={gallery.field.placeholder}
+            className="h-auto min-h-0 rounded-none border-0 border-b-[1.5px] border-muted-foreground bg-transparent px-0.5 py-2 text-base md:text-base dark:bg-transparent outline-hidden motion-reduce:transition-none focus-visible:ring-0"
+          />
+          <span
+            class="bar absolute inset-x-0 bottom-0 h-0.75 scale-x-0 bg-brand-text motion-safe:transition-transform motion-safe:duration-150 group-focus-within:scale-x-100"
+            aria-hidden="true"
+          ></span>
+        </div>
+      </div>
+      <div class="pat-info grid min-w-0 content-start gap-2 px-4.5 pt-4 pb-1.5 font-sans">
+        <h3 class="m-0 text-lg leading-tight font-semibold text-foreground">
+          {gallery.field.title}
+        </h3>
+        <p class="gallery-description text-muted-foreground">{gallery.field.description}</p>
+        <div class="chips flex flex-wrap gap-1.5 pb-2.5">
+          {criteria[0].map(([id, page, state]) => (
+            <a
+              class="no-underline hover:underline hover:underline-offset-3"
+              href={`${criteriaBase}${page}`}
+            >
+              <ComplianceBadge state={state}>{id}</ComplianceBadge>
+              <span class="sr-only">
+                {' '}
+                {criterionTitleById[id]}, {criterionStatus[state]}
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </article>
+    <article class="pat grid min-w-0 overflow-hidden rounded-sm border border-border bg-card">
+      <div class="pat-demo grid min-h-42.5 place-items-center border-b border-border bg-background px-4.5 py-7.5">
         <Button
           className="gallery-invert h-auto min-h-0 cursor-pointer rounded-full border-2 border-foreground bg-transparent px-5.5 py-3 font-sans text-base font-semibold text-foreground hover:bg-foreground/10 focus-visible:border-foreground focus-visible:bg-foreground focus-visible:text-background transition-none motion-safe:transition-colors motion-safe:duration-150"
           type="button"
@@ -84,15 +131,15 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
         </h3>
         <p class="text-sm leading-normal text-muted-foreground">{gallery.button.description}</p>
         <div class="chips flex flex-wrap gap-1.5 pb-2.5">
-          {criteria[0].map(([id, page]) => (
+          {criteria[1].map(([id, page, state]) => (
             <a
               class="no-underline hover:underline hover:underline-offset-3"
               href={`${criteriaBase}${page}`}
             >
-              <ComplianceBadge state="ok">{id}</ComplianceBadge>
+              <ComplianceBadge state={state}>{id}</ComplianceBadge>
               <span class="sr-only">
                 {' '}
-                {criterionTitleById[id]}, {criterionStatus}
+                {criterionTitleById[id]}, {criterionStatus[state]}
               </span>
             </a>
           ))}
@@ -119,15 +166,15 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
         <h3 class="m-0 text-lg leading-tight font-semibold text-foreground">{gallery.nav.title}</h3>
         <p class="text-sm leading-normal text-muted-foreground">{gallery.nav.description}</p>
         <div class="chips flex flex-wrap gap-1.5 pb-2.5">
-          {criteria[1].map(([id, page]) => (
+          {criteria[2].map(([id, page, state]) => (
             <a
               class="no-underline hover:underline hover:underline-offset-3"
               href={`${criteriaBase}${page}`}
             >
-              <ComplianceBadge state="ok">{id}</ComplianceBadge>
+              <ComplianceBadge state={state}>{id}</ComplianceBadge>
               <span class="sr-only">
                 {' '}
-                {criterionTitleById[id]}, {criterionStatus}
+                {criterionTitleById[id]}, {criterionStatus[state]}
               </span>
             </a>
           ))}
@@ -160,15 +207,15 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
         </h3>
         <p class="text-sm leading-normal text-muted-foreground">{gallery.highlight.description}</p>
         <div class="chips flex flex-wrap gap-1.5 pb-2.5">
-          {criteria[2].map(([id, page]) => (
+          {criteria[3].map(([id, page, state]) => (
             <a
               class="no-underline hover:underline hover:underline-offset-3"
               href={`${criteriaBase}${page}`}
             >
-              <ComplianceBadge state="ok">{id}</ComplianceBadge>
+              <ComplianceBadge state={state}>{id}</ComplianceBadge>
               <span class="sr-only">
                 {' '}
-                {criterionTitleById[id]}, {criterionStatus}
+                {criterionTitleById[id]}, {criterionStatus[state]}
               </span>
             </a>
           ))}
@@ -191,15 +238,15 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
         </h3>
         <p class="text-sm leading-normal text-muted-foreground">{gallery.viewfinder.description}</p>
         <div class="chips flex flex-wrap gap-1.5 pb-2.5">
-          {criteria[3].map(([id, page]) => (
+          {criteria[4].map(([id, page, state]) => (
             <a
               class="no-underline hover:underline hover:underline-offset-3"
               href={`${criteriaBase}${page}`}
             >
-              <ComplianceBadge state="ok">{id}</ComplianceBadge>
+              <ComplianceBadge state={state}>{id}</ComplianceBadge>
               <span class="sr-only">
                 {' '}
-                {criterionTitleById[id]}, {criterionStatus}
+                {criterionTitleById[id]}, {criterionStatus[state]}
               </span>
             </a>
           ))}
@@ -232,15 +279,15 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
         </h3>
         <p class="text-sm leading-normal text-muted-foreground">{gallery.overlay.description}</p>
         <div class="chips flex flex-wrap gap-1.5 pb-2.5">
-          {criteria[4].map(([id, page]) => (
+          {criteria[5].map(([id, page, state]) => (
             <a
               class="no-underline hover:underline hover:underline-offset-3"
               href={`${criteriaBase}${page}`}
             >
-              <ComplianceBadge state="ok">{id}</ComplianceBadge>
+              <ComplianceBadge state={state}>{id}</ComplianceBadge>
               <span class="sr-only">
                 {' '}
-                {criterionTitleById[id]}, {criterionStatus}
+                {criterionTitleById[id]}, {criterionStatus[state]}
               </span>
             </a>
           ))}
