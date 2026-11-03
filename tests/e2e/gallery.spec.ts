@@ -175,6 +175,50 @@ async function waitForMotion(locator: Locator) {
   });
 }
 
+function splitShadowList(value: string) {
+  const shadows: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (const [index, character] of [...value].entries()) {
+    if (character === '(') depth += 1;
+    if (character === ')') depth -= 1;
+    if (character === ',' && depth === 0) {
+      shadows.push(value.slice(start, index).trim());
+      start = index + 1;
+    }
+  }
+  shadows.push(value.slice(start).trim());
+  return shadows;
+}
+
+function colorAlpha(value: string) {
+  const match = value.match(/rgba?\(([^)]+)\)/i);
+  const channels =
+    match?.[1]
+      ?.trim()
+      .split(/[\s,/]+/)
+      .filter(Boolean) ?? [];
+  return channels.length === 4 ? Number(channels[3]) : 1;
+}
+
+function hasVisibleBoxShadow(value: string) {
+  if (value === 'none') return false;
+  return splitShadowList(value).some((shadow) => {
+    const color = shadow.match(/rgba?\([^)]*\)/i)?.[0] ?? '';
+    const lengths = [...shadow.matchAll(/(-?(?:\d+(?:\.\d*)?|\.\d+))px/g)].map((match) =>
+      Number(match[1])
+    );
+    const [offsetX = Number.NaN, offsetY = Number.NaN, blur = 0, spread = 0] = lengths;
+    const geometryIsZero =
+      lengths.length >= 2 && offsetX === 0 && offsetY === 0 && blur === 0 && spread === 0;
+    return colorAlpha(color) !== 0 && !geometryIsZero;
+  });
+}
+
+function hasVisibleOutline(style: string, color: string) {
+  return style !== 'none' && colorAlpha(color) !== 0;
+}
+
 async function contrast(page: Page, ink: string, paper: string) {
   return page.evaluate(
     ([foreground, background]) => {
@@ -588,6 +632,33 @@ for (const item of cases) {
     });
     expect(outline.style).toBe('solid');
     expect(outline.width).toBeGreaterThanOrEqual(2);
+  });
+
+  test(`${item.route} field shows only the underline on keyboard focus`, async ({ page }) => {
+    await page.goto(item.route);
+    await page.locator('#sin-anillo .more a').last().focus();
+    const field = page.locator('#sin-anillo .gallery article').first().locator('.fld');
+    const input = field.locator('input');
+    const bar = field.locator('.bar');
+    await page.keyboard.press('Tab');
+    await expect(input).toBeFocused();
+    expect(await input.evaluate((node) => node.matches(':focus-visible'))).toBe(true);
+    await expect.poll(() => bar.evaluate((node) => getComputedStyle(node).scale)).toBe('1');
+    const [fieldBox, barBox] = await Promise.all([field.boundingBox(), bar.boundingBox()]);
+    expect(fieldBox).not.toBeNull();
+    expect(barBox).not.toBeNull();
+    expect(Math.abs(barBox!.width - fieldBox!.width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(barBox!.height - 3)).toBeLessThanOrEqual(0.5);
+    const focusStyle = await input.evaluate((node) => {
+      const style = getComputedStyle(node);
+      return {
+        boxShadow: style.boxShadow,
+        outlineStyle: style.outlineStyle,
+        outlineColor: style.outlineColor,
+      };
+    });
+    expect(hasVisibleBoxShadow(focusStyle.boxShadow)).toBe(false);
+    expect(hasVisibleOutline(focusStyle.outlineStyle, focusStyle.outlineColor)).toBe(false);
   });
 
   for (const theme of ['light', 'dark'] as const) {
