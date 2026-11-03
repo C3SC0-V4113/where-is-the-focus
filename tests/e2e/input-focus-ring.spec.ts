@@ -122,8 +122,10 @@ async function expectGlobalFocusRing(input: Locator) {
     context.fillStyle = backgroundColor;
     context.fillRect(0, 0, 1, 1);
     const backgroundAlpha = context.getImageData(0, 0, 1, 1).data[3] / 255;
+    context.clearRect(0, 0, 1, 1);
     context.fillStyle = ringColor;
     context.fillRect(0, 0, 1, 1);
+    const ringAlpha = context.getImageData(0, 0, 1, 1).data[3] / 255;
     colorProbe.remove();
 
     return {
@@ -135,7 +137,7 @@ async function expectGlobalFocusRing(input: Locator) {
       backgroundColor,
       ringColor,
       backgroundAlpha,
-      ringAlpha: context.getImageData(0, 0, 1, 1).data[3] / 255,
+      ringAlpha,
     };
   });
 
