@@ -7,7 +7,7 @@ const cases = [
       'Correo electrónico',
       'nombre@empresa.com',
       'Línea que crece bajo el campo',
-      'La línea pasa de 1,5 px gris a 3 px de color y la etiqueta cambia de tono. En campos de texto el foco también aparece con el clic, porque indica dónde se escribe. Para 2.4.13 la línea tendría que llegar a unos 5 px.',
+      'La línea inferior es el único indicador visual del foco: pasa de 1,5 px gris a 3 px de color. En campos de texto también aparece con el clic, porque indica dónde se escribe. Para 2.4.13 tendría que llegar a unos 5 px.',
     ],
     button: [
       'Descargar informe',
@@ -64,7 +64,7 @@ const cases = [
       'Email',
       'name@company.com',
       'Line that grows under the field',
-      'The line goes from 1.5 px gray to 3 px of color and the label changes tone. In text fields focus also appears on click, because it shows where you’re typing. For 2.4.13 the line would need to reach about 5 px.',
+      'The underline is the only visual focus indicator: it goes from 1.5 px gray to 3 px of color. In text fields it also appears on click because it shows where you’re typing. For 2.4.13 it would need to reach about 5 px.',
     ],
     button: [
       'Download report',
@@ -337,11 +337,11 @@ async function expectFieldFocus(page: Page, locator: Locator) {
     const css = getComputedStyle(bar);
     return [getComputedStyle(label).color, css.transform, css.scale];
   });
-  const brandText = await page
+  const mutedForeground = await page
     .locator('html')
-    .evaluate((node) => getComputedStyle(node).getPropertyValue('--brand-text').trim());
-  expect(await colorPixels(page, [labelColor!, brandText])).toEqual(
-    await colorPixels(page, [brandText, brandText])
+    .evaluate((node) => getComputedStyle(node).getPropertyValue('--muted-foreground').trim());
+  expect(await colorPixels(page, [labelColor!, mutedForeground])).toEqual(
+    await colorPixels(page, [mutedForeground, mutedForeground])
   );
   expect(transform).toBe('none');
   expect(scale).toBe('1');
@@ -639,11 +639,16 @@ for (const item of cases) {
     await page.locator('#sin-anillo .more a').last().focus();
     const field = page.locator('#sin-anillo .gallery article').first().locator('.fld');
     const input = field.locator('input');
+    const label = field.locator('label');
     const bar = field.locator('.bar');
+    const restingLabelColor = await label.evaluate((node) => getComputedStyle(node).color);
     await page.keyboard.press('Tab');
     await expect(input).toBeFocused();
     expect(await input.evaluate((node) => node.matches(':focus-visible'))).toBe(true);
     await expect.poll(() => bar.evaluate((node) => getComputedStyle(node).scale)).toBe('1');
+    await expect
+      .poll(() => label.evaluate((node) => getComputedStyle(node).color))
+      .toBe(restingLabelColor);
     const [fieldBox, barBox] = await Promise.all([field.boundingBox(), bar.boundingBox()]);
     expect(fieldBox).not.toBeNull();
     expect(barBox).not.toBeNull();
@@ -875,7 +880,6 @@ for (const item of cases) {
       )
     ).toBeGreaterThan(0);
     for (const duration of [
-      await normalLabel.evaluate((node) => getComputedStyle(node).transitionDuration),
       await normalBar.evaluate((node) => getComputedStyle(node).transitionDuration),
     ]) {
       expect(duration).not.toBe('0s');
@@ -884,6 +888,7 @@ for (const item of cases) {
         expect(seconds).toBeLessThanOrEqual(0.15);
       }
     }
+    await expect(normalLabel).toHaveCSS('transition-duration', '0s');
     const normalNav = normalPage.locator('#sin-anillo .gallery-nav a').first();
     expect(
       await normalNav.evaluate((node) => getComputedStyle(node, '::after').transitionDuration)

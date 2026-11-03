@@ -116,7 +116,7 @@ export const es = {
           placeholder: 'nombre@empresa.com',
           title: 'Línea que crece bajo el campo',
           description:
-            'La línea pasa de 1,5 px gris a 3 px de color y la etiqueta cambia de tono. En campos de texto el foco también aparece con el clic, porque indica dónde se escribe. Para 2.4.13 la línea tendría que llegar a unos 5 px.',
+            'La línea inferior es el único indicador visual del foco: pasa de 1,5 px gris a 3 px de color. En campos de texto también aparece con el clic, porque indica dónde se escribe. Para 2.4.13 tendría que llegar a unos 5 px.',
         },
         button: {
           label: 'Descargar informe',
@@ -283,7 +283,7 @@ export const en = {
           placeholder: 'name@company.com',
           title: 'Line that grows under the field',
           description:
-            'The line goes from 1.5 px gray to 3 px of color and the label changes tone. In text fields focus also appears on click, because it shows where you’re typing. For 2.4.13 the line would need to reach about 5 px.',
+            'The underline is the only visual focus indicator: it goes from 1.5 px gray to 3 px of color. In text fields it also appears on click because it shows where you’re typing. For 2.4.13 it would need to reach about 5 px.',
         },
         button: {
           label: 'Download report',
