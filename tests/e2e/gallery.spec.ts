@@ -3,6 +3,12 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 const cases = [
   {
     route: '/',
+    field: [
+      'Correo electrónico',
+      'nombre@empresa.com',
+      'Línea que crece bajo el campo',
+      'La línea pasa de 1,5 px gris a 3 px de color y la etiqueta cambia de tono. En campos de texto el foco también aparece con el clic, porque indica dónde se escribe. Para 2.4.13 la línea tendría que llegar a unos 5 px.',
+    ],
     button: [
       'Descargar informe',
       'Botón que se invierte',
@@ -21,6 +27,7 @@ const cases = [
       'Apariencia del foco',
     ],
     criterionStatus: 'cumple el criterio',
+    criterionPartialStatus: 'cumple AA pero no AAA, o solo en parte de la superficie',
     highlight: [
       'Consulta los ',
       'términos de envío',
@@ -43,6 +50,7 @@ const cases = [
       'La imagen se cubre con un velo de color y la acción escrita. Con teclado suma un borde interior blanco para distinguirse del hover.',
     ],
     chips: [
+      ['2.4.7', '1.4.11', '2.4.13'],
       ['2.4.7', '2.4.13'],
       ['2.4.7', '1.4.11'],
       ['2.4.7', '2.4.13'],
@@ -52,6 +60,12 @@ const cases = [
   },
   {
     route: '/en/',
+    field: [
+      'Email',
+      'name@company.com',
+      'Line that grows under the field',
+      'The line goes from 1.5 px gray to 3 px of color and the label changes tone. In text fields focus also appears on click, because it shows where you’re typing. For 2.4.13 the line would need to reach about 5 px.',
+    ],
     button: [
       'Download report',
       'Button that inverts',
@@ -70,6 +84,7 @@ const cases = [
       'Focus appearance',
     ],
     criterionStatus: 'meets the criterion',
+    criterionPartialStatus: 'meets AA but not AAA, or only on part of the surface',
     highlight: [
       'Check the ',
       'shipping terms',
@@ -92,6 +107,7 @@ const cases = [
       'The image is covered by a color veil with the action written on it. With the keyboard it adds a white inner border to stand apart from hover.',
     ],
     chips: [
+      ['2.4.7', '1.4.11', '2.4.13'],
       ['2.4.7', '2.4.13'],
       ['2.4.7', '1.4.11'],
       ['2.4.7', '2.4.13'],
@@ -111,7 +127,24 @@ const criterionTitleIndexes: Record<string, number> = {
   '1.4.11': 2,
   '2.4.13': 3,
 };
-const demoSelectors = ['button', 'nav a', '.hl', '.vis strong', '.thumb'] as const;
+const chipExpectationsByRoute = new Map(
+  cases.map((item) => [
+    item.route,
+    item.chips.map((cardChips, cardIndex) =>
+      cardChips.map((criterion) => {
+        const partial = cardIndex === 0 && criterion === '2.4.13';
+        return {
+          criterion,
+          href: urls[criterion]!,
+          status: partial ? item.criterionPartialStatus : item.criterionStatus,
+          badgeClass: partial ? /bg-warning-muted/ : /bg-success-muted/,
+          marker: partial ? '◐' : '✓',
+        };
+      })
+    ),
+  ])
+);
+const demoSelectors = ['input', 'button', 'nav a', '.hl', '.vis strong', '.thumb'] as const;
 
 async function colors(locator: Locator) {
   return locator.evaluate((node) => {
@@ -252,6 +285,24 @@ async function expectButtonFocus(page: Page, locator: Locator) {
   expect(await colorPixels(page, actual)).toEqual(await colorPixels(page, expected));
 }
 
+async function expectFieldFocus(page: Page, locator: Locator) {
+  await waitForMotion(locator);
+  const [labelColor, transform, scale] = await locator.evaluate((node) => {
+    const label = node.querySelector('label')!;
+    const bar = node.querySelector('.bar')!;
+    const css = getComputedStyle(bar);
+    return [getComputedStyle(label).color, css.transform, css.scale];
+  });
+  const brandText = await page
+    .locator('html')
+    .evaluate((node) => getComputedStyle(node).getPropertyValue('--brand-text').trim());
+  expect(await colorPixels(page, [labelColor!, brandText])).toEqual(
+    await colorPixels(page, [brandText, brandText])
+  );
+  expect(transform).toBe('none');
+  expect(scale).toBe('1');
+}
+
 async function expectNavFocus(page: Page, locator: Locator) {
   await expectTransparentOutline(locator);
   const [color, underline] = await locator.evaluate((node) => [
@@ -363,13 +414,16 @@ async function expectHoverState(page: Page) {
 
 test('navigation focus keeps the full underline while hovered', async ({ page }) => {
   await page.goto('/');
-  const firstCard = page.locator('#sin-anillo .gallery article').first();
-  const button = firstCard.getByRole('button');
-  const buttonChips = await firstCard.locator('.chips a').all();
+  const cards = page.locator('#sin-anillo .gallery article');
+  const field = cards.nth(0).locator('.fld');
+  const input = field.getByRole('textbox', { name: 'Correo electrónico' });
+  const fieldChips = await cards.nth(0).locator('.chips a').all();
+  const button = cards.nth(1).getByRole('button');
+  const buttonChips = await cards.nth(1).locator('.chips a').all();
   const navLink = page.locator('#sin-anillo .gallery-nav a').first();
 
   await page.locator('#sin-anillo .more a').last().focus();
-  for (const target of [button, ...buttonChips, navLink]) {
+  for (const target of [input, ...fieldChips, button, ...buttonChips, navLink]) {
     await page.keyboard.press('Tab');
     await expect(target).toBeFocused();
   }
@@ -385,8 +439,9 @@ for (const item of cases) {
   test(`${item.route} gallery renders exact copy, order and criteria`, async ({ page }) => {
     await page.goto(item.route);
     const cards = page.locator('#sin-anillo .gallery article');
-    await expect(cards).toHaveCount(5);
+    await expect(cards).toHaveCount(6);
     const titles = [
+      item.field[2],
       item.button[1],
       item.nav[0],
       item.highlight[5],
@@ -394,6 +449,7 @@ for (const item of cases) {
       item.overlay[2],
     ];
     const descriptions = [
+      item.field[3],
       item.button[2],
       item.nav[1],
       item.highlight[6],
@@ -405,37 +461,47 @@ for (const item of cases) {
       await expect(card.locator('.pat-info > p')).toHaveText(descriptions[index]!);
       const chips = card.locator('.chips a');
       await expect(chips).toHaveCount(item.chips[index]!.length);
-      for (const [position, criterion] of item.chips[index]!.entries()) {
+      const expectedChips = chipExpectationsByRoute.get(item.route)![index]!;
+      for (const [position, expectedChip] of expectedChips.entries()) {
+        const { criterion } = expectedChip;
         const chip = chips.nth(position);
-        await expect(chip).toHaveAttribute('href', urls[criterion]!);
+        await expect(chip).toHaveAttribute('href', expectedChip.href);
         await expect(chip).toHaveAccessibleName(
-          `${criterion} ${item.criterionTitles[criterionTitleIndexes[criterion]!]}, ${item.criterionStatus}`
+          `${criterion} ${item.criterionTitles[criterionTitleIndexes[criterion]!]}, ${expectedChip.status}`
         );
         await expect(chip.locator('[data-slot="badge"]')).toContainText(criterion);
-        await expect(chip.locator('[data-slot="badge"]')).toHaveClass(/bg-success-muted/);
+        await expect(chip.locator('[data-slot="badge"]')).toHaveClass(expectedChip.badgeClass);
+        await expect(chip.locator('[data-slot="badge"]')).toContainText(expectedChip.marker);
       }
     }
-    await expect(cards.nth(0).getByRole('button', { name: item.button[0] })).toHaveAttribute(
+    const field = cards.nth(0).locator('.fld');
+    const input = field.getByRole('textbox', { name: item.field[0] });
+    await expect(input).toHaveAttribute('type', 'email');
+    await expect(input).toHaveAttribute('placeholder', item.field[1]);
+    await expect(input).toHaveAttribute('id', 'g-mail');
+    await expect(field.locator('label')).toHaveAttribute('for', 'g-mail');
+    await expect(field.locator('.bar')).toHaveAttribute('aria-hidden', 'true');
+    await expect(cards.nth(1).getByRole('button', { name: item.button[0] })).toHaveAttribute(
       'type',
       'button'
     );
-    const nav = cards.nth(1).getByRole('navigation', { name: item.navName });
+    const nav = cards.nth(2).getByRole('navigation', { name: item.navName });
     await expect(nav.getByRole('link')).toHaveText(item.navLinks);
     for (const link of await nav.getByRole('link').all())
       await expect(link).toHaveAttribute('href', '#sin-anillo');
-    const text = cards.nth(2).locator('.hl-p');
+    const text = cards.nth(3).locator('.hl-p');
     await expect(text).toHaveText(item.highlight.slice(0, 5).join(''));
     await expect(text.getByRole('link')).toHaveText([item.highlight[1], item.highlight[3]]);
     for (const link of await text.getByRole('link').all())
       await expect(link).toHaveAttribute('href', '#sin-anillo');
-    const viewfinderLink = cards.nth(3).locator('.vis');
+    const viewfinderLink = cards.nth(4).locator('.vis');
     await expect(viewfinderLink).toHaveAttribute('href', '#sin-anillo');
     await expect(viewfinderLink).toHaveAccessibleName(
       `${item.viewfinder[0]} ${item.viewfinder[1]}`
     );
     await expect(viewfinderLink.locator('strong')).toHaveText(item.viewfinder[0]);
     await expect(viewfinderLink.locator('span')).toHaveText(item.viewfinder[1]);
-    const overlayLink = cards.nth(4).locator('.thumb');
+    const overlayLink = cards.nth(5).locator('.thumb');
     await expect(overlayLink).toHaveAttribute('href', '#sin-anillo');
     await expect(overlayLink).toHaveAttribute('aria-label', item.overlay[0]);
     await expect(overlayLink).toHaveAccessibleName(item.overlay[0]);
@@ -451,40 +517,49 @@ for (const item of cases) {
   test(`${item.route} keyboard walks demos and chips in order`, async ({ page }) => {
     await page.goto(item.route);
     const cards = page.locator('#sin-anillo .gallery article');
+    const checkField = (locator: Locator) => expectFieldFocus(page, locator.locator('..'));
     const checkButton = (locator: Locator) => expectButtonFocus(page, locator);
     const checkNav = (locator: Locator) => expectNavFocus(page, locator);
     const checkHighlighter = (locator: Locator) => expectHighlighterFocus(page, locator);
     const checkViewfinder = (locator: Locator) => expectViewfinderFocus(page, locator);
     const checkOverlay = (locator: Locator) => expectOverlayFocus(locator);
     const sequence = [
-      { locator: cards.nth(0).getByRole('button'), check: checkButton },
+      {
+        locator: cards.nth(0).getByRole('textbox', { name: item.field[0] }),
+        check: checkField,
+      },
       ...(await cards.nth(0).locator('.chips a').all()).map((locator) => ({
         locator,
         check: expectChipFocus,
       })),
-      ...(await cards.nth(1).locator('nav a').all()).map((locator) => ({
-        locator,
-        check: checkNav,
-      })),
+      { locator: cards.nth(1).getByRole('button'), check: checkButton },
       ...(await cards.nth(1).locator('.chips a').all()).map((locator) => ({
         locator,
         check: expectChipFocus,
       })),
-      ...(await cards.nth(2).locator('.hl').all()).map((locator) => ({
+      ...(await cards.nth(2).locator('nav a').all()).map((locator) => ({
         locator,
-        check: checkHighlighter,
+        check: checkNav,
       })),
       ...(await cards.nth(2).locator('.chips a').all()).map((locator) => ({
         locator,
         check: expectChipFocus,
       })),
-      { locator: cards.nth(3).locator('.vis'), check: checkViewfinder },
+      ...(await cards.nth(3).locator('.hl').all()).map((locator) => ({
+        locator,
+        check: checkHighlighter,
+      })),
       ...(await cards.nth(3).locator('.chips a').all()).map((locator) => ({
         locator,
         check: expectChipFocus,
       })),
-      { locator: cards.nth(4).locator('.thumb'), check: checkOverlay },
+      { locator: cards.nth(4).locator('.vis'), check: checkViewfinder },
       ...(await cards.nth(4).locator('.chips a').all()).map((locator) => ({
+        locator,
+        check: expectChipFocus,
+      })),
+      { locator: cards.nth(5).locator('.thumb'), check: checkOverlay },
+      ...(await cards.nth(5).locator('.chips a').all()).map((locator) => ({
         locator,
         check: expectChipFocus,
       })),
@@ -517,7 +592,7 @@ for (const item of cases) {
           css.getPropertyValue('--brand-text').trim(),
         ];
       });
-      for (let index = 0; index < 3; index += 1) {
+      for (let index = 0; index < 4; index += 1) {
         const card = cards.nth(index);
         const demoInk = await card
           .locator(demoSelectors[index]!)
@@ -530,7 +605,7 @@ for (const item of cases) {
         expect(await contrast(page, heading, surface)).toBeGreaterThanOrEqual(4.5);
         expect(await contrast(page, description, surface)).toBeGreaterThanOrEqual(4.5);
       }
-      for (let index = 3; index < 5; index += 1) {
+      for (let index = 4; index < 6; index += 1) {
         const card = cards.nth(index);
         const [heading] = await colors(card.locator('h3'));
         const [description] = await colors(card.locator('.pat-info > p'));
@@ -547,15 +622,49 @@ for (const item of cases) {
           expect(await contrast(page, ...pair)).toBeGreaterThanOrEqual(4.5);
         }
       }
-      const button = cards.nth(0).getByRole('button');
+      const fieldCard = cards.nth(0);
+      const field = fieldCard.locator('.fld');
+      const fieldInput = field.getByRole('textbox', { name: item.field[0] });
+      const fieldPalette = await field.evaluate((node) => {
+        const input = node.querySelector('input')!;
+        const label = node.querySelector('label')!;
+        const demo = node.closest('.pat-demo')!;
+        return [
+          getComputedStyle(label).color,
+          getComputedStyle(input).color,
+          getComputedStyle(input, '::placeholder').color,
+          getComputedStyle(input).borderBottomColor,
+          getComputedStyle(demo).backgroundColor,
+        ];
+      });
+      expect(await contrast(page, fieldPalette[0]!, fieldPalette[4]!)).toBeGreaterThanOrEqual(4.5);
+      expect(await contrast(page, fieldPalette[1]!, fieldPalette[4]!)).toBeGreaterThanOrEqual(4.5);
+      expect(await contrast(page, fieldPalette[2]!, fieldPalette[4]!)).toBeGreaterThanOrEqual(4.5);
+      expect(await contrast(page, fieldPalette[3]!, fieldPalette[4]!)).toBeGreaterThanOrEqual(3);
+      const button = cards.nth(1).getByRole('button');
       await page.locator('#sin-anillo .more a').last().focus();
+      await page.keyboard.press('Tab');
+      await expect(fieldInput).toBeFocused();
+      await expectFieldFocus(page, field);
+      const focusedLabel = await field
+        .locator('label')
+        .evaluate((node) => getComputedStyle(node).color);
+      expect(await contrast(page, focusedLabel, fieldPalette[4]!)).toBeGreaterThanOrEqual(4.5);
+      const barColor = await field
+        .locator('.bar')
+        .evaluate((node) => getComputedStyle(node).backgroundColor);
+      expect(await contrast(page, barColor, fieldPalette[4]!)).toBeGreaterThanOrEqual(3);
+      for (const chip of await fieldCard.locator('.chips a').all()) {
+        await page.keyboard.press('Tab');
+        await expect(chip).toBeFocused();
+      }
       await page.keyboard.press('Tab');
       await expect(button).toBeFocused();
       await waitForMotion(button);
       const focused = await colors(button);
       expect(await contrast(page, ...focused)).toBeGreaterThanOrEqual(4.5);
       expect(await contrast(page, focused[1], surfaces[0]!)).toBeGreaterThanOrEqual(3);
-      const viewfinder = cards.nth(3).locator('.vis');
+      const viewfinder = cards.nth(4).locator('.vis');
       const viewfinderSurface = await viewfinder.evaluate(
         (node) => getComputedStyle(node).backgroundColor
       );
@@ -564,16 +673,18 @@ for (const item of cases) {
       expect(await contrast(page, planText, viewfinderSurface)).toBeGreaterThanOrEqual(4.5);
       expect(await contrast(page, planDetails, viewfinderSurface)).toBeGreaterThanOrEqual(4.5);
       expect(await contrast(page, surfaces[3]!, surfaces[0]!)).toBeGreaterThanOrEqual(3);
-      const overlayLink = cards.nth(4).locator('.thumb');
+      const overlayLink = cards.nth(5).locator('.thumb');
       const focusOrder = [
+        fieldInput,
+        ...(await fieldCard.locator('.chips a').all()),
         button,
-        ...(await cards.nth(0).locator('.chips a').all()),
-        ...(await cards.nth(1).locator('nav a').all()),
         ...(await cards.nth(1).locator('.chips a').all()),
-        ...(await cards.nth(2).locator('.hl').all()),
+        ...(await cards.nth(2).locator('nav a').all()),
         ...(await cards.nth(2).locator('.chips a').all()),
-        cards.nth(3).locator('.vis'),
+        ...(await cards.nth(3).locator('.hl').all()),
         ...(await cards.nth(3).locator('.chips a').all()),
+        cards.nth(4).locator('.vis'),
+        ...(await cards.nth(4).locator('.chips a').all()),
         overlayLink,
       ];
       await page.locator('#sin-anillo .more a').last().focus();
@@ -610,6 +721,9 @@ for (const item of cases) {
 
   test(`${item.route} click does not activate focus-visible`, async ({ page }) => {
     await page.goto(item.route);
+    const field = page.locator('#sin-anillo .gallery article').first().locator('.fld');
+    await field.getByRole('textbox', { name: item.field[0] }).click();
+    await expectFieldFocus(page, field);
     const targets = [
       page.locator('#sin-anillo .gallery button'),
       page.locator('#sin-anillo .gallery-nav a').first(),
@@ -632,11 +746,16 @@ for (const item of cases) {
   test(`${item.route} reduced motion removes gallery transitions`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto(item.route);
+    const field = page.locator('#sin-anillo .gallery article').first().locator('.fld');
+    const label = field.locator('label');
+    const bar = field.locator('.bar');
     const button = page.locator('#sin-anillo .gallery button');
     const nav = page.locator('#sin-anillo .gallery-nav a').first();
     const hl = page.locator('#sin-anillo .hl').first();
     const viewfinder = page.locator('#sin-anillo .vis');
     const overlay = page.locator('#sin-anillo .thumb');
+    await expect(label).toHaveCSS('transition-duration', '0s');
+    await expect(bar).toHaveCSS('transition-duration', '0s');
     await expect(button).toHaveCSS('transition-duration', '0s');
     expect(await nav.evaluate((node) => getComputedStyle(node, '::after').transitionDuration)).toBe(
       '0s'
@@ -650,6 +769,19 @@ for (const item of cases) {
     const normalPage = await page.context().newPage();
     await normalPage.emulateMedia({ reducedMotion: 'no-preference' });
     await normalPage.goto(item.route);
+    const normalField = normalPage.locator('#sin-anillo .gallery article').first().locator('.fld');
+    const normalLabel = normalField.locator('label');
+    const normalBar = normalField.locator('.bar');
+    for (const duration of [
+      await normalLabel.evaluate((node) => getComputedStyle(node).transitionDuration),
+      await normalBar.evaluate((node) => getComputedStyle(node).transitionDuration),
+    ]) {
+      expect(duration).not.toBe('0s');
+      for (const seconds of duration.split(',').map((value) => Number.parseFloat(value))) {
+        expect(seconds).toBeGreaterThan(0);
+        expect(seconds).toBeLessThanOrEqual(0.15);
+      }
+    }
     const normalNav = normalPage.locator('#sin-anillo .gallery-nav a').first();
     expect(
       await normalNav.evaluate((node) => getComputedStyle(node, '::after').transitionDuration)
@@ -680,7 +812,7 @@ for (const item of cases) {
     for (const width of [320, 375, 768, 1280]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(item.route);
-      await expect(page.locator('#sin-anillo .gallery article')).toHaveCount(5);
+      await expect(page.locator('#sin-anillo .gallery article')).toHaveCount(6);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true
       );
@@ -697,14 +829,17 @@ for (const item of cases) {
       expect(box?.x).toBeGreaterThanOrEqual(0);
       expect(box!.x + box!.width).toBeLessThanOrEqual(320);
     }
+    const fieldBox = await page.locator('#sin-anillo .gallery article').first().boundingBox();
+    expect(fieldBox).not.toBeNull();
+    expect(fieldBox!.x + fieldBox!.width).toBeLessThanOrEqual(320);
     const viewBox = await page
       .locator('#sin-anillo .gallery article')
-      .nth(3)
+      .nth(4)
       .locator('.vis')
       .boundingBox();
     const demoBox = await page
       .locator('#sin-anillo .gallery article')
-      .nth(3)
+      .nth(4)
       .locator('.pat-demo')
       .boundingBox();
     expect(viewBox).not.toBeNull();
