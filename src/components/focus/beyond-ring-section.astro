@@ -5,6 +5,7 @@ import { ComplianceBadge } from '../common/compliance-badge';
 import { RichText } from '../common/rich-text';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 
 interface Props {
   locale: Locale;
@@ -79,9 +80,9 @@ const criteriaBase = 'https://www.w3.org/WAI/WCAG22/Understanding/';
     <article class="pat grid min-w-0 overflow-hidden rounded-sm border border-border bg-card">
       <div class="pat-demo grid min-h-42.5 place-items-center border-b border-border bg-background px-4.5 py-7.5">
         <div class="fld group relative grid w-full max-w-65 gap-1 font-sans">
-          <label class="text-sm font-medium text-muted-foreground" for="g-mail">
+          <Label htmlFor="g-mail" className="text-muted-foreground">
             {gallery.field.label}
-          </label>
+          </Label>
           <Input
             id="g-mail"
             type="email"

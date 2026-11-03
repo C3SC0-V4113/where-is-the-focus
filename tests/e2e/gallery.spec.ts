@@ -641,6 +641,11 @@ for (const item of cases) {
     const input = field.locator('input');
     const label = field.locator('label');
     const bar = field.locator('.bar');
+    await expect(label).toHaveAttribute('data-slot', 'label');
+    expect(await label.evaluate((node) => node.tagName)).toBe('LABEL');
+    await expect(label).toHaveAttribute('for', 'g-mail');
+    await expect(label).toHaveText(item.field[0]);
+    await expect(input).toHaveAccessibleName(item.field[0]);
     const restingLabelColor = await label.evaluate((node) => getComputedStyle(node).color);
     await page.keyboard.press('Tab');
     await expect(input).toBeFocused();
