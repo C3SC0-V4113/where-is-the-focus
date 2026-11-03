@@ -572,6 +572,24 @@ for (const item of cases) {
     }
   });
 
+  test(`${item.route} field keeps a solid focus outline in forced colors`, async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active' });
+    await page.goto(item.route);
+    expect(await page.evaluate(() => matchMedia('(forced-colors: active)').matches)).toBe(true);
+    const predecessor = page.locator('#sin-anillo .more a').last();
+    await predecessor.focus();
+    const input = page.locator('#g-mail');
+    await page.keyboard.press('Tab');
+    await expect(input).toBeFocused();
+    expect(await input.evaluate((node) => node.matches(':focus-visible'))).toBe(true);
+    const outline = await input.evaluate((node) => {
+      const style = getComputedStyle(node);
+      return { style: style.outlineStyle, width: Number.parseFloat(style.outlineWidth) };
+    });
+    expect(outline.style).toBe('solid');
+    expect(outline.width).toBeGreaterThanOrEqual(2);
+  });
+
   for (const theme of ['light', 'dark'] as const) {
     test(`${item.route} gallery text and focus states meet contrast in ${theme} mode`, async ({
       page,
@@ -749,6 +767,7 @@ for (const item of cases) {
     const field = page.locator('#sin-anillo .gallery article').first().locator('.fld');
     const label = field.locator('label');
     const bar = field.locator('.bar');
+    const input = field.locator('input');
     const button = page.locator('#sin-anillo .gallery button');
     const nav = page.locator('#sin-anillo .gallery-nav a').first();
     const hl = page.locator('#sin-anillo .hl').first();
@@ -756,6 +775,7 @@ for (const item of cases) {
     const overlay = page.locator('#sin-anillo .thumb');
     await expect(label).toHaveCSS('transition-duration', '0s');
     await expect(bar).toHaveCSS('transition-duration', '0s');
+    await expect(input).toHaveCSS('transition-property', 'none');
     await expect(button).toHaveCSS('transition-duration', '0s');
     expect(await nav.evaluate((node) => getComputedStyle(node, '::after').transitionDuration)).toBe(
       '0s'
@@ -772,6 +792,17 @@ for (const item of cases) {
     const normalField = normalPage.locator('#sin-anillo .gallery article').first().locator('.fld');
     const normalLabel = normalField.locator('label');
     const normalBar = normalField.locator('.bar');
+    const normalInput = normalField.locator('input');
+    const inputTransitionProperty = await normalInput.evaluate(
+      (node) => getComputedStyle(node).transitionProperty
+    );
+    expect(inputTransitionProperty).toContain('color');
+    expect(inputTransitionProperty).toContain('background-color');
+    expect(
+      Number.parseFloat(
+        await normalInput.evaluate((node) => getComputedStyle(node).transitionDuration)
+      )
+    ).toBeGreaterThan(0);
     for (const duration of [
       await normalLabel.evaluate((node) => getComputedStyle(node).transitionDuration),
       await normalBar.evaluate((node) => getComputedStyle(node).transitionDuration),
