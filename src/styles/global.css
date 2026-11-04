@@ -229,6 +229,12 @@
     0 0 0 5px var(--ring);
 }
 
+@utility transition-surface {
+  transition-property: color, background-color;
+  transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+  transition-duration: var(--tw-duration, var(--default-transition-duration));
+}
+
 @layer base {
   * {
     @apply border-border;
