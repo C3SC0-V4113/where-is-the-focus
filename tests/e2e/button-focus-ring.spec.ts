@@ -233,3 +233,39 @@ test('button focus rings appear without a box-shadow or outline transition', asy
     await page.keyboard.press('Tab');
   }
 });
+
+test('gallery Button focus ring does not transition its outline color', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/');
+  const button = page.locator('#sin-anillo .gallery button').first();
+  await focusFirstButtonWithTab(page, button);
+
+  const result = await button.evaluate((element) => {
+    const computed = getComputedStyle(element);
+    const runningRingTransitions = element
+      .getAnimations()
+      .filter(
+        (animation): animation is CSSTransition =>
+          animation instanceof CSSTransition &&
+          animation.playState === 'running' &&
+          /^(box-shadow|outline(?:-|$))/.test(animation.transitionProperty)
+      )
+      .map((animation) => animation.transitionProperty);
+
+    return {
+      focusVisible: element.matches(':focus-visible'),
+      runningRingTransitions,
+      transitionProperties: computed.transitionProperty
+        .split(',')
+        .map((property) => property.trim()),
+    };
+  });
+
+  expect(result.focusVisible).toBe(true);
+  expect(result.runningRingTransitions).toEqual([]);
+  expect(result.transitionProperties).toContain('color');
+  expect(result.transitionProperties).toContain('background-color');
+  expect(result.transitionProperties.some((property) => property.startsWith('outline'))).toBe(
+    false
+  );
+});
