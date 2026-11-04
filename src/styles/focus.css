@@ -156,7 +156,7 @@
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   }
 
-  .toc li {
+  .toc a {
     grid-template-columns: 3ch minmax(0, 1fr);
   }
 

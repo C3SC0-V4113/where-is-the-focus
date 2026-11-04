@@ -92,7 +92,10 @@ async function insertInput(page: Page) {
 }
 
 async function focusFirstInputWithTab(page: Page, input: Locator) {
-  for (let tab = 0; tab < 8; tab += 1) {
+  const maxTabs = await page
+    .locator('a[href], button, input, select, textarea, [tabindex]')
+    .count();
+  for (let tab = 0; tab < maxTabs; tab += 1) {
     await page.keyboard.press('Tab');
     if (await input.evaluate((element) => document.activeElement === element)) {
       return;
