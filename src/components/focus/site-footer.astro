@@ -1,0 +1,60 @@
+---
+import { en, es, type Locale } from '../../i18n/messages';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const messages = locale === 'en' ? en : es;
+const referenceHrefs = [
+  'https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html',
+  'https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html',
+  'https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html',
+  'https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance.html',
+  'https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html',
+  'https://www.w3.org/WAI/WCAG22/Understanding/bypass-blocks.html',
+  'https://www.sarasoueidan.com/blog/focus-indicators/',
+  'https://vercel.com/design/guidelines',
+  'https://www.w3.org/WAI/ARIA/apg/patterns/',
+  'https://tailwindcss.com/docs/hover-focus-and-other-states',
+  'https://ui.shadcn.com/docs/theming',
+  'https://developer.mozilla.org/es/docs/Web/CSS/:focus-visible',
+];
+const socialHrefs = ['https://cescovalle.com', 'https://github.com/Valle-Aracari'];
+---
+
+<footer class="foot mt-auto border-t-2 border-foreground text-sm leading-relaxed text-muted-foreground">
+  <div class="mx-auto grid w-full max-w-5xl gap-2.5 px-4 pt-7 pb-12">
+    <div class="sig flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 py-1">
+      <div class="who grid gap-0.5">
+        <strong class="font-sans text-lg font-semibold text-foreground">
+          {messages.footerName}
+        </strong>
+        <span>{messages.footerRole}</span>
+      </div>
+      <ul role="list" class="social m-0 flex list-none flex-wrap gap-x-4.5 gap-y-1 p-0 font-medium">
+        {messages.footer.social.map((label, index) => (
+          <li>
+            <a class="text-brand-text underline underline-offset-3" href={socialHrefs[index]}>
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <h2 class="foot-h m-0 mt-3 font-mono text-xs font-medium tracking-wider text-muted-foreground uppercase">
+      {messages.footer.referencesTitle}
+    </h2>
+    <ul role="list" class="refs m-0 flex list-none flex-wrap gap-x-4.5 gap-y-1 p-0">
+      {messages.footer.references.map((label, index) => (
+        <li>
+          <a class="text-brand-text underline underline-offset-3" href={referenceHrefs[index]}>
+            {label}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="closing-line m-0">{messages.footer.closingLine}</p>
+  </div>
+</footer>

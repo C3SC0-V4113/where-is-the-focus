@@ -172,3 +172,23 @@
     }
   }
 }
+
+@layer utilities {
+  .close {
+    --background: var(--brand);
+    --ring: var(--brand-foreground);
+  }
+
+  .close .display {
+    font-size: clamp(44px, 8vw, 104px);
+  }
+
+  .close-copy {
+    max-width: 52ch;
+    font-size: 19px;
+  }
+
+  .close [data-slot='kbd'] {
+    color: var(--foreground);
+  }
+}

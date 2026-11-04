@@ -27,6 +27,25 @@ export const es = {
   themeDark: 'Oscuro',
   footerName: 'Francisco Valle',
   footerRole: 'FrontEnd Web',
+  footer: {
+    social: ['cescovalle.com', 'GitHub'],
+    referencesTitle: 'Referencias',
+    references: [
+      'WCAG 2.4.7 Foco visible',
+      'WCAG 2.4.11 Foco no oculto',
+      'WCAG 1.4.11 Contraste no textual',
+      'WCAG 2.4.13 Apariencia del foco',
+      'WCAG 2.4.3 Orden del foco',
+      'WCAG 2.4.1 Evitar bloques',
+      'Sara Soueidan: indicadores de foco',
+      'Vercel: Web Interface Guidelines',
+      'W3C: patrones ARIA',
+      'Tailwind: estados',
+      'shadcn/ui: temas',
+      'MDN: :focus-visible',
+    ],
+    closingLine: 'Ejemplos en CSS y en Tailwind CSS v4.',
+  },
   sections: {
     premise: {
       number: '01 · El planteamiento',
@@ -196,6 +215,12 @@ export const es = {
       number: '08 · Preguntas frecuentes',
       title: 'Lo que suele preguntarse en el equipo',
     },
+    closing: {
+      title: '¿Sabes dónde está el foco en tu interfaz ahora mismo?',
+      paragraph:
+        'Si la respuesta es «depende», pulsa [[Tab]] en tu producto y recórrelo de principio a fin. Es la prueba de accesibilidad más rápida que existe, y la que más dice.',
+      link: 'Volver al contenido',
+    },
   },
 } as const;
 
@@ -233,6 +258,25 @@ export const en = {
   themeDark: 'Dark',
   footerName: 'Francisco Valle',
   footerRole: 'FrontEnd Web',
+  footer: {
+    social: ['cescovalle.com', 'GitHub'],
+    referencesTitle: 'References',
+    references: [
+      'WCAG 2.4.7 Focus visible',
+      'WCAG 2.4.11 Focus not obscured',
+      'WCAG 1.4.11 Non-text contrast',
+      'WCAG 2.4.13 Focus appearance',
+      'WCAG 2.4.3 Focus order',
+      'WCAG 2.4.1 Bypass blocks',
+      'Sara Soueidan: focus indicators',
+      'Vercel: Web Interface Guidelines',
+      'W3C: ARIA patterns',
+      'Tailwind: states',
+      'shadcn/ui: theming',
+      'MDN: :focus-visible',
+    ],
+    closingLine: 'Examples in CSS and Tailwind CSS v4.',
+  },
   sections: {
     premise: {
       number: '01 · The premise',
@@ -401,6 +445,12 @@ export const en = {
     objections: {
       number: '08 · Frequent questions',
       title: 'What teams usually ask',
+    },
+    closing: {
+      title: 'Do you know where focus is in your interface right now?',
+      paragraph:
+        'If the answer is “it depends”, press [[Tab]] in your product and go through it from start to finish. It’s the fastest accessibility test there is, and the most revealing.',
+      link: 'Back to content',
     },
   },
 } satisfies MessageShape;

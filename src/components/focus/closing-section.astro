@@ -1,0 +1,31 @@
+---
+import { en, es, type Locale } from '../../i18n/messages';
+import { RichText } from '../common/rich-text';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const text = (locale === 'en' ? en : es).sections.closing;
+---
+
+<section class="close bg-brand text-brand-foreground" aria-labelledby="h-close">
+  <div class="mx-auto grid w-full max-w-5xl gap-6 px-4 py-16">
+    <h2
+      class="display m-0 font-display text-section font-stretch-66% text-balance uppercase"
+      id="h-close"
+    >
+      {text.title}
+    </h2>
+    <p class="close-copy m-0 font-serif leading-relaxed">
+      <RichText text={text.paragraph} />
+    </p>
+    <a
+      class="w-fit rounded-sm font-medium text-brand-foreground underline underline-offset-4"
+      href="#contenido"
+    >
+      {text.link}
+    </a>
+  </div>
+</section>
