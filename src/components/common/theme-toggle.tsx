@@ -42,9 +42,15 @@ export function ThemeToggle({ label, light, dark }: Props) {
       return;
     }
 
-    document.documentElement.classList.toggle('dark', selectedTheme === 'dark');
+    const root = document.documentElement;
+    root.classList.add('theme-switching');
+    root.classList.toggle('dark', selectedTheme === 'dark');
     setStoredTheme(selectedTheme);
     window.dispatchEvent(new Event(themeChangeEvent));
+    requestAnimationFrame(() => {
+      void getComputedStyle(root).color;
+      root.classList.remove('theme-switching');
+    });
   }
 
   return (
