@@ -157,6 +157,45 @@ export const es = {
         },
       },
     },
+    obscured: {
+      number: '06 · Que nada lo tape',
+      title: 'Visible también significa a la vista',
+      paragraphs: [
+        'Al pulsar [[Tab]], el navegador solo desplaza la página si el siguiente elemento está fuera de la vista. Una cabecera fija o un banner de cookies están dentro de ella, así que el elemento puede quedar debajo sin que el navegador lo note. `scroll-padding` le dice cuánto espacio está ocupado.',
+        'El segundo caso es el modo de alto contraste de Windows: elimina las sombras y los fondos, y un foco hecho solo con `box-shadow` desaparece. Un contorno transparente lo salva, porque el sistema lo pinta con su propio color.',
+      ],
+      more: {
+        label: 'Más: ',
+        separator: ' · ',
+        links: [
+          { text: '2.4.11 Foco no oculto (mínimo)' },
+          { text: '2.4.12 (mejorado)' },
+          { text: 'forced-colors en MDN' },
+        ],
+      },
+    },
+    movement: {
+      number: '07 · A dónde va el foco',
+      title: 'Cuando la pantalla cambia, el foco se decide',
+      paragraphs: [
+        'Al abrir un modal, cambiar de vista o borrar un elemento, lo que tenía el foco puede desaparecer. Si nadie decide a dónde va, el navegador lo deja al inicio de la página. Mover el foco es obligatorio (2.4.3); que se vea o no lo decide `:focus-visible`.',
+        'En pestañas, menús y barras de herramientas, [[Tab]] entra y sale del componente, y las flechas recorren las opciones. Solo una opción tiene `tabindex="0"` a la vez; las demás tienen `-1`.',
+      ],
+      pull: 'Al cerrar un modal, el foco vuelve al botón que lo abrió. Con el ratón no se ve el anillo; con [[Esc]], sí.',
+      more: {
+        label: 'Más: ',
+        separator: ' · ',
+        links: [
+          { text: '2.4.3 Orden del foco' },
+          { text: 'W3C, navegación por teclado en componentes' },
+          { text: 'patrón de pestañas' },
+        ],
+      },
+    },
+    objections: {
+      number: '08 · Preguntas frecuentes',
+      title: 'Lo que suele preguntarse en el equipo',
+    },
   },
 } as const;
 
@@ -323,6 +362,45 @@ export const en = {
             'The image is covered by a color veil with the action written on it. With the keyboard it adds a white inner border to stand apart from hover.',
         },
       },
+    },
+    obscured: {
+      number: '06 · Nothing should cover it',
+      title: 'Visible also means in view',
+      paragraphs: [
+        'When you press [[Tab]], the browser only scrolls if the next element is out of view. A sticky header or a cookie banner are inside the view, so the element can end up underneath without the browser noticing. `scroll-padding` tells it how much space is taken.',
+        'The second case is Windows high contrast mode: it removes shadows and backgrounds, and focus made only with `box-shadow` disappears. A transparent outline saves it, because the system paints it with its own color.',
+      ],
+      more: {
+        label: 'More: ',
+        separator: ' · ',
+        links: [
+          { text: '2.4.11 Focus not obscured (minimum)' },
+          { text: '2.4.12 (enhanced)' },
+          { text: 'forced-colors on MDN' },
+        ],
+      },
+    },
+    movement: {
+      number: '07 · Where focus goes',
+      title: 'When the screen changes, focus is decided',
+      paragraphs: [
+        'When a modal opens, the view changes or an item is deleted, whatever had focus may disappear. If nobody decides where it goes, the browser leaves it at the top of the page. Moving focus is required (2.4.3); whether it’s visible is decided by `:focus-visible`.',
+        'In tabs, menus and toolbars, [[Tab]] enters and leaves the component, and the arrow keys move between options. Only one option has `tabindex="0"` at a time; the rest have `-1`.',
+      ],
+      pull: 'When a modal closes, focus returns to the button that opened it. With the mouse the ring doesn’t show; with [[Esc]], it does.',
+      more: {
+        label: 'More: ',
+        separator: ' · ',
+        links: [
+          { text: '2.4.3 Focus order' },
+          { text: 'W3C, keyboard navigation inside components' },
+          { text: 'tabs pattern' },
+        ],
+      },
+    },
+    objections: {
+      number: '08 · Frequent questions',
+      title: 'What teams usually ask',
     },
   },
 } satisfies MessageShape;

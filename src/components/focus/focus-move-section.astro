@@ -1,0 +1,51 @@
+---
+import { en, es, type Locale } from '../../i18n/messages';
+import { RichText } from '../common/rich-text';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const text = (locale === 'en' ? en : es).sections.movement;
+const hrefs = [
+  'https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html',
+  'https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/',
+  'https://www.w3.org/WAI/ARIA/apg/patterns/tabs/',
+];
+---
+
+<section class="arg grid gap-6" aria-labelledby="h-mov" id="movimiento">
+  <div class="head grid gap-3.5">
+    <span class="num font-mono text-xs font-medium tracking-wider text-muted-foreground">
+      {text.number}
+    </span>
+    <h2 class="m-0 font-display text-section font-stretch-66% text-balance uppercase" id="h-mov">
+      {text.title}
+    </h2>
+  </div>
+  <div class="intro grid max-w-prose gap-4 font-serif text-lg leading-relaxed">
+    <p>
+      <RichText text={text.paragraphs[0]} />
+    </p>
+    <p class="pull my-1.5 font-display text-pull text-pretty font-stretch-75% normal-case">
+      <RichText text={text.pull} />
+    </p>
+  </div>
+  <div class="intro grid max-w-prose gap-4 font-serif text-lg leading-relaxed">
+    <p>
+      <RichText text={text.paragraphs[1]} />
+    </p>
+  </div>
+  <p class="more m-0 max-w-prose text-sm leading-normal text-muted-foreground">
+    {text.more.label}
+    {text.more.links.map((link, index) => (
+      <>
+        {index > 0 && text.more.separator}
+        <a class="text-brand-text font-medium underline underline-offset-3" href={hrefs[index]}>
+          {link.text}
+        </a>
+      </>
+    ))}
+  </p>
+</section>

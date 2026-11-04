@@ -8,6 +8,16 @@ const locales = [
     hint: 'Esta página se recorre con Tab. Pruébalo.',
     meta: '8 argumentos · 6 laboratorios · ejemplos en CSS y Tailwind v4',
     indexName: 'Contenido',
+    hrefs: [
+      '#planteamiento',
+      '#reglas',
+      '#focus-visible',
+      '#anillo',
+      '#sin-anillo',
+      '#tapado',
+      '#movimiento',
+      '#objeciones',
+    ],
     entries: [
       'El planteamiento',
       'Qué piden las reglas',
@@ -26,6 +36,16 @@ const locales = [
     hint: 'This page can be navigated with Tab. Try it.',
     meta: '8 arguments · 6 labs · examples in CSS and Tailwind v4',
     indexName: 'Contents',
+    hrefs: [
+      '#planteamiento',
+      '#reglas',
+      '#focus-visible',
+      '#anillo',
+      '#sin-anillo',
+      '#tapado',
+      '#movimiento',
+      '#objeciones',
+    ],
     entries: [
       'The premise',
       'What the rules ask for',
@@ -108,11 +128,41 @@ for (const locale of locales) {
     const list = navigation.getByRole('list');
     await expect(list).toHaveAttribute('role', 'list');
     await expect(list.getByRole('listitem')).toHaveCount(8);
-    await expect(navigation.locator('a')).toHaveCount(0);
+    await expect(navigation.getByRole('link')).toHaveCount(8);
+    expect(
+      await navigation
+        .getByRole('link')
+        .evaluateAll((links) => links.map((link) => link.getAttribute('href')))
+    ).toEqual([...locale.hrefs]);
     await expect(list.locator('.toc-label')).toHaveText([...locale.entries]);
     await expect(list.locator('.toc-number')).toHaveText(
       locale.entries.map((_, index) => `0${index + 1}`)
     );
+    const tocLayout = await navigation.getByRole('link').evaluateAll((links) =>
+      links.map((link) => {
+        const item = link.closest('li')!;
+        const number = link.querySelector('.toc-number')!;
+        const label = link.querySelector('.toc-label')!;
+        const linkBounds = link.getBoundingClientRect();
+        const itemBounds = item.getBoundingClientRect();
+        const numberBounds = number.getBoundingClientRect();
+        const labelBounds = label.getBoundingClientRect();
+        return {
+          linkWidth: linkBounds.width,
+          itemWidth: itemBounds.width,
+          labelLeft: labelBounds.left,
+          numberRight: numberBounds.right,
+          labelWidth: labelBounds.width,
+          numberWidth: numberBounds.width,
+        };
+      })
+    );
+    expect(tocLayout).toHaveLength(8);
+    expect(
+      tocLayout.every(({ linkWidth, itemWidth }) => Math.abs(linkWidth - itemWidth) <= 1)
+    ).toBe(true);
+    expect(tocLayout.every(({ labelLeft, numberRight }) => labelLeft >= numberRight)).toBe(true);
+    expect(tocLayout.every(({ labelWidth, numberWidth }) => labelWidth > numberWidth)).toBe(true);
 
     // Hero and index sit between the only banner and main, outside it.
     await expect(page.locator('header')).toHaveCount(1);
