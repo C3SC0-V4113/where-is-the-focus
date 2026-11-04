@@ -219,7 +219,7 @@ export const es = {
       title: '¿Sabes dónde está el foco en tu interfaz ahora mismo?',
       paragraph:
         'Si la respuesta es «depende», pulsa [[Tab]] en tu producto y recórrelo de principio a fin. Es la prueba de accesibilidad más rápida que existe, y la que más dice.',
-      link: 'Volver al principio',
+      link: 'Volver al contenido',
     },
   },
 } as const;
@@ -450,7 +450,7 @@ export const en = {
       title: 'Do you know where focus is in your interface right now?',
       paragraph:
         'If the answer is “it depends”, press [[Tab]] in your product and go through it from start to finish. It’s the fastest accessibility test there is, and the most revealing.',
-      link: 'Back to the top',
+      link: 'Back to content',
     },
   },
 } satisfies MessageShape;
