@@ -30,7 +30,10 @@ async function insertButtons(page: Page) {
 }
 
 async function focusFirstButtonWithTab(page: Page, button: Locator) {
-  for (let tab = 0; tab < 8; tab += 1) {
+  const maxTabs = await page
+    .locator('a[href], button, input, select, textarea, [tabindex]')
+    .count();
+  for (let tab = 0; tab < maxTabs; tab += 1) {
     await page.keyboard.press('Tab');
     if (await button.evaluate((element) => document.activeElement === element)) {
       return;
