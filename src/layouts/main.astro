@@ -1,6 +1,7 @@
 ---
 import LangSwitch from '../components/common/lang-switch.astro';
 import { ThemeToggle } from '../components/common/theme-toggle';
+import SiteFooter from '../components/focus/site-footer.astro';
 import { en, es, type Locale } from '../i18n/messages';
 import '../styles/global.css';
 import '../styles/focus.css';
@@ -109,10 +110,7 @@ const ogImage = site
     <main id="contenido" tabindex="-1" class="mx-auto w-full max-w-5xl flex-1 px-4 py-16">
       <slot />
     </main>
-    <footer class="mt-auto border-t border-border">
-      <p class="mx-auto w-full max-w-5xl px-4 py-6 text-sm text-muted-foreground">
-        {messages.footerName} · {messages.footerRole}
-      </p>
-    </footer>
+    <slot name="after-main" />
+    <SiteFooter locale={locale} />
   </body>
 </html>
