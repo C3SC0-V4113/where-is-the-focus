@@ -229,6 +229,21 @@
     0 0 0 5px var(--ring);
 }
 
+@utility transition-surface {
+  transition-property: color, background-color;
+  transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+  transition-duration: var(--tw-duration, var(--default-transition-duration));
+}
+
+.theme-switching,
+.theme-switching *,
+.theme-switching::before,
+.theme-switching::after,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
 @layer base {
   * {
     @apply border-border;

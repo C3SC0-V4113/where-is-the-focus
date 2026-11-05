@@ -207,3 +207,68 @@ for (const locale of locales) {
     expect(errors).toEqual([]);
   });
 }
+
+test('theme changes update gallery highlight color without a transition smear', async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/');
+  const group = page.getByRole('group', { name: 'Tema' });
+  const lightButton = page.getByRole('button', { name: 'Claro' });
+  await expect(group).toBeVisible();
+  await expect(lightButton).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('astro-island', { has: group })).not.toHaveAttribute('ssr');
+
+  for (const buttonName of ['Oscuro', 'Claro']) {
+    const button = page.getByRole('button', { name: buttonName });
+    const result = await button.evaluate(async (button) => {
+      if (!(button instanceof HTMLElement)) {
+        throw new Error('Theme toggle button is unavailable.');
+      }
+      const link = document.querySelector('.gallery-highlight a');
+      if (!link) {
+        throw new Error('Gallery highlight link is unavailable.');
+      }
+
+      const colorBefore = getComputedStyle(link).color;
+      button.click();
+      const isDark = document.documentElement.classList.contains('dark');
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      });
+
+      const transitions = document
+        .getAnimations()
+        .filter(
+          (animation) => animation instanceof CSSTransition && animation.playState === 'running'
+        );
+      const color = getComputedStyle(link).color;
+      const expectedColorProbe = document.createElement('span');
+      expectedColorProbe.style.color = 'var(--foreground)';
+      document.body.append(expectedColorProbe);
+      const expectedColor = getComputedStyle(expectedColorProbe).color;
+      expectedColorProbe.remove();
+      const transitionDuration = getComputedStyle(link).transitionDuration;
+      const isSwitching = document.documentElement.classList.contains('theme-switching');
+
+      return {
+        colorBefore,
+        isDark,
+        color,
+        expectedColor,
+        runningTransitions: transitions.length,
+        transitionDuration,
+        isSwitching,
+      };
+    });
+
+    expect(result.isDark).toBe(buttonName === 'Oscuro');
+    expect(result.color).toBe(result.expectedColor);
+    expect(result.color).not.toBe(result.colorBefore);
+    expect(result.runningTransitions).toBe(0);
+    expect(result.transitionDuration).not.toBe('0s');
+    expect(result.isSwitching).toBe(false);
+    await expect(button).toHaveAttribute('aria-pressed', 'true');
+  }
+});

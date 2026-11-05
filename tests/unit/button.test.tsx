@@ -18,3 +18,13 @@ describe('Button focus ring classes', () => {
     expect(button.className).toBe(cn(buttonVariants({ variant })));
   });
 });
+
+describe('Button transition classes', () => {
+  it('lets consumers replace the primitive transition', () => {
+    render(<Button className="transition-none">Download report</Button>);
+    const classes = screen.getByRole('button', { name: 'Download report' }).className.split(/\s+/);
+
+    expect(classes).toContain('transition-none');
+    expect(classes).not.toContain('transition-surface');
+  });
+});
