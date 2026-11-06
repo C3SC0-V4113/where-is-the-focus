@@ -242,8 +242,8 @@
     transition: none;
   }
 
-  [data-pattern-code]:has([data-pattern-code-trigger]:focus-visible) [data-pattern-code-chevron],
-  [data-pattern-code]:has([data-pattern-code-trigger]:focus-visible) [data-pattern-code-panel] {
+  [data-pattern-code][data-activation='keyboard'] [data-pattern-code-chevron],
+  [data-pattern-code][data-activation='keyboard'] [data-pattern-code-panel] {
     transition-duration: 0ms;
   }
 

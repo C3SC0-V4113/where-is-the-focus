@@ -23,7 +23,22 @@ export function PatternCode({ snippet, locale, label, codeLabels }: Props) {
 
   return (
     <Collapsible className="grid" data-pattern-code="">
-      <CollapsibleTrigger className="inline-flex" data-pattern-code-trigger="">
+      <CollapsibleTrigger
+        className="inline-flex"
+        data-pattern-code-trigger=""
+        onPointerDown={(event) => {
+          event.currentTarget
+            .closest('[data-pattern-code]')
+            ?.setAttribute('data-activation', 'pointer');
+        }}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.currentTarget
+              .closest('[data-pattern-code]')
+              ?.setAttribute('data-activation', 'keyboard');
+          }
+        }}
+      >
         {label}
         <ChevronDown aria-hidden="true" data-pattern-code-chevron="" />
       </CollapsibleTrigger>

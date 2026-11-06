@@ -262,21 +262,163 @@ for (const route of routes) {
         const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
         (element as HTMLButtonElement).click();
         await frame();
+        const card = element.closest('[data-pattern-code]');
+        const openedBeforeClose = element.getAttribute('aria-expanded') === 'true';
         (element as HTMLButtonElement).click();
         await frame();
         await frame();
-        const card = element.closest('[data-pattern-code]');
         const panel = card?.querySelector('[data-pattern-code-panel]');
         const runningTransitions =
           panel?.getAnimations().filter((animation) => animation instanceof CSSTransition).length ??
           0;
         return {
+          openedBeforeClose,
+          expandedAfterClose: element.getAttribute('aria-expanded'),
           panelInDom: panel !== null,
+          panelHeight: panel?.getBoundingClientRect().height ?? 0,
           runningTransitions,
         };
       });
 
+      expect(result.openedBeforeClose).toBe(true);
+      expect(result.expandedAfterClose).toBe('false');
+      expect(result.panelInDom && result.panelHeight > 0).toBe(false);
       expect(result.panelInDom && result.runningTransitions > 0).toBe(false);
+    });
+
+    test('pointer activation fades after keyboard use while keyboard remains instant', async ({
+      page,
+    }) => {
+      await page.goto(route.path);
+      const card = page.locator('.gallery article.pat').first();
+      const trigger = card.getByRole('button', { name: route.label });
+      await trigger.scrollIntoViewIfNeeded();
+      await expect(trigger).toBeVisible();
+      await expect(card.locator('astro-island:not([ssr])')).toHaveCount(1);
+      await focusTriggerWithKeyboard(page, card, trigger, route.fieldName);
+
+      await page.keyboard.press('Enter');
+      await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      await expect(trigger).toBeFocused();
+      await expect
+        .poll(() => trigger.evaluate((element) => element.matches(':focus-visible')))
+        .toBe(true);
+      const panel = card.locator('[data-pattern-code-panel]');
+      const chevron = card.locator('[data-pattern-code-chevron]');
+      await expect(card.getByRole('tabpanel', { name: 'CSS' })).toContainText(route.firstCode);
+      await expectNoPatternMotion(panel, chevron);
+
+      await page.keyboard.press('Enter');
+      await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+      await expect(trigger).toBeFocused();
+      await expect
+        .poll(() => trigger.evaluate((element) => element.matches(':focus-visible')))
+        .toBe(true);
+
+      await page.evaluate(() => {
+        const targetWindow = window as Window & { __patternCodeTransitionRuns?: string[] };
+        targetWindow.__patternCodeTransitionRuns = [];
+        document.addEventListener(
+          'transitionrun',
+          (event) => {
+            const target = event.target;
+            if (
+              target instanceof Element &&
+              target.matches('[data-pattern-code-panel], [data-pattern-code-chevron]')
+            ) {
+              targetWindow.__patternCodeTransitionRuns?.push(
+                (event as TransitionEvent).propertyName
+              );
+            }
+          },
+          true
+        );
+      });
+
+      await expect
+        .poll(() => trigger.evaluate((element) => element.matches(':focus-visible')))
+        .toBe(true);
+      await trigger.click();
+      await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      await expect(card.getByRole('tabpanel', { name: 'CSS' })).toContainText(route.firstCode);
+      const pointerTransition = await page.evaluate(async () => {
+        const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        for (let index = 0; index < 20; index += 1) {
+          const targetWindow = window as Window & { __patternCodeTransitionRuns?: string[] };
+          if (targetWindow.__patternCodeTransitionRuns?.includes('opacity')) break;
+          await frame();
+        }
+        const targetWindow = window as Window & { __patternCodeTransitionRuns?: string[] };
+        return targetWindow.__patternCodeTransitionRuns ?? [];
+      });
+      expect(pointerTransition).toContain('opacity');
+      await expectInstantPanelHeight(panel);
+      await expect(trigger).toBeFocused();
+      await expect
+        .poll(() => trigger.evaluate((element) => element.matches(':focus-visible')))
+        .toBe(true);
+      await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+      await page.evaluate(() => {
+        const targetWindow = window as Window & { __patternCodeTransitionRuns?: string[] };
+        targetWindow.__patternCodeTransitionRuns = [];
+      });
+      await page.keyboard.press('Enter');
+      await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+      await expect(card.getByRole('tabpanel', { name: 'CSS' })).toHaveCount(0);
+      await page.evaluate(
+        () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+      );
+      const closingTransitions = await page.evaluate(() => {
+        const targetWindow = window as Window & { __patternCodeTransitionRuns?: string[] };
+        return targetWindow.__patternCodeTransitionRuns ?? [];
+      });
+      expect(closingTransitions).toEqual([]);
+
+      await page.evaluate(() => {
+        const targetWindow = window as Window & { __patternCodeTransitionRuns?: string[] };
+        targetWindow.__patternCodeTransitionRuns = [];
+      });
+      await page.keyboard.press('Enter');
+      await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      await expect(card.getByRole('tabpanel', { name: 'CSS' })).toContainText(route.firstCode);
+      await expectNoPatternMotion(panel, chevron);
+      await page.evaluate(
+        () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+      );
+      const openingTransitions = await page.evaluate(() => {
+        const targetWindow = window as Window & { __patternCodeTransitionRuns?: string[] };
+        return targetWindow.__patternCodeTransitionRuns ?? [];
+      });
+      expect(openingTransitions).toEqual([]);
+    });
+
+    test('reduced motion stays instant through keyboard then pointer activation', async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.goto(route.path);
+      const card = page.locator('.gallery article.pat').first();
+      const trigger = card.getByRole('button', { name: route.label });
+      await trigger.scrollIntoViewIfNeeded();
+      await expect(trigger).toBeVisible();
+      await expect(card.locator('astro-island:not([ssr])')).toHaveCount(1);
+      await focusTriggerWithKeyboard(page, card, trigger, route.fieldName);
+      const panel = card.locator('[data-pattern-code-panel]');
+      const chevron = card.locator('[data-pattern-code-chevron]');
+
+      await page.keyboard.press('Enter');
+      await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      await expectNoPatternMotion(panel, chevron);
+      await page.keyboard.press('Enter');
+      await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+      await expect(trigger).toBeFocused();
+
+      await trigger.click();
+      await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      await expect(card.getByRole('tabpanel', { name: 'CSS' })).toContainText(route.firstCode);
+      await expectNoPatternMotion(panel, chevron);
+      await expectInstantPanelHeight(panel);
     });
 
     test('pointer opening starts a real opacity transition', async ({ page }) => {
