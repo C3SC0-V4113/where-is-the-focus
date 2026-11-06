@@ -80,6 +80,10 @@
   --font-display: 'Archivo Variable', 'Arial Narrow', Impact, sans-serif;
   --font-mono: 'Geist Mono Variable', ui-monospace, Menlo, Consolas, monospace;
   --font-heading: var(--font-display);
+  --color-code-bg: var(--code-bg);
+  --color-code-fg: var(--code-fg);
+  --color-code-dim: var(--code-dim);
+  --color-code-hi: var(--code-hi);
   --text-display: clamp(56px, 13vw, 168px);
   --text-display--line-height: 1.07;
   --text-display--letter-spacing: -0.005em;
@@ -162,6 +166,10 @@
   --warning-muted: oklch(0.96 0.05 85);
   --destructive-text: oklch(0.46 0.17 27);
   --destructive-muted: oklch(0.95 0.03 25);
+  --code-bg: oklch(0.18 0.01 270);
+  --code-fg: #e6e8ef;
+  --code-dim: #8b90a0;
+  --code-hi: #9fb0ff;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -206,6 +214,7 @@
   --warning-muted: oklch(0.29 0.05 75);
   --destructive-text: oklch(0.8 0.12 25);
   --destructive-muted: oklch(0.27 0.06 25);
+  --code-bg: oklch(0.11 0.005 270);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);

@@ -1,5 +1,7 @@
 ---
 import { en, es, type Locale } from '../../i18n/messages';
+import { getSnippetCode, snippets } from '../../lib/focus/snippets';
+import { CodeExample } from '../common/code-example';
 import { RichText } from '../common/rich-text';
 
 interface Props {
@@ -7,6 +9,9 @@ interface Props {
 }
 const { locale } = Astro.props;
 const text = (locale === 'en' ? en : es).sections.ring;
+const snippet = snippets.shadcn;
+const css = getSnippetCode(snippet, 'css', locale);
+const tailwind = getSnippetCode(snippet, 'tw', locale);
 const hrefs = [
   'https://www.sarasoueidan.com/blog/focus-indicators/',
   'https://ui.shadcn.com/docs/theming',
@@ -48,4 +53,10 @@ const hrefs = [
       {text.pullMore.links[0]!.text}
     </a>
   </p>
+  <CodeExample
+    client:visible
+    css={css}
+    tailwind={tailwind}
+    labels={(locale === 'en' ? en : es).codeExample}
+  />
 </section>
