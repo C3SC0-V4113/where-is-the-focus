@@ -41,6 +41,39 @@ async function expectMoreLine(
   }
 }
 
+async function tabAcrossCodeContent(
+  page: Page,
+  section: Locator,
+  content: Locator,
+  nextLink: Locator
+) {
+  const hydratedIsland = section
+    .locator('astro-island:not([ssr])')
+    .filter({ has: page.locator('[data-slot="code-block-content"]') });
+  await expect(hydratedIsland).toHaveCount(1);
+  await expect
+    .poll(() =>
+      content.evaluate((node) => {
+        const overflows = node.scrollWidth > node.clientWidth + 1;
+        return overflows ? node.tabIndex === 0 : node.tabIndex === -1;
+      })
+    )
+    .toBe(true);
+  const overflows = await content.evaluate((node) => node.scrollWidth > node.clientWidth + 1);
+  await page.keyboard.press('Tab');
+  if (overflows) {
+    await expect(content).toBeFocused();
+    await page.keyboard.press('Tab');
+  }
+  await expect(nextLink).toBeFocused();
+}
+
+async function codeBlockHeight(codeBlock: Locator) {
+  const box = await codeBlock.boundingBox();
+  expect(box).not.toBeNull();
+  return box!.height;
+}
+
 const phase12 = [
   {
     route: '/',
@@ -179,6 +212,45 @@ async function expectPrettyWrap(page: Page, pull: Locator) {
 
 for (const [route, messages, hrefs] of routes) {
   const copy = messages.sections.focusVisible;
+
+  test(`${route} keeps code example height stable across tabs`, async ({ page }) => {
+    await page.goto(route);
+    const sections = [page.locator('#focus-visible'), page.locator('#anillo')];
+    const codeBlocks = sections.map((section) => section.locator('[data-slot="code-block"]'));
+
+    for (const [index, section] of sections.entries()) {
+      await codeBlocks[index]!.scrollIntoViewIfNeeded();
+      const hydratedIsland = section
+        .locator('astro-island:not([ssr])')
+        .filter({ has: page.locator('[data-slot="code-block"]') });
+      await expect(hydratedIsland).toHaveCount(1);
+    }
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+    });
+
+    const [focusVisible] = sections;
+    await focusVisible!.getByRole('tab', { name: 'CSS', exact: true }).click();
+    for (const section of sections) {
+      await expect(section.getByRole('tab', { name: 'CSS', exact: true })).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+    }
+    const heightsBefore = await Promise.all(codeBlocks.map(codeBlockHeight));
+
+    await focusVisible!.getByRole('tab', { name: 'Tailwind', exact: true }).click();
+    for (const section of sections) {
+      await expect(section.getByRole('tab', { name: 'Tailwind', exact: true })).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+    }
+    const heightsAfter = await Promise.all(codeBlocks.map(codeBlockHeight));
+
+    expect(Math.abs(heightsAfter[0]! - heightsBefore[0]!)).toBeLessThanOrEqual(1);
+    expect(Math.abs(heightsAfter[1]! - heightsBefore[1]!)).toBeLessThanOrEqual(1);
+  });
 
   test(`${route} renders the focus-visible prose and inline code`, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 900 });
@@ -394,18 +466,39 @@ for (const [route, messages, hrefs] of routes) {
     await page.goto(route);
     await expect(page.locator('#anillo .pull')).toHaveCSS('font-size', '32px');
     await page.locator('#focus-visible .more a').last().focus();
-    for (const index of [0, 1]) {
-      await page.keyboard.press('Tab');
-      const link = lines.nth(index).getByRole('link');
-      await expect(link).toBeFocused();
-      const ringStyle = await link.evaluate((node) => {
-        const style = getComputedStyle(node);
-        return [style.outlineStyle, style.outlineWidth, style.boxShadow];
-      });
-      expect(ringStyle.slice(0, 2)).toEqual(['solid', '2px']);
-      expect(ringStyle[2]).toContain('2px');
-      expect(ringStyle[2]).toContain('5px');
-    }
+    const codeExample = page.locator('#focus-visible');
+    const cssTab = codeExample.getByRole('tab', { name: 'CSS', exact: true });
+    const copyButton = codeExample.getByRole('button', {
+      name: messages.codeExample.copy,
+      exact: true,
+    });
+    await page.keyboard.press('Tab');
+    await expect(cssTab).toHaveAttribute('aria-selected', 'true');
+    await expect(cssTab).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(copyButton).toBeFocused();
+    const codeContent = codeExample
+      .getByRole('tabpanel', { name: 'CSS' })
+      .locator('[data-slot="code-block-content"]');
+    const firstLink = lines.nth(0).getByRole('link');
+    await tabAcrossCodeContent(page, codeExample, codeContent, firstLink);
+    const firstRingStyle = await firstLink.evaluate((node) => {
+      const style = getComputedStyle(node);
+      return [style.outlineStyle, style.outlineWidth, style.boxShadow];
+    });
+    expect(firstRingStyle.slice(0, 2)).toEqual(['solid', '2px']);
+    expect(firstRingStyle[2]).toContain('2px');
+    expect(firstRingStyle[2]).toContain('5px');
+    await page.keyboard.press('Tab');
+    const secondLink = lines.nth(1).getByRole('link');
+    await expect(secondLink).toBeFocused();
+    const secondRingStyle = await secondLink.evaluate((node) => {
+      const style = getComputedStyle(node);
+      return [style.outlineStyle, style.outlineWidth, style.boxShadow];
+    });
+    expect(secondRingStyle.slice(0, 2)).toEqual(['solid', '2px']);
+    expect(secondRingStyle[2]).toContain('2px');
+    expect(secondRingStyle[2]).toContain('5px');
     for (const width of [320, 375, 768, 1280]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(route);
@@ -497,8 +590,21 @@ for (const [route, messages, hrefs] of routes) {
     expect(headingStyles[4]).toBe(headingStyles[0]);
 
     await page.locator('#anillo .more a').last().focus();
+    const codeExample = page.locator('#anillo');
+    const cssTab = codeExample.getByRole('tab', { name: 'CSS', exact: true });
+    const copyButton = codeExample.getByRole('button', {
+      name: route === '/en/' ? en.codeExample.copy : es.codeExample.copy,
+      exact: true,
+    });
     await page.keyboard.press('Tab');
-    await expect(link).toBeFocused();
+    await expect(cssTab).toHaveAttribute('aria-selected', 'true');
+    await expect(cssTab).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(copyButton).toBeFocused();
+    const codeContent = codeExample
+      .getByRole('tabpanel', { name: 'CSS' })
+      .locator('[data-slot="code-block-content"]');
+    await tabAcrossCodeContent(page, codeExample, codeContent, link);
     const focusRing = await link.evaluate((node) => {
       const style = getComputedStyle(node);
       return [style.outlineStyle, style.outlineWidth, style.boxShadow];

@@ -25,6 +25,12 @@ export const es = {
   themeLabel: 'Tema',
   themeLight: 'Claro',
   themeDark: 'Oscuro',
+  codeExample: {
+    copy: 'Copiar',
+    copied: 'Copiado',
+    selectAndCopy: 'Selecciona y copia',
+    language: 'Lenguaje del ejemplo',
+  },
   footerName: 'Francisco Valle',
   footerRole: 'FrontEnd Web',
   footer: {
@@ -256,6 +262,12 @@ export const en = {
   themeLabel: 'Theme',
   themeLight: 'Light',
   themeDark: 'Dark',
+  codeExample: {
+    copy: 'Copy',
+    copied: 'Copied',
+    selectAndCopy: 'Select and copy',
+    language: 'Example language',
+  },
   footerName: 'Francisco Valle',
   footerRole: 'FrontEnd Web',
   footer: {
