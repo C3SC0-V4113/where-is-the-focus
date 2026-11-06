@@ -192,3 +192,65 @@
     color: var(--foreground);
   }
 }
+@layer components {
+  [data-pattern-code] {
+    align-self: end;
+    margin: 8px 12px 12px;
+    font-family: var(--font-sans);
+  }
+
+  [data-pattern-code-trigger] {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.25rem;
+    color: var(--brand-text);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    cursor: pointer;
+  }
+
+  [data-pattern-code-chevron] {
+    width: 1rem;
+    height: 1rem;
+    transition: transform 200ms cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  [data-pattern-code-trigger][data-panel-open] [data-pattern-code-chevron] {
+    transform: rotate(180deg);
+  }
+
+  [data-pattern-code-panel] {
+    opacity: 1;
+    transition: opacity 150ms cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  @starting-style {
+    [data-pattern-code-panel] {
+      opacity: 0;
+    }
+  }
+
+  [data-pattern-code-panel][data-starting-style] {
+    opacity: 0;
+  }
+
+  [data-pattern-code-panel][data-ending-style] {
+    transition: none;
+  }
+
+  [data-pattern-code]:has([data-pattern-code-trigger]:focus-visible) [data-pattern-code-chevron],
+  [data-pattern-code]:has([data-pattern-code-trigger]:focus-visible) [data-pattern-code-panel] {
+    transition-duration: 0ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-pattern-code]:has([data-pattern-code-trigger]) [data-pattern-code-chevron],
+    [data-pattern-code]:has([data-pattern-code-trigger]) [data-pattern-code-panel] {
+      transition-duration: 0ms;
+    }
+  }
+}

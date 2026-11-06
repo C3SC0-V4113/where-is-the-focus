@@ -131,6 +131,21 @@ describe('focus language preference', () => {
 });
 
 describe('CodeExample', () => {
+  it.each([
+    ['campo', 'css', 'high-contrast mode'],
+    ['campo', 'tw', 'Email'],
+    ['invertir', 'tw', 'Download report'],
+    ['nav', 'tw', 'Products'],
+    ['subrayador', 'tw', 'shipping terms'],
+    ['visor', 'css', 'repeat for the other three corners'],
+    ['visor', 'tw', 'Team plan'],
+    ['capa', 'tw', 'View route →'],
+  ] as const)('translates %s %s gallery snippet text into English', (key, language, phrase) => {
+    const code = getSnippetCode(snippets[key], language, 'en');
+
+    expect(code).toContain(phrase);
+  });
+
   it('renders only the selected language tab tabbable before hydration', () => {
     const view = renderToString(localizedExample(snippets.fv, 'es'));
     const cssTab = view.match(/<button[^>]*role=\"tab\"[^>]*>CSS<\/button>/)?.[0];

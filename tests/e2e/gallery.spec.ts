@@ -3,6 +3,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 const cases = [
   {
     route: '/',
+    codeLabel: 'Ver código',
     field: [
       'Correo electrónico',
       'nombre@empresa.com',
@@ -60,6 +61,7 @@ const cases = [
   },
   {
     route: '/en/',
+    codeLabel: 'View code',
     field: [
       'Email',
       'name@company.com',
@@ -418,12 +420,12 @@ async function expectOverlayFocus(locator: Locator) {
   expect(styles[1]).toContain(borderColor);
 }
 
-async function expectHoverState(page: Page) {
+async function expectHoverState(page: Page, buttonName: string) {
   const supportsHover = await page.evaluate(() => matchMedia('(hover: hover)').matches);
   const checks = [
     async () => expect(supportsHover).toBe(false),
     async () => {
-      const button = page.locator('#sin-anillo .gallery button');
+      const button = page.getByRole('button', { name: buttonName });
       await button.hover();
       expect(await button.evaluate((node) => node.matches(':focus-visible'))).toBe(false);
       const [, hoverBackground] = await colors(button);
@@ -462,12 +464,22 @@ test('navigation focus keeps the full underline while hovered', async ({ page })
   const field = cards.nth(0).locator('.fld');
   const input = field.getByRole('textbox', { name: 'Correo electrónico' });
   const fieldChips = await cards.nth(0).locator('.chips a').all();
-  const button = cards.nth(1).getByRole('button');
+  const button = cards.nth(1).getByRole('button', { name: 'Descargar informe' });
+  const fieldCodeTrigger = cards.nth(0).getByRole('button', { name: 'Ver código' });
+  const buttonCodeTrigger = cards.nth(1).getByRole('button', { name: 'Ver código' });
   const buttonChips = await cards.nth(1).locator('.chips a').all();
   const navLink = page.locator('#sin-anillo .gallery-nav a').first();
 
   await page.locator('#sin-anillo .more a').last().focus();
-  for (const target of [input, ...fieldChips, button, ...buttonChips, navLink]) {
+  for (const target of [
+    input,
+    ...fieldChips,
+    fieldCodeTrigger,
+    button,
+    ...buttonChips,
+    buttonCodeTrigger,
+    navLink,
+  ]) {
     await page.keyboard.press('Tab');
     await expect(target).toBeFocused();
   }
@@ -563,6 +575,7 @@ for (const item of cases) {
     const cards = page.locator('#sin-anillo .gallery article');
     const checkField = (locator: Locator) => expectFieldFocus(page, locator.locator('..'));
     const checkButton = (locator: Locator) => expectButtonFocus(page, locator);
+    const checkCodeTrigger = (locator: Locator) => expect(locator).toBeFocused();
     const checkNav = (locator: Locator) => expectNavFocus(page, locator);
     const checkHighlighter = (locator: Locator) => expectHighlighterFocus(page, locator);
     const checkViewfinder = (locator: Locator) => expectViewfinderFocus(page, locator);
@@ -576,11 +589,19 @@ for (const item of cases) {
         locator,
         check: expectChipFocus,
       })),
-      { locator: cards.nth(1).getByRole('button'), check: checkButton },
+      {
+        locator: cards.nth(0).getByRole('button', { name: item.codeLabel }),
+        check: checkCodeTrigger,
+      },
+      { locator: cards.nth(1).getByRole('button', { name: item.button[0] }), check: checkButton },
       ...(await cards.nth(1).locator('.chips a').all()).map((locator) => ({
         locator,
         check: expectChipFocus,
       })),
+      {
+        locator: cards.nth(1).getByRole('button', { name: item.codeLabel }),
+        check: checkCodeTrigger,
+      },
       ...(await cards.nth(2).locator('nav a').all()).map((locator) => ({
         locator,
         check: checkNav,
@@ -589,6 +610,10 @@ for (const item of cases) {
         locator,
         check: expectChipFocus,
       })),
+      {
+        locator: cards.nth(2).getByRole('button', { name: item.codeLabel }),
+        check: checkCodeTrigger,
+      },
       ...(await cards.nth(3).locator('.hl').all()).map((locator) => ({
         locator,
         check: checkHighlighter,
@@ -597,16 +622,28 @@ for (const item of cases) {
         locator,
         check: expectChipFocus,
       })),
+      {
+        locator: cards.nth(3).getByRole('button', { name: item.codeLabel }),
+        check: checkCodeTrigger,
+      },
       { locator: cards.nth(4).locator('.vis'), check: checkViewfinder },
       ...(await cards.nth(4).locator('.chips a').all()).map((locator) => ({
         locator,
         check: expectChipFocus,
       })),
+      {
+        locator: cards.nth(4).getByRole('button', { name: item.codeLabel }),
+        check: checkCodeTrigger,
+      },
       { locator: cards.nth(5).locator('.thumb'), check: checkOverlay },
       ...(await cards.nth(5).locator('.chips a').all()).map((locator) => ({
         locator,
         check: expectChipFocus,
       })),
+      {
+        locator: cards.nth(5).getByRole('button', { name: item.codeLabel }),
+        check: checkCodeTrigger,
+      },
     ];
     await page.locator('#sin-anillo .more a').last().focus();
     for (const { locator, check } of sequence) {
@@ -740,7 +777,9 @@ for (const item of cases) {
       expect(await contrast(page, fieldPalette[1]!, fieldPalette[4]!)).toBeGreaterThanOrEqual(4.5);
       expect(await contrast(page, fieldPalette[2]!, fieldPalette[4]!)).toBeGreaterThanOrEqual(4.5);
       expect(await contrast(page, fieldPalette[3]!, fieldPalette[4]!)).toBeGreaterThanOrEqual(3);
-      const button = cards.nth(1).getByRole('button');
+      const button = cards.nth(1).getByRole('button', { name: item.button[0] });
+      const fieldCodeTrigger = cards.nth(0).getByRole('button', { name: item.codeLabel });
+      const buttonCodeTrigger = cards.nth(1).getByRole('button', { name: item.codeLabel });
       await page.locator('#sin-anillo .more a').last().focus();
       await page.keyboard.press('Tab');
       await expect(fieldInput).toBeFocused();
@@ -757,6 +796,8 @@ for (const item of cases) {
         await page.keyboard.press('Tab');
         await expect(chip).toBeFocused();
       }
+      await page.keyboard.press('Tab');
+      await expect(fieldCodeTrigger).toBeFocused();
       await page.keyboard.press('Tab');
       await expect(button).toBeFocused();
       await waitForMotion(button);
@@ -776,14 +817,19 @@ for (const item of cases) {
       const focusOrder = [
         fieldInput,
         ...(await fieldCard.locator('.chips a').all()),
+        fieldCodeTrigger,
         button,
         ...(await cards.nth(1).locator('.chips a').all()),
+        buttonCodeTrigger,
         ...(await cards.nth(2).locator('nav a').all()),
         ...(await cards.nth(2).locator('.chips a').all()),
+        cards.nth(2).getByRole('button', { name: item.codeLabel }),
         ...(await cards.nth(3).locator('.hl').all()),
         ...(await cards.nth(3).locator('.chips a').all()),
+        cards.nth(3).getByRole('button', { name: item.codeLabel }),
         cards.nth(4).locator('.vis'),
         ...(await cards.nth(4).locator('.chips a').all()),
+        cards.nth(4).getByRole('button', { name: item.codeLabel }),
         overlayLink,
       ];
       await page.locator('#sin-anillo .more a').last().focus();
@@ -824,7 +870,7 @@ for (const item of cases) {
     await field.getByRole('textbox', { name: item.field[0] }).click();
     await expectFieldFocus(page, field);
     const targets = [
-      page.locator('#sin-anillo .gallery button'),
+      page.getByRole('button', { name: item.button[0] }),
       page.locator('#sin-anillo .gallery-nav a').first(),
       page.locator('#sin-anillo .hl').first(),
       page.locator('#sin-anillo .vis'),
@@ -839,7 +885,7 @@ for (const item of cases) {
   test(`${item.route} hover differs from keyboard focus`, async ({ page }) => {
     await page.goto(item.route);
     await expect(page.locator('#sin-anillo .gallery')).toBeVisible();
-    await expectHoverState(page);
+    await expectHoverState(page, item.button[0]);
   });
 
   test(`${item.route} reduced motion removes gallery transitions`, async ({ page }) => {
@@ -849,7 +895,7 @@ for (const item of cases) {
     const label = field.locator('label');
     const bar = field.locator('.bar');
     const input = field.locator('input');
-    const button = page.locator('#sin-anillo .gallery button');
+    const button = page.getByRole('button', { name: item.button[0] });
     const nav = page.locator('#sin-anillo .gallery-nav a').first();
     const hl = page.locator('#sin-anillo .hl').first();
     const viewfinder = page.locator('#sin-anillo .vis');
