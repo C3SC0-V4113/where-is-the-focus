@@ -237,7 +237,7 @@ test('button focus rings appear without a box-shadow or outline transition', asy
 test('gallery Button focus ring does not transition its outline color', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/');
-  const button = page.locator('#sin-anillo .gallery button').first();
+  const button = page.locator('#sin-anillo .gallery-invert');
   await focusFirstButtonWithTab(page, button);
 
   const result = await button.evaluate((element) => {

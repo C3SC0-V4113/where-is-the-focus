@@ -136,6 +136,7 @@ export const es = {
         links: [{ text: 'cómo medir el área y el contraste en 2.4.13' }],
       },
       gallery: {
+        code: { trigger: 'Ver código' },
         field: {
           label: 'Correo electrónico',
           placeholder: 'nombre@empresa.com',
@@ -373,6 +374,7 @@ export const en = {
         links: [{ text: 'how to measure area and contrast in 2.4.13' }],
       },
       gallery: {
+        code: { trigger: 'View code' },
         field: {
           label: 'Email',
           placeholder: 'name@company.com',
