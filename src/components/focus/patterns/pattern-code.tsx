@@ -22,7 +22,7 @@ export function PatternCode({ snippet, locale, label, codeLabels }: Props) {
   const code = snippets[snippet];
 
   return (
-    <Collapsible className="mx-3 mt-2 mb-3 grid self-end font-sans" data-pattern-code="">
+    <Collapsible className="mx-3 mt-2 mb-3 grid self-start font-sans" data-pattern-code="">
       <CollapsibleTrigger
         className="inline-flex w-fit cursor-pointer items-center gap-1.5 px-1 py-1.5 text-sm font-medium text-brand-text"
         data-pattern-code-trigger=""

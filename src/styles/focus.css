@@ -12,8 +12,34 @@
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr));
   }
 
-  .pat {
-    grid-template-rows: auto 1fr;
+  .gallery > .pat {
+    grid-template-rows: auto auto 1fr;
+  }
+
+  @supports (grid-template-rows: subgrid) {
+    .gallery > .pat {
+      grid-row: span 3;
+      grid-template-rows: subgrid;
+      row-gap: 0;
+    }
+  }
+
+  [data-pattern-code-trigger] {
+    position: relative;
+    z-index: 1;
+  }
+
+  [data-pattern-code-trigger]::before {
+    position: absolute;
+    inset-block: -4px;
+    inset-inline: 0;
+    content: '';
+  }
+
+  @media (pointer: coarse) {
+    [data-pattern-code-trigger]::before {
+      inset-block: -6px;
+    }
   }
 
   .gallery-nav a::after {
