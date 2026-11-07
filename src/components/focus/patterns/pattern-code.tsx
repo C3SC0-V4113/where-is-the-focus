@@ -22,9 +22,9 @@ export function PatternCode({ snippet, locale, label, codeLabels }: Props) {
   const code = snippets[snippet];
 
   return (
-    <Collapsible className="grid" data-pattern-code="">
+    <Collapsible className="mx-3 mt-2 mb-3 grid self-end font-sans" data-pattern-code="">
       <CollapsibleTrigger
-        className="inline-flex"
+        className="inline-flex w-fit cursor-pointer items-center gap-1.5 px-1 py-1.5 text-sm font-medium text-brand-text"
         data-pattern-code-trigger=""
         onPointerDown={(event) => {
           event.currentTarget
@@ -40,7 +40,7 @@ export function PatternCode({ snippet, locale, label, codeLabels }: Props) {
         }}
       >
         {label}
-        <ChevronDown aria-hidden="true" data-pattern-code-chevron="" />
+        <ChevronDown aria-hidden="true" className="size-4" data-pattern-code-chevron="" />
       </CollapsibleTrigger>
       <CollapsibleContent className="grid" data-pattern-code-panel="">
         <CodeExample
