@@ -221,6 +221,38 @@ export const es = {
     objections: {
       number: '08 · Preguntas frecuentes',
       title: 'Lo que suele preguntarse en el equipo',
+      items: [
+        {
+          question: '«El anillo se ve feo»',
+          answer:
+            'El anillo por defecto del navegador no está pensado para ninguna marca. Uno diseñado con los colores, el radio y la separación del sistema de diseño se integra igual que el hover. Si aun así no convence, las piezas del punto 05 ofrecen alternativas sin anillo.',
+          answerLink: '',
+        },
+        {
+          question: '«Al cerrar el modal, el botón se queda marcado»',
+          answer:
+            'El foco tiene que volver al botón; si no, quien usa teclado acaba al principio de la página. Con `:focus-visible` ese regreso no se ve tras un clic y sí tras [[Esc]]. Lo puedes comprobar en el laboratorio 5.',
+          answerLink: '',
+        },
+        {
+          question: '«Casi nadie navega con teclado»',
+          answer:
+            'El teclado lo usan personas con movilidad reducida, usuarios de lectores de pantalla, de conmutadores y de control por voz, y también muchas personas que rellenan formularios rápido. Además, 2.4.7 es nivel AA, el que suelen exigir las leyes de accesibilidad.',
+          answerLink: '2.4.7',
+        },
+        {
+          question: '«¿No basta con cambiar el color del botón?»',
+          answer:
+            'Solo si el cambio llega a 3:1 frente al estado anterior y no depende únicamente del tono. Un 10 % de tinte o una sombra suave no llegan. Súmale una forma: línea, grosor, marco o icono.',
+          answerLink: '',
+        },
+        {
+          question: '«Usamos una librería de componentes»',
+          answer:
+            'Revisa qué selector usa. Muchas aplican el foco con `:focus` o con una clase propia, como `.Mui-focusVisible`. Ajusta sus tokens de tema en lugar de pisarlos con CSS global. En Tailwind, cambia `focus:` por `focus-visible:`.',
+          answerLink: '',
+        },
+      ],
     },
     closing: {
       title: '¿Sabes dónde está el foco en tu interfaz ahora mismo?',
@@ -459,6 +491,38 @@ export const en = {
     objections: {
       number: '08 · Frequent questions',
       title: 'What teams usually ask',
+      items: [
+        {
+          question: '“The ring looks ugly”',
+          answer:
+            'The browser’s default ring isn’t made for any brand. One designed with your design system’s colors, radius and offset fits in just like hover. If that still doesn’t convince, the pieces in section 05 offer alternatives without a ring.',
+          answerLink: '',
+        },
+        {
+          question: '“After closing the modal, the button stays highlighted”',
+          answer:
+            'Focus has to return to the button; otherwise keyboard users end up at the top of the page. With `:focus-visible` that return isn’t visible after a click and is visible after [[Esc]]. You can check it in lab 5.',
+          answerLink: '',
+        },
+        {
+          question: '“Hardly anyone uses the keyboard”',
+          answer:
+            'The keyboard is used by people with reduced mobility, by screen reader, switch and voice control users, and also by many people who fill in forms quickly. Also, 2.4.7 is level AA, the one accessibility laws usually require.',
+          answerLink: '2.4.7',
+        },
+        {
+          question: '“Isn’t changing the button color enough?”',
+          answer:
+            'Only if the change reaches 3:1 against the previous state and doesn’t rely on hue alone. A 10 % tint or a soft shadow won’t get there. Add a shape: a line, thickness, a frame or an icon.',
+          answerLink: '',
+        },
+        {
+          question: '“We use a component library”',
+          answer:
+            'Check which selector it uses. Many apply focus with `:focus` or with their own class, like `.Mui-focusVisible`. Adjust their theme tokens instead of overriding them with global CSS. In Tailwind, replace `focus:` with `focus-visible:`.',
+          answerLink: '',
+        },
+      ],
     },
     closing: {
       title: 'Do you know where focus is in your interface right now?',
