@@ -179,6 +179,8 @@ for (const route of routes) {
           const answerStyle = getComputedStyle(answer);
           const lineHeight = Number.parseFloat(triggerStyle.lineHeight);
           const fontSize = Number.parseFloat(triggerStyle.fontSize);
+          const answerLineHeight = Number.parseFloat(answerStyle.lineHeight);
+          const answerFontSize = Number.parseFloat(answerStyle.fontSize);
 
           return {
             borderBottomWidth: getComputedStyle(item).borderBottomWidth,
@@ -189,6 +191,8 @@ for (const route of routes) {
             triggerFontWeight: triggerStyle.fontWeight,
             triggerPaddingBlockStart: triggerStyle.paddingBlockStart,
             triggerPaddingBlockEnd: triggerStyle.paddingBlockEnd,
+            answerFontFamily: answerStyle.fontFamily,
+            answerLineHeight: Number((answerLineHeight / answerFontSize).toFixed(2)),
             answerFontSize: answerStyle.fontSize,
             answerPaddingBottom: answerStyle.paddingBottom,
           };
@@ -203,16 +207,22 @@ for (const route of routes) {
       expect(computed.borderTopWidth).toBe('2px');
       expect(computed.items).toHaveLength(5);
       for (const item of computed.items) {
-        expect(item).toEqual({
+        const { answerFontFamily, ...measuredStyles } = item;
+        expect({
+          ...measuredStyles,
+          triggerLineHeight: Number(measuredStyles.triggerLineHeight.toFixed(2)),
+        }).toEqual({
           borderBottomWidth: '1px',
           triggerFontSize: '19px',
           triggerLineHeight: 1.3,
           triggerFontWeight: '600',
           triggerPaddingBlockStart: '18px',
           triggerPaddingBlockEnd: '18px',
+          answerLineHeight: 1.6,
           answerFontSize: '17px',
           answerPaddingBottom: '20px',
         });
+        expect(answerFontFamily).toMatch(/^['"]?Literata/);
       }
     });
 
@@ -221,12 +231,57 @@ for (const route of routes) {
     }) => {
       await loadFaq(page, route.path);
       const trigger = page.getByRole('button', { name: route.questions[0] });
+
+      await page.evaluate(() => {
+        const targetWindow = window as Window & {
+          __faqPanelOpacityTransition?: { panelId: string; propertyName: string };
+        };
+        const recordTransition = (event: TransitionEvent) => {
+          const panel = event.target;
+          if (
+            panel instanceof HTMLElement &&
+            panel.matches('[data-slot="accordion-content"]') &&
+            event.propertyName === 'opacity'
+          ) {
+            targetWindow.__faqPanelOpacityTransition = {
+              panelId: panel.id,
+              propertyName: event.propertyName,
+            };
+            document.removeEventListener('transitionrun', recordTransition, true);
+          }
+        };
+        document.addEventListener('transitionrun', recordTransition, true);
+      });
+
       await trigger.click();
 
       const root = page.locator('#objeciones [data-faq]');
       const panel = page.locator(accordionPanelSelector).first();
       await expect(root).toHaveAttribute('data-activation', 'pointer');
       await expect(panel).toBeVisible();
+      await expect
+        .poll(() =>
+          page.evaluate(
+            () =>
+              (
+                window as Window & {
+                  __faqPanelOpacityTransition?: { panelId: string; propertyName: string };
+                }
+              ).__faqPanelOpacityTransition ?? null
+          )
+        )
+        .not.toBeNull();
+      const transition = await page.evaluate(
+        () =>
+          (
+            window as Window & {
+              __faqPanelOpacityTransition?: { panelId: string; propertyName: string };
+            }
+          ).__faqPanelOpacityTransition ?? null
+      );
+      expect(transition?.panelId).toBe(await panel.getAttribute('id'));
+      expect(transition?.propertyName).toBe('opacity');
+
       const styles = await panel.evaluate((element) => {
         const computed = getComputedStyle(element);
         return {
@@ -270,16 +325,74 @@ for (const route of routes) {
       ).toBe(true);
     });
 
-    test('closing removes its Panel immediately without a transition', async ({ page }) => {
+    test('closing stops the active Panel fade without waiting for it to finish', async ({
+      page,
+    }) => {
       await loadFaq(page, route.path);
-      const trigger = page.getByRole('button', { name: route.questions[0] });
-      await trigger.click();
+      const result = await page.evaluate(async (question) => {
+        const trigger = Array.from(
+          document.querySelectorAll<HTMLButtonElement>(
+            '#objeciones [data-slot="accordion-trigger"]'
+          )
+        ).find((button) => button.textContent?.trim() === question);
+        if (!trigger) throw new Error('The FAQ trigger was not found.');
 
-      const panel = page.locator(accordionPanelSelector).first();
-      await expect(panel).toBeVisible();
-      await trigger.click();
+        const openingTransition = new Promise<HTMLElement>((resolve) => {
+          const recordTransition = (event: TransitionEvent) => {
+            const panel = event.target;
+            if (
+              panel instanceof HTMLElement &&
+              panel.matches('[data-slot="accordion-content"]') &&
+              event.propertyName === 'opacity'
+            ) {
+              document.removeEventListener('transitionrun', recordTransition, true);
+              resolve(panel);
+            }
+          };
+          document.addEventListener('transitionrun', recordTransition, true);
+        });
 
-      await expect(panel).toHaveCount(0, { timeout: 0 });
+        trigger.click();
+        const panel = await openingTransition;
+        const openingTransitionIsRunning = panel
+          .getAnimations()
+          .some(
+            (animation) =>
+              animation instanceof CSSTransition &&
+              animation.transitionProperty === 'opacity' &&
+              animation.playState === 'running'
+          );
+        const opened = trigger.getAttribute('aria-expanded') === 'true';
+        const panelId = panel.id;
+
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => {
+            trigger.click();
+            resolve();
+          });
+        });
+
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+        const remainingPanel = document.getElementById(panelId);
+        const runningAfterClose =
+          remainingPanel?.getAnimations().some((animation) => animation.playState === 'running') ??
+          false;
+
+        return {
+          opened,
+          openingTransitionIsRunning,
+          closed: trigger.getAttribute('aria-expanded') === 'false',
+          panelRemoved: remainingPanel === null,
+          runningAfterClose,
+        };
+      }, route.questions[0]);
+
+      expect(result.opened).toBe(true);
+      expect(result.openingTransitionIsRunning).toBe(true);
+      expect(result.closed).toBe(true);
+      expect(result.panelRemoved || !result.runningAfterClose).toBe(true);
     });
 
     test('has instant Panel and visible chevron motion when reduced motion is requested', async ({
