@@ -126,7 +126,7 @@ for (const locale of locales) {
     await page.goto(locale.route);
 
     const languageLink = page.getByRole('link', { name: locale.finalLanguageLink });
-    const light = page.getByRole('button', { name: locale.light });
+    const light = page.getByRole('button', { name: locale.light, exact: true });
 
     await expect(light).toHaveAttribute('aria-pressed', 'true');
     await expect(light).toHaveAttribute('tabindex', '0');
@@ -141,7 +141,7 @@ for (const locale of locales) {
     await page.goto(locale.route);
 
     const group = page.getByRole('group', { name: locale.label });
-    const light = page.getByRole('button', { name: locale.light });
+    const light = page.getByRole('button', { name: locale.light, exact: true });
     const dark = page.getByRole('button', { name: locale.dark });
 
     await expect(group).toBeVisible();
@@ -163,9 +163,9 @@ for (const locale of locales) {
     );
     await expectBodyBackgroundToMatchToken(page);
 
-    await page.getByRole('button', { name: locale.light }).click();
+    await page.getByRole('button', { name: locale.light, exact: true }).click();
     await expect(page.locator('html')).not.toHaveClass(/dark/);
-    await expect(page.getByRole('button', { name: locale.light })).toHaveAttribute(
+    await expect(page.getByRole('button', { name: locale.light, exact: true })).toHaveAttribute(
       'aria-pressed',
       'true'
     );
@@ -174,7 +174,7 @@ for (const locale of locales) {
 
     await page.reload();
     await expect(page.locator('html')).not.toHaveClass(/dark/);
-    await expect(page.getByRole('button', { name: locale.light })).toHaveAttribute(
+    await expect(page.getByRole('button', { name: locale.light, exact: true })).toHaveAttribute(
       'aria-pressed',
       'true'
     );
@@ -187,7 +187,7 @@ for (const locale of locales) {
     await page.goto(locale.route);
 
     const languageLink = page.getByRole('link', { name: locale.finalLanguageLink });
-    const light = page.getByRole('button', { name: locale.light });
+    const light = page.getByRole('button', { name: locale.light, exact: true });
     const dark = page.getByRole('button', { name: locale.dark });
     await languageLink.focus();
     await page.keyboard.press('Tab');

@@ -165,13 +165,13 @@ for (const locale of locales) {
 
         await expect(page.getByRole('link', { name: locale.currentLanguage })).toBeVisible();
         await expect(page.getByRole('link', { name: locale.otherLanguage })).toBeVisible();
-        await expect(page.getByRole('button', { name: locale.light })).toBeVisible();
+        await expect(page.getByRole('button', { name: locale.light, exact: true })).toBeVisible();
         await expect(page.getByRole('button', { name: locale.dark })).toBeVisible();
 
         for (const target of [
           page.getByRole('link', { name: locale.currentLanguage }),
           page.getByRole('link', { name: locale.otherLanguage }),
-          page.getByRole('button', { name: locale.light }),
+          page.getByRole('button', { name: locale.light, exact: true }),
           page.getByRole('button', { name: locale.dark }),
         ]) {
           const box = await target.boundingBox();
@@ -184,7 +184,7 @@ for (const locale of locales) {
           'aria-current',
           'page'
         );
-        await expect(page.getByRole('button', { name: locale.light })).toHaveAttribute(
+        await expect(page.getByRole('button', { name: locale.light, exact: true })).toHaveAttribute(
           'aria-pressed',
           'true'
         );
@@ -195,7 +195,7 @@ for (const locale of locales) {
   test('shows theme labels only from the small breakpoint at ' + locale.route, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 800 });
     await page.goto(locale.route);
-    await expect(page.getByRole('button', { name: locale.light })).toBeVisible();
+    await expect(page.getByRole('button', { name: locale.light, exact: true })).toBeVisible();
     for (const label of [locale.light, locale.dark]) {
       const box = await page.getByText(label, { exact: true }).boundingBox();
       expect(box).not.toBeNull();
@@ -301,7 +301,7 @@ for (const locale of locales) {
 
         const selectedLanguage = page.getByRole('link', { name: locale.currentLanguage });
         const otherLanguage = page.getByRole('link', { name: locale.otherLanguage });
-        const selectedTheme = page.getByRole('button', { name: locale.light });
+        const selectedTheme = page.getByRole('button', { name: locale.light, exact: true });
         const otherTheme = page.getByRole('button', { name: locale.dark });
         const [selectedLanguageStyle, otherLanguageStyle, selectedThemeStyle, otherThemeStyle] =
           await Promise.all([
@@ -373,7 +373,7 @@ for (const locale of locales) {
     await page.keyboard.press('Tab');
     await expect(page.getByRole('link', { name: 'EN (English)' })).toBeFocused();
     await page.keyboard.press('Tab');
-    await expect(page.getByRole('button', { name: locale.light })).toBeFocused();
+    await expect(page.getByRole('button', { name: locale.light, exact: true })).toBeFocused();
     await page.keyboard.press('ArrowRight');
     await expect(page.getByRole('button', { name: locale.dark })).toBeFocused();
   });

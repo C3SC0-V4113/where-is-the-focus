@@ -197,7 +197,7 @@ for (const locale of locales) {
   }) => {
     await page.goto(locale.route);
     const topLink = page.locator('.close a');
-    await page.locator('#movimiento .more a').last().focus();
+    await page.locator('#objeciones [data-slot="accordion-trigger"]').last().focus();
     await page.keyboard.press('Tab');
     await expect(topLink).toBeFocused();
 
