@@ -293,6 +293,11 @@
 }
 
 @layer utilities {
+  [data-faq] [data-slot='accordion-trigger'] {
+    font-size: 19px;
+    line-height: 1.3;
+  }
+
   [data-faq] [data-slot='accordion-content'][data-open],
   [data-faq] [data-slot='accordion-content'][data-closed] {
     animation: none;

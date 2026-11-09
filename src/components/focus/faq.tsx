@@ -44,7 +44,7 @@ export function FAQ({ locale }: Props) {
           value={`question-${index + 1}`}
         >
           <AccordionTrigger
-            className="w-full py-4.5 text-left font-sans faq-trigger-type font-semibold group-data-[activation=keyboard]/faq:transition-none motion-reduce:transition-none"
+            className="w-full py-4.5 text-left font-sans font-semibold group-data-[activation=keyboard]/faq:transition-none motion-reduce:transition-none"
             onPointerDown={(event) => {
               event.currentTarget.closest('[data-faq]')?.setAttribute('data-activation', 'pointer');
             }}
@@ -58,7 +58,7 @@ export function FAQ({ locale }: Props) {
           >
             {question}
           </AccordionTrigger>
-          <AccordionContent className="max-w-prose pb-5 faq-answer-type">
+          <AccordionContent className="max-w-prose pb-5 font-serif faq-answer-type">
             <p className="m-0">
               <Answer text={answer} linkText={answerLink} />
             </p>
