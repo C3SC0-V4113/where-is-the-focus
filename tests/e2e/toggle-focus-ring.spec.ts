@@ -30,7 +30,7 @@ async function focusFirstThemeItemWithKeyboard(
   const brand = page.locator('header').locator(':scope > a');
   const languageLinks = locale.languageNames.map((name) => page.getByRole('link', { name }));
   const group = page.getByRole('group', { name: locale.themeGroup });
-  const light = page.getByRole('button', { name: locale.light });
+  const light = page.getByRole('button', { name: locale.light, exact: true });
   const dark = page.getByRole('button', { name: locale.dark });
 
   await expect(group).toHaveRole('group');

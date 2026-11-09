@@ -257,4 +257,40 @@
       transition-duration: 0ms;
     }
   }
+
+  [data-faq] [data-slot='accordion-content'] {
+    opacity: 1;
+    transition: opacity 150ms cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  @starting-style {
+    [data-faq] [data-slot='accordion-content'] {
+      opacity: 0;
+    }
+  }
+
+  [data-faq] [data-slot='accordion-content'][data-starting-style] {
+    opacity: 0;
+  }
+
+  [data-faq] [data-slot='accordion-content'][data-ending-style] {
+    transition: none;
+  }
+
+  [data-faq][data-activation='keyboard'] [data-slot='accordion-content'] {
+    transition-duration: 0ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-faq] [data-slot='accordion-content'] {
+      transition-duration: 0ms;
+    }
+  }
+}
+
+@layer utilities {
+  [data-faq] [data-slot='accordion-content'][data-open],
+  [data-faq] [data-slot='accordion-content'][data-closed] {
+    animation: none;
+  }
 }

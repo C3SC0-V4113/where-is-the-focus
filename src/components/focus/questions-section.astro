@@ -1,4 +1,5 @@
 ---
+import { FAQ } from './faq';
 import { en, es, type Locale } from '../../i18n/messages';
 
 interface Props {
@@ -18,4 +19,5 @@ const text = (locale === 'en' ? en : es).sections.objections;
       {text.title}
     </h2>
   </div>
+  <FAQ locale={locale} client:visible />
 </section>
