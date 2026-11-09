@@ -244,11 +244,6 @@
   transition-duration: var(--tw-duration, var(--default-transition-duration));
 }
 
-@utility faq-answer-type {
-  font-size: 17px;
-  line-height: 1.6;
-}
-
 .theme-switching,
 .theme-switching *,
 .theme-switching::before,

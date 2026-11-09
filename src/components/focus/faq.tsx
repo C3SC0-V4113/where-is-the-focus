@@ -36,7 +36,7 @@ export function FAQ({ locale }: Props) {
   const items = (locale === 'en' ? en : es).sections.objections.items;
 
   return (
-    <Accordion className="group/faq w-full" data-faq="" multiple>
+    <Accordion className="group/faq w-full border-t-2 border-foreground" data-faq="" multiple>
       {items.map(({ question, answer, answerLink }, index) => (
         <AccordionItem
           className="border-b border-border"
@@ -44,7 +44,7 @@ export function FAQ({ locale }: Props) {
           value={`question-${index + 1}`}
         >
           <AccordionTrigger
-            className="w-full py-4.5 text-left font-sans font-semibold group-data-[activation=keyboard]/faq:transition-none motion-reduce:transition-none"
+            className="w-full py-4.5 text-left font-sans text-lg leading-tight font-semibold group-data-[activation=keyboard]/faq:transition-none motion-reduce:transition-none"
             onPointerDown={(event) => {
               event.currentTarget.closest('[data-faq]')?.setAttribute('data-activation', 'pointer');
             }}
@@ -58,7 +58,7 @@ export function FAQ({ locale }: Props) {
           >
             {question}
           </AccordionTrigger>
-          <AccordionContent className="max-w-prose pb-5 font-serif faq-answer-type">
+          <AccordionContent className="max-w-prose pb-5 font-serif text-base">
             <p className="m-0">
               <Answer text={answer} linkText={answerLink} />
             </p>

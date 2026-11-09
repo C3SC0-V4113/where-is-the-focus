@@ -213,13 +213,13 @@ for (const route of routes) {
           triggerLineHeight: Number(measuredStyles.triggerLineHeight.toFixed(2)),
         }).toEqual({
           borderBottomWidth: '1px',
-          triggerFontSize: '19px',
-          triggerLineHeight: 1.3,
+          triggerFontSize: '18px',
+          triggerLineHeight: 1.25,
           triggerFontWeight: '600',
           triggerPaddingBlockStart: '18px',
           triggerPaddingBlockEnd: '18px',
-          answerLineHeight: 1.6,
-          answerFontSize: '17px',
+          answerLineHeight: 1.5,
+          answerFontSize: '16px',
           answerPaddingBottom: '20px',
         });
         expect(answerFontFamily).toMatch(/^['"]?Literata/);
