@@ -393,6 +393,7 @@ for (const route of routes) {
       expect(result.openingTransitionIsRunning).toBe(true);
       expect(result.closed).toBe(true);
       expect(result.panelRemoved || !result.runningAfterClose).toBe(true);
+      await expect(page.locator('#objeciones [data-slot="accordion-content"]')).toHaveCount(0);
     });
 
     test('has instant Panel and visible chevron motion when reduced motion is requested', async ({
