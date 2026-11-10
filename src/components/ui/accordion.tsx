@@ -28,12 +28,32 @@ function AccordionTrigger({ className, children, ...props }: AccordionPrimitive.
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          'group/accordion-trigger relative flex flex-1 items-start justify-between rounded-lg border border-transparent py-2.5 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:after:border-ring aria-disabled:pointer-events-none aria-disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground',
+          'group/accordion-trigger relative flex flex-1 scroll-my-2 items-start justify-between rounded-lg border border-transparent py-2.5 text-left text-sm font-medium transition-surface not-forced-colors:outline-hidden hover:underline focus-visible:shadow-none aria-disabled:pointer-events-none aria-disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground',
           className
         )}
         {...props}
       >
         {children}
+        <span
+          aria-hidden="true"
+          data-slot="accordion-focus-corner"
+          className="pointer-events-none absolute -top-2 -left-2 size-4.5 border-t-3 border-l-3 border-brand-text opacity-0 group-focus-visible/accordion-trigger:opacity-100 forced-colors:hidden"
+        />
+        <span
+          aria-hidden="true"
+          data-slot="accordion-focus-corner"
+          className="pointer-events-none absolute -top-2 -right-2 size-4.5 border-t-3 border-r-3 border-brand-text opacity-0 group-focus-visible/accordion-trigger:opacity-100 forced-colors:hidden"
+        />
+        <span
+          aria-hidden="true"
+          data-slot="accordion-focus-corner"
+          className="pointer-events-none absolute -bottom-2 -left-2 size-4.5 border-b-3 border-l-3 border-brand-text opacity-0 group-focus-visible/accordion-trigger:opacity-100 forced-colors:hidden"
+        />
+        <span
+          aria-hidden="true"
+          data-slot="accordion-focus-corner"
+          className="pointer-events-none absolute -right-2 -bottom-2 size-4.5 border-r-3 border-b-3 border-brand-text opacity-0 group-focus-visible/accordion-trigger:opacity-100 forced-colors:hidden"
+        />
         <ChevronDownIcon
           data-slot="accordion-trigger-icon"
           className="pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
