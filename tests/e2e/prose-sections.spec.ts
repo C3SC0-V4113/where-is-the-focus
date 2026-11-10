@@ -465,7 +465,7 @@ for (const [route, messages, hrefs] of routes) {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(route);
     await expect(page.locator('#anillo .pull')).toHaveCSS('font-size', '32px');
-    await page.locator('#focus-visible .more a').last().focus();
+    await page.getByRole('button', { name: copy.lab1.save, exact: true }).last().focus();
     const codeExample = page.locator('#focus-visible');
     const cssTab = codeExample.getByRole('tab', { name: 'CSS', exact: true });
     const copyButton = codeExample.getByRole('button', {
