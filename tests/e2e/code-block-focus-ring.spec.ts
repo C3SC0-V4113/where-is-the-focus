@@ -236,6 +236,8 @@ async function verifyCodeBlockKeyboardFocus(
   await expect(hydratedIsland).toHaveCount(1);
   await expect(cssTab).toHaveAttribute('aria-selected', 'true');
   await previousLink.focus();
+  for (const button of (await section.locator('#lab-fv').getByRole('button').all()).slice(0, 2))
+    await page.keyboard.press('Tab').then(() => expect(button).toBeFocused());
   await page.keyboard.press('Tab');
   await expect(cssTab).toBeFocused();
   await expect(cssTab).toHaveAttribute('aria-selected', 'true');
