@@ -654,14 +654,20 @@ for (const copy of phase12) {
       plain(copy.movement.paragraphs[1]),
     ]);
     await expect(section.locator('.pull')).toHaveText(plain(copy.movement.pull));
-    await expect(section.locator('code')).toHaveText([':focus-visible', 'tabindex="0"', '-1']);
-    await expect(section.locator('kbd')).toHaveText(['Esc', 'Tab']);
+    await expect(section.locator('.intro code')).toHaveText([
+      ':focus-visible',
+      'tabindex="0"',
+      '-1',
+    ]);
+    await expect(section.locator('.intro kbd')).toHaveText(['Esc', 'Tab']);
     const childKinds = await section
       .locator(':scope > *')
       .evaluateAll((nodes) =>
-        nodes.map((node) => ['head', 'intro', 'more'].find((name) => node.classList.contains(name)))
+        nodes.map((node) =>
+          ['head', 'intro', 'lab', 'more'].find((name) => node.classList.contains(name))
+        )
       );
-    expect(childKinds).toEqual(['head', 'intro', 'intro', 'more']);
+    expect(childKinds).toEqual(['head', 'intro', 'lab', 'intro', 'more']);
     await expectMoreLine(section.locator('.more'), copy.movement.more);
   });
 

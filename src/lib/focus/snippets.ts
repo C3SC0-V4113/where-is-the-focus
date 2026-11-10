@@ -180,6 +180,41 @@ a:focus-visible {
   </span>
 </a>`,
   },
+  modal: {
+    css: `<button id="abrir">Eliminar proyecto</button>
+<dialog id="dlg" aria-labelledby="t">
+  <h2 id="t">¿Eliminar el proyecto?</h2>
+  <form method="dialog">
+    <button autofocus>Cancelar</button>
+    <button>Eliminar</button>
+  </form>
+</dialog>
+
+<script>
+  abrir.addEventListener('click', () => dlg.showModal());
+  /* showModal() devuelve el foco al cerrar.
+     Si tu modal no es <dialog>, hazlo tú: */
+  dlg.addEventListener('close', () => abrir.focus());
+</script>`,
+    tw: `<AlertDialog>
+  <AlertDialogTrigger
+    render={
+      <Button className="focus-visible:outline-3
+                         focus-visible:outline-offset-3
+                         focus-visible:outline-blue-700" />
+    }
+  >
+    Eliminar proyecto
+  </AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogTitle>¿Eliminar el proyecto?</AlertDialogTitle>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+      <AlertDialogAction>Eliminar</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>`,
+  },
 } satisfies Record<string, CodeSnippet>;
 
 const translations: ReadonlyArray<readonly [string, string]> = [
@@ -211,6 +246,12 @@ const translations: ReadonlyArray<readonly [string, string]> = [
   ['Plan Equipo', 'Team plan'],
   ['ruta.jpg', 'path/to/image.jpg'],
   ['Ver ruta →', 'View route →'],
+  ['¿Eliminar el proyecto?', 'Delete the project?'],
+  ['Eliminar proyecto', 'Delete project'],
+  ['Cancelar', 'Cancel'],
+  ['>Eliminar<', '>Delete<'],
+  ['showModal() devuelve el foco al cerrar.', 'showModal() returns focus on close.'],
+  ['Si tu modal no es <dialog>, hazlo tú:', 'If your modal isn’t a <dialog>, do it yourself:'],
 ];
 
 export function getSnippetCode(snippet: CodeSnippet, language: 'css' | 'tw', locale: 'es' | 'en') {
