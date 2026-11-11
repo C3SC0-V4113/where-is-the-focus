@@ -26,27 +26,25 @@ export function LabDialog({ locale }: { locale: Locale }) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<Status>({ kind: 'initial' });
   const triggers = [text.triggerFocus, text.triggerFocusVisible];
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (nextOpen) {
+      setStatus({ kind: 'opened' });
+    } else {
+      const trigger = openedTrigger.current;
+      const visible = trigger === 0 || via.current !== 'ptr';
+      setStatus({
+        kind: 'closed',
+        trigger,
+        method: via.current === 'ptr' ? 'mouse' : 'keyboard',
+        visible,
+      });
+    }
+  };
 
   return (
     <div className="grid gap-4">
-      <AlertDialog
-        open={open}
-        onOpenChange={(nextOpen) => {
-          setOpen(nextOpen);
-          if (nextOpen) {
-            setStatus({ kind: 'opened' });
-          } else {
-            const trigger = openedTrigger.current;
-            const visible = trigger === 0 || via.current !== 'ptr';
-            setStatus({
-              kind: 'closed',
-              trigger,
-              method: via.current === 'ptr' ? 'mouse' : 'keyboard',
-              visible,
-            });
-          }
-        }}
-      >
+      <AlertDialog open={open} onOpenChange={handleOpenChange}>
         <div className="flex flex-wrap gap-3">
           {triggers.map((label, index) => (
             <AlertDialogTrigger
@@ -82,7 +80,10 @@ export function LabDialog({ locale }: { locale: Locale }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{text.cancel}</AlertDialogCancel>
-            <AlertDialogAction className="focus-visible:border-transparent focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-ring focus-visible:outline-solid">
+            <AlertDialogAction
+              className="focus-visible:border-transparent focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-ring focus-visible:outline-solid"
+              onClick={() => handleOpenChange(false)}
+            >
               {text.confirm}
             </AlertDialogAction>
           </AlertDialogFooter>

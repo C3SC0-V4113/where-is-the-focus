@@ -21,6 +21,7 @@ const copy = {
     hidden: 'no se ve',
     title: '¿Eliminar el proyecto «Rediseño web»?',
     cancel: 'Cancelar',
+    confirm: 'Eliminar',
   },
   en: {
     triggers: ['Delete project (:focus)', 'Delete project (:focus-visible)'],
@@ -35,6 +36,7 @@ const copy = {
     hidden: 'is hidden',
     title: 'Delete the “Website redesign” project?',
     cancel: 'Cancel',
+    confirm: 'Delete',
   },
 } as const;
 
@@ -85,6 +87,27 @@ describe('LabDialog', () => {
   });
 
   it.each(['es', 'en'] as const)(
+    'closes with the confirm action after keyboard activation in %s',
+    async (locale) => {
+      const { user, status, triggers } = renderLab(locale);
+
+      await user.tab();
+      await user.tab();
+      await user.keyboard('{Enter}');
+      const cancel = screen.getByRole('button', { name: copy[locale].cancel });
+      await waitFor(() => expect(cancel).toHaveProperty('ownerDocument.activeElement', cancel));
+      await user.tab();
+      const confirm = screen.getByRole('button', { name: copy[locale].confirm });
+      expect(confirm).toHaveProperty('ownerDocument.activeElement', confirm);
+      await user.keyboard('{Enter}');
+
+      expect(screen.queryByRole('alertdialog', { name: copy[locale].title })).toBeNull();
+      expect(triggers[1]).toHaveProperty('ownerDocument.activeElement', triggers[1]);
+      expectClosedStatus(status, locale, 'keyboard', 1, true);
+    }
+  );
+
+  it.each(['es', 'en'] as const)(
     'reports the exact pointer states for both triggers in %s',
     async (locale) => {
       const { user, status, triggers } = renderLab(locale);
@@ -94,6 +117,22 @@ describe('LabDialog', () => {
         expect(screen.getByRole('alertdialog', { name: copy[locale].title })).toBeTruthy();
         expect(status.textContent).toBe(copy[locale].opened);
         await user.click(screen.getByRole('button', { name: copy[locale].cancel }));
+        expect(trigger).toHaveProperty('ownerDocument.activeElement', trigger);
+        expectClosedStatus(status, locale, 'mouse', index as 0 | 1, index === 0);
+      }
+    }
+  );
+
+  it.each(['es', 'en'] as const)(
+    'closes with the confirm action after pointer activation in %s',
+    async (locale) => {
+      const { user, status, triggers } = renderLab(locale);
+
+      for (const [index, trigger] of triggers.entries()) {
+        await user.click(trigger);
+        await user.click(screen.getByRole('button', { name: copy[locale].confirm }));
+
+        expect(screen.queryByRole('alertdialog', { name: copy[locale].title })).toBeNull();
         expect(trigger).toHaveProperty('ownerDocument.activeElement', trigger);
         expectClosedStatus(status, locale, 'mouse', index as 0 | 1, index === 0);
       }

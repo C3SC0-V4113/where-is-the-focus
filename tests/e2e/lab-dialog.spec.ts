@@ -46,6 +46,9 @@ async function loadLab(page: Page, path: string, theme: Theme) {
   await page.emulateMedia({ colorScheme: theme });
   await page.addInitScript((value) => localStorage.setItem('foco-theme', value), theme);
   await page.goto(path);
+  await expect
+    .poll(() => page.locator('html').evaluate((element) => element.classList.contains('dark')))
+    .toBe(theme === 'dark');
 
   const section = page.locator('#movimiento');
   const lab = section.locator('#lab-modal');
@@ -141,6 +144,28 @@ for (const locale of locales) {
       await expect(status).toHaveText(closedStatus(copy, 'keyboard', 1, true));
     });
 
+    test(`${locale.path} Lab 5 keyboard confirmation closes and restores focus in ${theme}`, async ({
+      page,
+    }) => {
+      const { buttons, status, copy } = await loadLab(page, locale.path, theme);
+      await tabToButton(page, buttons[1]!);
+      await page.keyboard.press('Enter');
+
+      const dialog = page.getByRole('alertdialog', { name: copy.dialogTitle, exact: true });
+      const cancel = dialog.getByRole('button', { name: copy.cancel, exact: true });
+      const confirm = dialog.getByRole('button', { name: copy.confirm, exact: true });
+      await expect(cancel).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expect(confirm).toBeFocused();
+      await page.keyboard.press('Enter');
+
+      await expect(dialog).toBeHidden();
+      await expect(buttons[1]!).toBeFocused();
+      await expect(buttons[1]!).toHaveCSS('outline-style', 'solid');
+      await expect(buttons[1]!).toHaveCSS('outline-width', '3px');
+      await expect(status).toHaveText(closedStatus(copy, 'keyboard', 1, true));
+    });
+
     for (const triggerIndex of [0, 1] as const) {
       test(`${locale.path} Lab 5 pointer close restores trigger ${triggerIndex + 1} in ${theme}`, async ({
         page,
@@ -154,6 +179,25 @@ for (const locale of locales) {
         await expect(dialog.getByRole('button', { name: copy.cancel, exact: true })).toBeFocused();
         await expect(status).toHaveText(copy.opened);
         await dialog.getByRole('button', { name: copy.cancel, exact: true }).click();
+
+        await expect(dialog).toBeHidden();
+        await expect(trigger).toBeFocused();
+        await expect(trigger).toHaveCSS('outline-style', triggerIndex === 0 ? 'solid' : 'none');
+        await expect(status).toHaveText(
+          closedStatus(copy, 'mouse', triggerIndex, triggerIndex === 0)
+        );
+      });
+
+      test(`${locale.path} Lab 5 pointer confirmation restores trigger ${triggerIndex + 1} in ${theme}`, async ({
+        page,
+      }) => {
+        const { buttons, status, copy } = await loadLab(page, locale.path, theme);
+        const trigger = buttons[triggerIndex]!;
+        await trigger.click();
+
+        const dialog = page.getByRole('alertdialog', { name: copy.dialogTitle, exact: true });
+        await expect(dialog).toBeVisible();
+        await dialog.getByRole('button', { name: copy.confirm, exact: true }).click();
 
         await expect(dialog).toBeHidden();
         await expect(trigger).toBeFocused();
