@@ -90,6 +90,56 @@ async function tabToButton(page: Page, button: Locator) {
   throw new Error('Tab did not reach the Lab 5 trigger.');
 }
 
+async function expectOutlineColorMatches(button: Locator, token: 'ring' | 'destructive-text') {
+  await expect
+    .poll(() =>
+      button.evaluate((element, variable) => {
+        const probe = document.createElement('span');
+        probe.style.outlineColor = `var(--${variable})`;
+        document.body.append(probe);
+        const expected = getComputedStyle(probe).outlineColor;
+        const actual = getComputedStyle(element).outlineColor;
+        probe.remove();
+        return expected !== '' && actual === expected;
+      }, token)
+    )
+    .toBe(true);
+}
+
+async function expectNoVisibleShadow(locator: Locator) {
+  await expect
+    .poll(() =>
+      locator.evaluate((element) => {
+        const boxShadow = getComputedStyle(element).boxShadow;
+        if (boxShadow === 'none') return true;
+
+        const layers: string[] = [];
+        let depth = 0;
+        let start = 0;
+        for (let index = 0; index < boxShadow.length; index += 1) {
+          if (boxShadow[index] === '(') depth += 1;
+          if (boxShadow[index] === ')') depth -= 1;
+          if (boxShadow[index] === ',' && depth === 0) {
+            layers.push(boxShadow.slice(start, index).trim());
+            start = index + 1;
+          }
+        }
+        layers.push(boxShadow.slice(start).trim());
+
+        return layers.every((layer) => layer === 'rgba(0, 0, 0, 0) 0px 0px 0px 0px');
+      })
+    )
+    .toBe(true);
+}
+
+async function closeDialogWithCancel(trigger: Locator, dialog: Locator, cancelName: string) {
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: cancelName, exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await expect(trigger).toBeFocused();
+}
+
 function closedStatus(
   copy: (typeof locales)[number],
   method: 'mouse' | 'keyboard',
@@ -106,6 +156,41 @@ for (const locale of locales) {
     }) => {
       const { lab } = await loadLab(page, locale.path, theme);
       await expect(lab.locator('.lab-body [data-slot="code-block"]')).toHaveCount(1);
+    });
+
+    test(`${locale.path} Lab 5 characterizes trigger focus styles in ${theme}`, async ({
+      page,
+    }) => {
+      const { buttons, copy } = await loadLab(page, locale.path, theme);
+      const tokens = ['destructive-text', 'ring'] as const;
+
+      await tabToButton(page, buttons[0]!);
+      await expect(buttons[0]!).toHaveCSS('outline-style', 'solid');
+      await expect(buttons[0]!).toHaveCSS('outline-width', '3px');
+      await expect(buttons[0]!).toHaveCSS('outline-offset', '3px');
+      await expectNoVisibleShadow(buttons[0]!);
+      await expectOutlineColorMatches(buttons[0]!, tokens[0]);
+
+      await page.keyboard.press('Tab');
+      await expect(buttons[1]!).toBeFocused();
+      await expect(buttons[1]!).toHaveCSS('outline-style', 'solid');
+      await expect(buttons[1]!).toHaveCSS('outline-width', '3px');
+      await expect(buttons[1]!).toHaveCSS('outline-offset', '3px');
+      await expectNoVisibleShadow(buttons[1]!);
+      await expectOutlineColorMatches(buttons[1]!, tokens[1]);
+
+      const dialog = page.getByRole('alertdialog', { name: copy.dialogTitle, exact: true });
+
+      await closeDialogWithCancel(buttons[0]!, dialog, copy.cancel);
+      await expect(buttons[0]!).toHaveCSS('outline-style', 'solid');
+      await expect(buttons[0]!).toHaveCSS('outline-width', '3px');
+      await expect(buttons[0]!).toHaveCSS('outline-offset', '3px');
+      await expectNoVisibleShadow(buttons[0]!);
+      await expectOutlineColorMatches(buttons[0]!, tokens[0]);
+
+      await closeDialogWithCancel(buttons[1]!, dialog, copy.cancel);
+      await expect(buttons[1]!).toHaveCSS('outline-style', 'none');
+      await expectNoVisibleShadow(buttons[1]!);
     });
 
     test(`${locale.path} Lab 5 keyboard dialog traps focus, restores it and passes axe in ${theme}`, async ({
