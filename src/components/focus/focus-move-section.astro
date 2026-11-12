@@ -1,6 +1,9 @@
 ---
 import { en, es, type Locale } from '../../i18n/messages';
+import { getSnippetCode, snippets } from '../../lib/focus/snippets';
+import { CodeExample } from '../common/code-example';
 import { RichText } from '../common/rich-text';
+import { LabDialog } from './labs/lab-dialog';
 
 interface Props {
   locale: Locale;
@@ -8,6 +11,9 @@ interface Props {
 
 const { locale } = Astro.props;
 const text = (locale === 'en' ? en : es).sections.movement;
+const snippet = snippets.modal;
+const css = getSnippetCode(snippet, 'css', locale);
+const tailwind = getSnippetCode(snippet, 'tw', locale);
 const hrefs = [
   'https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html',
   'https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/',
@@ -31,6 +37,26 @@ const hrefs = [
     <p class="pull my-1.5 font-display text-pull text-pretty font-stretch-75% normal-case">
       <RichText text={text.pull} />
     </p>
+  </div>
+  <div id="lab-modal" class="lab overflow-hidden rounded-md border border-border bg-card">
+    <div class="lab-head flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 border-b border-border px-4 py-3.5">
+      <span class="lab-title flex items-center gap-2.5 font-mono text-xs font-semibold tracking-wider uppercase">
+        <span aria-hidden="true" class="size-2.5 rounded-sm border-2 border-brand-text"></span>
+        {text.lab5.title}
+      </span>
+      <div class="lab-task text-sm leading-relaxed text-muted-foreground">
+        <RichText text={text.lab5.task} />
+      </div>
+    </div>
+    <div class="lab-body grid gap-4 p-4 sm:gap-5 sm:p-6">
+      <LabDialog locale={locale} client:visible />
+      <CodeExample
+        client:visible
+        css={css}
+        tailwind={tailwind}
+        labels={(locale === 'en' ? en : es).codeExample}
+      />
+    </div>
   </div>
   <div class="intro grid max-w-prose gap-4 font-serif text-lg leading-relaxed">
     <p>
