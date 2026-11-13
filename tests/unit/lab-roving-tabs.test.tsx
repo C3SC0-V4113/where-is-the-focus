@@ -1,6 +1,4 @@
-// Vitest globals are disabled, so Testing Library cannot register automatic cleanup.
-// eslint-disable-next-line testing-library/no-manual-cleanup
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -9,7 +7,11 @@ import { RovingTabsManual } from '@/components/focus/labs/roving-tabs-manual';
 import { RovingTabsShadcn } from '@/components/focus/labs/roving-tabs-shadcn';
 import { getSnippetCode, snippets } from '@/lib/focus/snippets';
 
-afterEach(cleanup);
+const unmounts: (() => void)[] = [];
+
+afterEach(() => {
+  unmounts.splice(0).forEach((unmount) => unmount());
+});
 
 const versions = [
   {
@@ -41,13 +43,15 @@ it('translates the roving tabs snippet comments and visible label literally', ()
 });
 
 it('does not add region landmarks around the tabs examples', () => {
-  render(<LabRovingTabs locale="es" />);
+  const view = render(<LabRovingTabs locale="es" />);
+  unmounts.push(view.unmount);
   expect(screen.queryAllByRole('region')).toHaveLength(0);
 });
 
 function setup(Component: (typeof versions)[number]['Component'], listName: string) {
   const user = userEvent.setup();
-  render(<Component locale="es" />);
+  const view = render(<Component locale="es" />);
+  unmounts.push(view.unmount);
   const list = screen.getByRole('tablist', { name: listName });
   return { user, list, items: within(list).getAllByRole('tab') };
 }
