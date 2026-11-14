@@ -4,7 +4,7 @@ import { getSnippetCode, snippets } from '../../lib/focus/snippets';
 import { CodeExample } from '../common/code-example';
 import { RichText } from '../common/rich-text';
 import { LabDialog } from './labs/lab-dialog';
-import { LabRovingTabs } from './labs/lab-roving-tabs';
+import { RovingTabsManual } from './labs/roving-tabs-manual';
 
 interface Props {
   locale: Locale;
@@ -89,7 +89,7 @@ const hrefs = [
       </div>
     </div>
     <div class="lab-body grid gap-4 p-4 sm:gap-5 sm:p-6">
-      <LabRovingTabs locale={locale} client:visible />
+      <RovingTabsManual locale={locale} client:visible />
       <CodeExample
         client:visible
         css={rovingCss}
