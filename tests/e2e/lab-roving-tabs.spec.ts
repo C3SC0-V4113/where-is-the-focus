@@ -3,8 +3,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 const locales = [
   {
     route: '/',
-    manualTablist: 'Detalles del producto, a mano',
-    shadcnTablist: 'Detalles del producto, con shadcn Tabs',
+    tablist: 'Detalles del producto',
     tabs: ['Descripción', 'Medidas', 'Envío', 'Opiniones'],
     panels: [
       'Mochila de 22 litros en tejido reciclado, con espalda ventilada.',
@@ -15,8 +14,7 @@ const locales = [
   },
   {
     route: '/en/',
-    manualTablist: 'Product details, manual',
-    shadcnTablist: 'Product details, with shadcn Tabs',
+    tablist: 'Product details',
     tabs: ['Description', 'Dimensions', 'Shipping', 'Reviews'],
     panels: [
       '22-litre backpack in recycled fabric, with a ventilated back.',
@@ -32,16 +30,11 @@ async function loadLab(page: Page, locale: (typeof locales)[number]) {
   const lab = page.locator('#lab-tabs');
   await lab.scrollIntoViewIfNeeded();
   await expect(lab).toBeVisible();
-  const manual = lab.getByRole('tablist', { name: locale.manualTablist });
-  const shadcn = lab.getByRole('tablist', { name: locale.shadcnTablist });
-  const manualIsland = manual.locator('xpath=ancestor::astro-island[1]');
-  const shadcnIsland = shadcn.locator('xpath=ancestor::astro-island[1]');
-  await expect(manualIsland).toHaveCount(1);
-  await expect(manualIsland).not.toHaveAttribute('ssr');
-  await expect(shadcnIsland).toHaveCount(1);
-  await expect(shadcnIsland).not.toHaveAttribute('ssr');
-  await expect(manual.getByRole('tab').first()).toHaveAttribute('tabindex', '0');
-  await expect(shadcn.getByRole('tab').first()).toHaveAttribute('tabindex', '0');
+  const tablist = lab.getByRole('tablist', { name: locale.tablist });
+  const island = tablist.locator('xpath=ancestor::astro-island[1]');
+  await expect(island).toHaveCount(1);
+  await expect(island).not.toHaveAttribute('ssr');
+  await expect(tablist.getByRole('tab').first()).toHaveAttribute('tabindex', '0');
   return lab;
 }
 
@@ -157,58 +150,96 @@ async function expectNoVisibleShadow(element: Locator) {
 }
 
 for (const locale of locales) {
-  for (const { implementation, tablistName } of [
-    { implementation: 'manual', tablistName: locale.manualTablist },
-    { implementation: 'shadcn', tablistName: locale.shadcnTablist },
-  ]) {
-    test(`${locale.route} ${implementation} tabs move focus and selection with the arrow keys`, async ({
-      page,
-    }) => {
-      const lab = await loadLab(page, locale);
-      const list = lab.getByRole('tablist', { name: tablistName });
-      const tabs = getTabs(list, locale.tabs);
-      const container = list.locator('xpath=..');
-      const panels = container.getByRole('tabpanel');
-      await expect(container.getByRole('tablist', { name: tablistName })).toHaveCount(1);
-      await expect(panels).toHaveCount(1);
-      await expect(panels).toBeVisible();
+  test(`${locale.route} modified navigation keys leave manual tabs unchanged`, async ({ page }) => {
+    const lab = await loadLab(page, locale);
+    const list = lab.getByRole('tablist', { name: locale.tablist });
+    const tabs = getTabs(list, locale.tabs);
+    const panel = lab.locator(`#${await tabs[0]!.getAttribute('aria-controls')}`);
+    await tabs[0]!.focus();
+
+    for (const key of [
+      'Alt+ArrowRight',
+      'Control+ArrowRight',
+      'Meta+ArrowRight',
+      'Shift+ArrowRight',
+      'Alt+End',
+    ]) {
+      await tabs[0]!.click();
       await tabs[0]!.focus();
+      const initialState = await Promise.all(
+        tabs.map(async (tab) => ({
+          selected: await tab.getAttribute('aria-selected'),
+          tabIndex: await tab.getAttribute('tabindex'),
+        }))
+      );
+      const urlBefore = page.url();
+      await page.keyboard.press(key);
+      await expect.soft(page).toHaveURL(urlBefore);
+      expect
+        .soft(await tabs[0]!.evaluate((tab) => tab === document.activeElement), `${key} focus`)
+        .toBe(true);
+      await expect.soft(panel).toBeVisible();
+      expect
+        .soft(
+          await Promise.all(
+            tabs.map(async (tab) => ({
+              selected: await tab.getAttribute('aria-selected'),
+              tabIndex: await tab.getAttribute('tabindex'),
+            }))
+          ),
+          `${key} must leave selection and tabindex unchanged`
+        )
+        .toEqual(initialState);
+    }
+  });
 
-      for (const [key, index] of [
-        ['ArrowRight', 1],
-        ['ArrowRight', 2],
-        ['ArrowLeft', 1],
-        ['End', 3],
-        ['ArrowRight', 0],
-        ['ArrowLeft', 3],
-        ['Home', 0],
-      ] as const) {
-        await page.keyboard.press(key);
-        await expect(tabs[index]!).toBeFocused();
-        for (const [tabIndex, tab] of tabs.entries()) {
-          await expect(tab).toHaveAttribute('aria-selected', tabIndex === index ? 'true' : 'false');
-          await expect(tab).toHaveAttribute('tabindex', tabIndex === index ? '0' : '-1');
-        }
-        await expect(tabs[index]!.getByText('tabindex="0"')).toBeVisible();
-        await expect(tabs[index]!).toHaveAttribute('id', /\S/);
-        await expect(tabs[index]!).toHaveAttribute('aria-controls', /\S/);
-        const panelId = await tabs[index]!.getAttribute('aria-controls');
-        const panel = container.locator(`#${panelId}`);
-        const tabId = await tabs[index]!.getAttribute('id');
-        expect(tabId).toMatch(/\S/);
-        await expect(panels).toHaveCount(1);
-        await expect(panel).toBeVisible();
-        await expect(panels).toHaveText(locale.panels[index]!);
-        await expect(panel).toHaveAttribute('aria-labelledby', tabId!);
-      }
-    });
-  }
-
-  test(`${locale.route} each tabs version has one Tab stop and returns to its selected tab`, async ({
+  test(`${locale.route} manual tabs move focus and selection with the arrow keys`, async ({
     page,
   }) => {
     const lab = await loadLab(page, locale);
-    const manual = lab.getByRole('tablist', { name: locale.manualTablist });
+    const list = lab.getByRole('tablist', { name: locale.tablist });
+    const tabs = getTabs(list, locale.tabs);
+    const container = list.locator('xpath=..');
+    const panels = container.getByRole('tabpanel');
+    await expect(container.getByRole('tablist', { name: locale.tablist })).toHaveCount(1);
+    await expect(panels).toHaveCount(1);
+    await expect(panels).toBeVisible();
+    await tabs[0]!.focus();
+
+    for (const [key, index] of [
+      ['ArrowRight', 1],
+      ['ArrowRight', 2],
+      ['ArrowLeft', 1],
+      ['End', 3],
+      ['ArrowRight', 0],
+      ['ArrowLeft', 3],
+      ['Home', 0],
+    ] as const) {
+      await page.keyboard.press(key);
+      await expect(tabs[index]!).toBeFocused();
+      for (const [tabIndex, tab] of tabs.entries()) {
+        await expect(tab).toHaveAttribute('aria-selected', tabIndex === index ? 'true' : 'false');
+        await expect(tab).toHaveAttribute('tabindex', tabIndex === index ? '0' : '-1');
+      }
+      await expect(tabs[index]!.getByText('tabindex="0"')).toBeVisible();
+      await expect(tabs[index]!).toHaveAttribute('id', /\S/);
+      await expect(tabs[index]!).toHaveAttribute('aria-controls', /\S/);
+      const panelId = await tabs[index]!.getAttribute('aria-controls');
+      const panel = container.locator(`#${panelId}`);
+      const tabId = await tabs[index]!.getAttribute('id');
+      expect(tabId).toMatch(/\S/);
+      await expect(panels).toHaveCount(1);
+      await expect(panel).toBeVisible();
+      await expect(panels).toHaveText(locale.panels[index]!);
+      await expect(panel).toHaveAttribute('aria-labelledby', tabId!);
+    }
+  });
+
+  test(`${locale.route} manual tabs have one Tab stop and return to the selected tab`, async ({
+    page,
+  }) => {
+    const lab = await loadLab(page, locale);
+    const manual = lab.getByRole('tablist', { name: locale.tablist });
     const manualTabs = getTabs(manual, locale.tabs);
     const beforeLab = page.locator('#movimiento .more a').last();
     await beforeLab.focus();
@@ -229,53 +260,30 @@ for (const locale of locales) {
     await expect(page.locator(':focus')).not.toHaveAttribute('role', 'tab');
     await page.keyboard.press('Shift+Tab');
     await expect(manualTabs[3]!).toBeFocused();
-
-    const shadcn = lab.getByRole('tablist', { name: locale.shadcnTablist });
-    const shadcnTabs = getTabs(shadcn, locale.tabs);
-    await manualPanel.focus();
-    await page.keyboard.press('Tab');
-    await expect(shadcnTabs[0]!).toBeFocused();
-    await page.keyboard.press('End');
-    await expect(shadcnTabs[3]!).toHaveAttribute('aria-selected', 'true');
-    const shadcnPanelId = await shadcnTabs[3]!.getAttribute('aria-controls');
-    const shadcnPanel = lab.locator(`#${shadcnPanelId}`);
-    await page.keyboard.press('Tab');
-    await expect(shadcnPanel).toBeFocused();
-    await expect(page.locator(':focus')).not.toHaveAttribute('role', 'tab');
-    await page.keyboard.press('Shift+Tab');
-    await expect(shadcnTabs[3]!).toBeFocused();
   });
 
   for (const theme of ['light', 'dark'] as const) {
-    test(`${locale.route} both tabs versions use the global keyboard focus ring in ${theme}`, async ({
+    test(`${locale.route} manual tabs use the global keyboard focus ring in ${theme}`, async ({
       page,
     }) => {
       await page.emulateMedia({ colorScheme: theme });
       await page.addInitScript((value) => localStorage.setItem('foco-theme', value), theme);
       const lab = await loadLab(page, locale);
-      const manual = lab.getByRole('tablist', { name: locale.manualTablist });
+      const manual = lab.getByRole('tablist', { name: locale.tablist });
       const manualTabs = getTabs(manual, locale.tabs);
       await page.locator('#movimiento .more a').last().focus();
       await page.keyboard.press('Tab');
       await expect(manualTabs[0]!).toBeFocused();
       await expectGlobalFocusRing(manualTabs[0]!);
-      const manualRing = await focusRing(manualTabs[0]!);
-
-      const manualPanelId = await manualTabs[0]!.getAttribute('aria-controls');
-      await lab.locator(`#${manualPanelId}`).focus();
-      await page.keyboard.press('Tab');
-      const shadcn = lab.getByRole('tablist', { name: locale.shadcnTablist });
-      const shadcnTab = getTabs(shadcn, locale.tabs)[0]!;
-      await expect(shadcnTab).toBeFocused();
-      await expectGlobalFocusRing(shadcnTab);
-      expect(await focusRing(shadcnTab)).toEqual(manualRing);
     });
   }
 
-  test(`${locale.route} both tab panels retain a forced-colors focus outline`, async ({ page }) => {
+  test(`${locale.route} manual tab panels retain a forced-colors focus outline`, async ({
+    page,
+  }) => {
     await page.emulateMedia({ forcedColors: 'active' });
     const lab = await loadLab(page, locale);
-    const manual = lab.getByRole('tablist', { name: locale.manualTablist });
+    const manual = lab.getByRole('tablist', { name: locale.tablist });
     const manualTab = getTabs(manual, locale.tabs)[0]!;
     await page.locator('#movimiento .more a').last().focus();
     await page.keyboard.press('Tab');
@@ -284,35 +292,17 @@ for (const locale of locales) {
     await page.keyboard.press('Tab');
     await expect(manualPanel).toBeFocused();
     await expectForcedColorsFocus(manualPanel);
-
-    await manualPanel.focus();
-    await page.keyboard.press('Tab');
-    const shadcn = lab.getByRole('tablist', { name: locale.shadcnTablist });
-    const shadcnTab = getTabs(shadcn, locale.tabs)[0]!;
-    await expect(shadcnTab).toBeFocused();
-    const shadcnPanel = lab.locator(`#${await shadcnTab.getAttribute('aria-controls')}`);
-    await page.keyboard.press('Tab');
-    await expect(shadcnPanel).toBeFocused();
-    await expectForcedColorsFocus(shadcnPanel);
   });
 
-  test(`${locale.route} both tab versions show a forced-colors focus outline`, async ({ page }) => {
+  test(`${locale.route} manual tabs show a forced-colors focus outline`, async ({ page }) => {
     await page.emulateMedia({ forcedColors: 'active' });
     const lab = await loadLab(page, locale);
-    const manual = lab.getByRole('tablist', { name: locale.manualTablist });
+    const manual = lab.getByRole('tablist', { name: locale.tablist });
     const manualTab = getTabs(manual, locale.tabs)[0]!;
     await page.locator('#movimiento .more a').last().focus();
     await page.keyboard.press('Tab');
     await expect(manualTab).toBeFocused();
     await expectForcedColorsFocus(manualTab);
-
-    const manualPanel = lab.locator(`#${await manualTab.getAttribute('aria-controls')}`);
-    await manualPanel.focus();
-    await page.keyboard.press('Tab');
-    const shadcn = lab.getByRole('tablist', { name: locale.shadcnTablist });
-    const shadcnTab = getTabs(shadcn, locale.tabs)[0]!;
-    await expect(shadcnTab).toBeFocused();
-    await expectForcedColorsFocus(shadcnTab);
   });
 
   test(`${locale.route} selected tabs remain distinct from unselected tabs in forced colors`, async ({
@@ -321,24 +311,22 @@ for (const locale of locales) {
     await page.emulateMedia({ forcedColors: 'active' });
     const lab = await loadLab(page, locale);
     await lab.click({ position: { x: 2, y: 2 } });
-    for (const tablistName of [locale.manualTablist, locale.shadcnTablist]) {
-      const tablist = lab.getByRole('tablist', { name: tablistName });
-      expect(await tablist.evaluate((element) => element.contains(document.activeElement))).toBe(
-        false
-      );
-      const selected = await tablist
-        .getByRole('tab', { selected: true })
-        .evaluate(readSelectionStyles);
-      const unselected = await Promise.all(
-        (await tablist.getByRole('tab', { selected: false }).all()).map((tab) =>
-          tab.evaluate(readSelectionStyles)
-        )
-      );
-      expect(selected.textDecorationLine.split(/\s+/)).toContain('underline');
-      expect(selected.textDecorationThickness).toBe('2px');
-      for (const styles of unselected) {
-        expect(styles.textDecorationLine.split(/\s+/)).not.toContain('underline');
-      }
+    const tablist = lab.getByRole('tablist', { name: locale.tablist });
+    expect(await tablist.evaluate((element) => element.contains(document.activeElement))).toBe(
+      false
+    );
+    const selected = await tablist
+      .getByRole('tab', { selected: true })
+      .evaluate(readSelectionStyles);
+    const unselected = await Promise.all(
+      (await tablist.getByRole('tab', { selected: false }).all()).map((tab) =>
+        tab.evaluate(readSelectionStyles)
+      )
+    );
+    expect(selected.textDecorationLine.split(/\s+/)).toContain('underline');
+    expect(selected.textDecorationThickness).toBe('2px');
+    for (const styles of unselected) {
+      expect(styles.textDecorationLine.split(/\s+/)).not.toContain('underline');
     }
   });
 

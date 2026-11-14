@@ -242,10 +242,7 @@ export const es = {
       lab6: {
         title: 'Laboratorio 6',
         task: 'Entra con [[Tab]], muévete con [[←]] [[→]] y mira cómo cambia el tabindex.',
-        manualTablist: 'Detalles del producto, a mano',
-        shadcnTablist: 'Detalles del producto, con shadcn Tabs',
-        manual: 'A mano',
-        shadcn: 'shadcn Tabs',
+        tablist: 'Detalles del producto',
         tabs: ['Descripción', 'Medidas', 'Envío', 'Opiniones'],
         panels: [
           'Mochila de 22 litros en tejido reciclado, con espalda ventilada.',
@@ -558,10 +555,7 @@ export const en = {
       lab6: {
         title: 'Lab 6',
         task: 'Enter with [[Tab]], move with [[←]] [[→]] and watch the tabindex change.',
-        manualTablist: 'Product details, manual',
-        shadcnTablist: 'Product details, with shadcn Tabs',
-        manual: 'Manual',
-        shadcn: 'shadcn Tabs',
+        tablist: 'Product details',
         tabs: ['Description', 'Dimensions', 'Shipping', 'Reviews'],
         panels: [
           '22-litre backpack in recycled fabric, with a ventilated back.',

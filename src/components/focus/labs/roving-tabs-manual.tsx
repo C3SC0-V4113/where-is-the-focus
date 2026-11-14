@@ -11,6 +11,8 @@ export function RovingTabsManual({ locale }: { locale: Locale }) {
   const refs = useRef<Array<HTMLButtonElement | null>>([]);
 
   function handleKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+
     const index = refs.current.indexOf(event.currentTarget);
     const next = {
       ArrowRight: (index + 1) % text.tabs.length,
@@ -28,7 +30,7 @@ export function RovingTabsManual({ locale }: { locale: Locale }) {
     <>
       <div
         role="tablist"
-        aria-label={text.manualTablist}
+        aria-label={text.tablist}
         className="grid w-full grid-cols-2 sm:grid-cols-4"
       >
         {text.tabs.map((label, index) => {

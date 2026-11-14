@@ -2,9 +2,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { LabRovingTabs } from '@/components/focus/labs/lab-roving-tabs';
 import { RovingTabsManual } from '@/components/focus/labs/roving-tabs-manual';
-import { RovingTabsShadcn } from '@/components/focus/labs/roving-tabs-shadcn';
 import { getSnippetCode, snippets } from '@/lib/focus/snippets';
 
 const unmounts: (() => void)[] = [];
@@ -17,12 +15,7 @@ const versions = [
   {
     name: 'manual',
     Component: RovingTabsManual,
-    listName: 'Detalles del producto, a mano',
-  },
-  {
-    name: 'shadcn',
-    Component: RovingTabsShadcn,
-    listName: 'Detalles del producto, con shadcn Tabs',
+    listName: 'Detalles del producto',
   },
 ] as const;
 const tabs = ['Descripción', 'Medidas', 'Envío', 'Opiniones'];
@@ -40,12 +33,6 @@ it('translates the roving tabs snippet comments and visible label literally', ()
     'The JS is the same. Styling, with attribute\n     and focus-visible variants:'
   );
   expect(getSnippetCode(snippets.roving, 'tw', 'en')).toContain('  Description');
-});
-
-it('does not add region landmarks around the tabs examples', () => {
-  const view = render(<LabRovingTabs locale="es" />);
-  unmounts.push(view.unmount);
-  expect(screen.queryAllByRole('region')).toHaveLength(0);
 });
 
 function setup(Component: (typeof versions)[number]['Component'], listName: string) {
