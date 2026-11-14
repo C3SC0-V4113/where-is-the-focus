@@ -239,6 +239,21 @@ export const es = {
         cancel: 'Cancelar',
         confirm: 'Eliminar',
       },
+      lab6: {
+        title: 'Laboratorio 6',
+        task: 'Entra con [[Tab]], muévete con [[←]] [[→]] y mira cómo cambia el tabindex.',
+        manualTablist: 'Detalles del producto, a mano',
+        shadcnTablist: 'Detalles del producto, con shadcn Tabs',
+        manual: 'A mano',
+        shadcn: 'shadcn Tabs',
+        tabs: ['Descripción', 'Medidas', 'Envío', 'Opiniones'],
+        panels: [
+          'Mochila de 22 litros en tejido reciclado, con espalda ventilada.',
+          '48 × 30 × 18 cm · 680 g.',
+          'Gratis desde 40 €. Llega en 48 horas.',
+          '4,7 de 5 en 312 opiniones.',
+        ],
+      },
       more: {
         label: 'Más: ',
         separator: ' · ',
@@ -539,6 +554,21 @@ export const en = {
           '24 files will be deleted. Focus starts on “Cancel” so a repeated Enter doesn’t delete anything.',
         cancel: 'Cancel',
         confirm: 'Delete',
+      },
+      lab6: {
+        title: 'Lab 6',
+        task: 'Enter with [[Tab]], move with [[←]] [[→]] and watch the tabindex change.',
+        manualTablist: 'Product details, manual',
+        shadcnTablist: 'Product details, with shadcn Tabs',
+        manual: 'Manual',
+        shadcn: 'shadcn Tabs',
+        tabs: ['Description', 'Dimensions', 'Shipping', 'Reviews'],
+        panels: [
+          '22-litre backpack in recycled fabric, with a ventilated back.',
+          '48 × 30 × 18 cm · 680 g.',
+          'Free from €40. Arrives in 48 hours.',
+          '4.7 out of 5 from 312 reviews.',
+        ],
       },
       more: {
         label: 'More: ',

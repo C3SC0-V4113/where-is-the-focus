@@ -667,7 +667,7 @@ for (const copy of phase12) {
           ['head', 'intro', 'lab', 'more'].find((name) => node.classList.contains(name))
         )
       );
-    expect(childKinds).toEqual(['head', 'intro', 'lab', 'intro', 'more']);
+    expect(childKinds).toEqual(['head', 'intro', 'lab', 'intro', 'more', 'lab']);
     await expectMoreLine(section.locator('.more'), copy.movement.more);
   });
 

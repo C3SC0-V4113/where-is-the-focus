@@ -4,6 +4,7 @@ import { getSnippetCode, snippets } from '../../lib/focus/snippets';
 import { CodeExample } from '../common/code-example';
 import { RichText } from '../common/rich-text';
 import { LabDialog } from './labs/lab-dialog';
+import { LabRovingTabs } from './labs/lab-roving-tabs';
 
 interface Props {
   locale: Locale;
@@ -14,6 +15,9 @@ const text = (locale === 'en' ? en : es).sections.movement;
 const snippet = snippets.modal;
 const css = getSnippetCode(snippet, 'css', locale);
 const tailwind = getSnippetCode(snippet, 'tw', locale);
+const roving = snippets.roving;
+const rovingCss = getSnippetCode(roving, 'css', locale);
+const rovingTailwind = getSnippetCode(roving, 'tw', locale);
 const hrefs = [
   'https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html',
   'https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/',
@@ -74,4 +78,24 @@ const hrefs = [
       </>
     ))}
   </p>
+  <div id="lab-tabs" class="lab overflow-hidden rounded-md border border-border bg-card">
+    <div class="lab-head flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 border-b border-border px-4 py-3.5">
+      <span class="lab-title flex items-center gap-2.5 font-mono text-xs font-semibold tracking-wider uppercase">
+        <span aria-hidden="true" class="size-2.5 rounded-sm border-2 border-brand-text"></span>
+        {text.lab6.title}
+      </span>
+      <div class="lab-task text-sm leading-relaxed text-muted-foreground">
+        <RichText text={text.lab6.task} />
+      </div>
+    </div>
+    <div class="lab-body grid gap-4 p-4 sm:gap-5 sm:p-6">
+      <LabRovingTabs locale={locale} client:visible />
+      <CodeExample
+        client:visible
+        css={rovingCss}
+        tailwind={rovingTailwind}
+        labels={(locale === 'en' ? en : es).codeExample}
+      />
+    </div>
+  </div>
 </section>

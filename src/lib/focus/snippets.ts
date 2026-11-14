@@ -215,6 +215,32 @@ a:focus-visible {
   </AlertDialogContent>
 </AlertDialog>`,
   },
+  roving: {
+    css: `const tabs = [...tablist.querySelectorAll('[role="tab"]')];
+tablist.addEventListener('keydown', e => {
+  const i = tabs.indexOf(document.activeElement);
+  const n = { ArrowRight: i + 1, ArrowLeft: i - 1,
+              Home: 0, End: tabs.length - 1 }[e.key];
+  if (n === undefined) return;
+  e.preventDefault();
+  const t = tabs[(n + tabs.length) % tabs.length];
+  tabs.forEach(x => x.tabIndex = -1);
+  t.tabIndex = 0;   // el único que entra con Tab
+  t.focus();
+  activar(t);       // aria-selected y su panel
+});`,
+    tw: `<!-- El JS es el mismo. El estilo, con variantes
+     de atributo y focus-visible: -->
+<button role="tab" aria-selected="true" tabindex="0"
+  class="border-b-3 border-transparent px-4 py-2
+         aria-selected:border-stone-900
+         focus-visible:outline-hidden
+         focus-visible:bg-blue-50
+         focus-visible:inset-ring-2
+         focus-visible:inset-ring-blue-700">
+  Descripción
+</button>`,
+  },
 } satisfies Record<string, CodeSnippet>;
 
 const translations: ReadonlyArray<readonly [string, string]> = [
@@ -252,6 +278,11 @@ const translations: ReadonlyArray<readonly [string, string]> = [
   ['>Eliminar<', '>Delete<'],
   ['showModal() devuelve el foco al cerrar.', 'showModal() returns focus on close.'],
   ['Si tu modal no es <dialog>, hazlo tú:', 'If your modal isn’t a <dialog>, do it yourself:'],
+  ['el único que entra con Tab', 'the only one reached with Tab'],
+  ['aria-selected y su panel', 'aria-selected and its panel'],
+  ['El JS es el mismo. El estilo, con variantes', 'The JS is the same. Styling, with attribute'],
+  ['     de atributo y focus-visible:', '     and focus-visible variants:'],
+  ['Descripción', 'Description'],
 ];
 
 export function getSnippetCode(snippet: CodeSnippet, language: 'css' | 'tw', locale: 'es' | 'en') {
