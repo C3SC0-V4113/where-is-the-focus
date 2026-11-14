@@ -6,12 +6,24 @@ const locales = [
     manualTablist: 'Detalles del producto, a mano',
     shadcnTablist: 'Detalles del producto, con shadcn Tabs',
     tabs: ['Descripción', 'Medidas', 'Envío', 'Opiniones'],
+    panels: [
+      'Mochila de 22 litros en tejido reciclado, con espalda ventilada.',
+      '48 × 30 × 18 cm · 680 g.',
+      'Gratis desde 40 €. Llega en 48 horas.',
+      '4,7 de 5 en 312 opiniones.',
+    ],
   },
   {
     route: '/en/',
     manualTablist: 'Product details, manual',
     shadcnTablist: 'Product details, with shadcn Tabs',
     tabs: ['Description', 'Dimensions', 'Shipping', 'Reviews'],
+    panels: [
+      '22-litre backpack in recycled fabric, with a ventilated back.',
+      '48 × 30 × 18 cm · 680 g.',
+      'Free from €40. Arrives in 48 hours.',
+      '4.7 out of 5 from 312 reviews.',
+    ],
   },
 ] as const;
 
@@ -145,34 +157,52 @@ async function expectNoVisibleShadow(element: Locator) {
 }
 
 for (const locale of locales) {
-  test(`${locale.route} manual tabs move focus and selection with the arrow keys`, async ({
-    page,
-  }) => {
-    const lab = await loadLab(page, locale);
-    const list = lab.getByRole('tablist', { name: locale.manualTablist });
-    const tabs = getTabs(list, locale.tabs);
-    await tabs[0]!.focus();
+  for (const { implementation, tablistName } of [
+    { implementation: 'manual', tablistName: locale.manualTablist },
+    { implementation: 'shadcn', tablistName: locale.shadcnTablist },
+  ]) {
+    test(`${locale.route} ${implementation} tabs move focus and selection with the arrow keys`, async ({
+      page,
+    }) => {
+      const lab = await loadLab(page, locale);
+      const list = lab.getByRole('tablist', { name: tablistName });
+      const tabs = getTabs(list, locale.tabs);
+      const container = list.locator('xpath=..');
+      const panels = container.getByRole('tabpanel');
+      await expect(container.getByRole('tablist', { name: tablistName })).toHaveCount(1);
+      await expect(panels).toHaveCount(1);
+      await expect(panels).toBeVisible();
+      await tabs[0]!.focus();
 
-    for (const [key, index] of [
-      ['ArrowRight', 1],
-      ['ArrowLeft', 0],
-      ['ArrowLeft', 3],
-      ['Home', 0],
-      ['End', 3],
-    ] as const) {
-      await page.keyboard.press(key);
-      await expect(tabs[index]!).toBeFocused();
-      await expect(tabs[index]!).toHaveAttribute('aria-selected', 'true');
-      await expect(tabs[index]!).toHaveAttribute('tabindex', '0');
-      await expect(tabs[index]!.getByText('tabindex="0"')).toBeVisible();
-      await expect(list.getByRole('tab', { name: locale.tabs[0], exact: true })).toHaveAttribute(
-        'tabindex',
-        index === 0 ? '0' : '-1'
-      );
-      const panelId = await tabs[index]!.getAttribute('aria-controls');
-      await expect(lab.locator(`#${panelId}`)).toBeVisible();
-    }
-  });
+      for (const [key, index] of [
+        ['ArrowRight', 1],
+        ['ArrowRight', 2],
+        ['ArrowLeft', 1],
+        ['End', 3],
+        ['ArrowRight', 0],
+        ['ArrowLeft', 3],
+        ['Home', 0],
+      ] as const) {
+        await page.keyboard.press(key);
+        await expect(tabs[index]!).toBeFocused();
+        for (const [tabIndex, tab] of tabs.entries()) {
+          await expect(tab).toHaveAttribute('aria-selected', tabIndex === index ? 'true' : 'false');
+          await expect(tab).toHaveAttribute('tabindex', tabIndex === index ? '0' : '-1');
+        }
+        await expect(tabs[index]!.getByText('tabindex="0"')).toBeVisible();
+        await expect(tabs[index]!).toHaveAttribute('id', /\S/);
+        await expect(tabs[index]!).toHaveAttribute('aria-controls', /\S/);
+        const panelId = await tabs[index]!.getAttribute('aria-controls');
+        const panel = container.locator(`#${panelId}`);
+        const tabId = await tabs[index]!.getAttribute('id');
+        expect(tabId).toMatch(/\S/);
+        await expect(panels).toHaveCount(1);
+        await expect(panel).toBeVisible();
+        await expect(panels).toHaveText(locale.panels[index]!);
+        await expect(panel).toHaveAttribute('aria-labelledby', tabId!);
+      }
+    });
+  }
 
   test(`${locale.route} each tabs version has one Tab stop and returns to its selected tab`, async ({
     page,
