@@ -49,7 +49,8 @@ async function tabAcrossCodeContent(
 ) {
   const hydratedIsland = section
     .locator('astro-island:not([ssr])')
-    .filter({ has: page.locator('[data-slot="code-block-content"]') });
+    .filter({ has: page.locator('[data-slot="code-block-content"]') })
+    .last();
   await expect(hydratedIsland).toHaveCount(1);
   await expect
     .poll(() =>
@@ -216,13 +217,11 @@ for (const [route, messages, hrefs] of routes) {
   test(`${route} keeps code example height stable across tabs`, async ({ page }) => {
     await page.goto(route);
     const sections = [page.locator('#focus-visible'), page.locator('#anillo')];
-    const codeBlocks = sections.map((section) => section.locator('[data-slot="code-block"]'));
+    const codeBlocks = sections.map((section) => section.getByTestId('code-example-block').last());
 
     for (const [index, section] of sections.entries()) {
       await codeBlocks[index]!.scrollIntoViewIfNeeded();
-      const hydratedIsland = section
-        .locator('astro-island:not([ssr])')
-        .filter({ has: page.locator('[data-slot="code-block"]') });
+      const hydratedIsland = section.locator('xpath=(.//astro-island[.//pre])[last()][not(@ssr)]');
       await expect(hydratedIsland).toHaveCount(1);
     }
     await page.evaluate(async () => {
@@ -231,7 +230,7 @@ for (const [route, messages, hrefs] of routes) {
 
     const [focusVisible] = sections;
     await focusVisible!.getByRole('tab', { name: 'CSS', exact: true }).click();
-    for (const section of sections) {
+    for (const section of codeBlocks) {
       await expect(section.getByRole('tab', { name: 'CSS', exact: true })).toHaveAttribute(
         'aria-selected',
         'true'
@@ -240,7 +239,7 @@ for (const [route, messages, hrefs] of routes) {
     const heightsBefore = await Promise.all(codeBlocks.map(codeBlockHeight));
 
     await focusVisible!.getByRole('tab', { name: 'Tailwind', exact: true }).click();
-    for (const section of sections) {
+    for (const section of codeBlocks) {
       await expect(section.getByRole('tab', { name: 'Tailwind', exact: true })).toHaveAttribute(
         'aria-selected',
         'true'
@@ -357,9 +356,11 @@ for (const [route, messages, hrefs] of routes) {
     const childKinds = await section
       .locator(':scope > *')
       .evaluateAll((nodes) =>
-        nodes.map((node) => ['head', 'intro', 'more'].find((name) => node.classList.contains(name)))
+        nodes.map((node) =>
+          ['head', 'intro', 'more', 'lab'].find((name) => node.classList.contains(name))
+        )
       );
-    expect(childKinds).toEqual(['head', 'intro', 'more', 'intro', 'more']);
+    expect(childKinds).toEqual(['head', 'intro', 'more', 'lab', 'intro', 'more']);
     const prose = section.locator(':scope > .intro');
     await expect(prose.nth(0).locator('p')).toHaveText(ring.paragraphs.map(plain));
     await expect(prose.nth(1).locator('p')).toHaveText([
@@ -465,8 +466,8 @@ for (const [route, messages, hrefs] of routes) {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(route);
     await expect(page.locator('#anillo .pull')).toHaveCSS('font-size', '32px');
-    await page.getByRole('button', { name: copy.lab1.save, exact: true }).last().focus();
     const codeExample = page.locator('#focus-visible');
+    await codeExample.getByRole('button', { name: copy.lab1.save, exact: true }).last().focus();
     const cssTab = codeExample.getByRole('tab', { name: 'CSS', exact: true });
     const copyButton = codeExample.getByRole('button', {
       name: messages.codeExample.copy,
@@ -489,7 +490,7 @@ for (const [route, messages, hrefs] of routes) {
     expect(firstRingStyle.slice(0, 2)).toEqual(['solid', '2px']);
     expect(firstRingStyle[2]).toContain('2px');
     expect(firstRingStyle[2]).toContain('5px');
-    await page.keyboard.press('Tab');
+    await section.getByRole('tab', { name: 'CSS', exact: true }).last().press('Shift+Tab');
     const secondLink = lines.nth(1).getByRole('link');
     await expect(secondLink).toBeFocused();
     const secondRingStyle = await secondLink.evaluate((node) => {
@@ -590,7 +591,7 @@ for (const [route, messages, hrefs] of routes) {
     expect(headingStyles[4]).toBe(headingStyles[0]);
 
     await page.locator('#anillo .more a').last().focus();
-    const codeExample = page.locator('#anillo');
+    const codeExample = page.locator('#anillo').getByTestId('code-example-block').last();
     const cssTab = codeExample.getByRole('tab', { name: 'CSS', exact: true });
     const copyButton = codeExample.getByRole('button', {
       name: route === '/en/' ? en.codeExample.copy : es.codeExample.copy,
@@ -604,7 +605,7 @@ for (const [route, messages, hrefs] of routes) {
     const codeContent = codeExample
       .getByRole('tabpanel', { name: 'CSS' })
       .locator('[data-slot="code-block-content"]');
-    await tabAcrossCodeContent(page, codeExample, codeContent, link);
+    await tabAcrossCodeContent(page, page.locator('#anillo'), codeContent, link);
     const focusRing = await link.evaluate((node) => {
       const style = getComputedStyle(node);
       return [style.outlineStyle, style.outlineWidth, style.boxShadow];

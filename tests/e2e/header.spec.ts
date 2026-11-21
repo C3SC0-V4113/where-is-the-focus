@@ -197,7 +197,7 @@ for (const locale of locales) {
     await page.goto(locale.route);
     await expect(page.getByRole('button', { name: locale.light, exact: true })).toBeVisible();
     for (const label of [locale.light, locale.dark]) {
-      const box = await page.getByText(label, { exact: true }).boundingBox();
+      const box = await page.getByRole('banner').getByText(label, { exact: true }).boundingBox();
       expect(box).not.toBeNull();
       expect(box!.width).toBeLessThanOrEqual(1);
       expect(box!.height).toBeLessThanOrEqual(1);
@@ -209,7 +209,7 @@ for (const locale of locales) {
       await page.evaluate(() => document.fonts.ready);
 
       for (const label of [locale.light, locale.dark]) {
-        const box = await page.getByText(label, { exact: true }).boundingBox();
+        const box = await page.getByRole('banner').getByText(label, { exact: true }).boundingBox();
         expect(box).not.toBeNull();
         expect(box!.width).toBeGreaterThan(1);
         expect(box!.height).toBeGreaterThan(1);

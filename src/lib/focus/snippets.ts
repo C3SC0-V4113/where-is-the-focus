@@ -257,6 +257,7 @@ const translations: ReadonlyArray<readonly [string, string]> = [
   ['Parcial', 'Partial'],
   ['No cumple', 'Fail'],
   ['para el modo de alto contraste', 'for high-contrast mode'],
+  ['alto contraste', 'high contrast'],
   ['Correo electrónico', 'Email'],
   ['Descargar informe', 'Download report'],
   ['Productos', 'Products'],

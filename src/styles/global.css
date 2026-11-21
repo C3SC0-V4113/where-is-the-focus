@@ -67,6 +67,19 @@
 
 @theme inline {
   --color-brand: var(--brand);
+  --color-lab-ring-bg-light: var(--lab-ring-bg-light);
+  --color-lab-ring-bg-dark: var(--lab-ring-bg-dark);
+  --color-lab-ring-bg-brand: var(--lab-ring-bg-brand);
+  --color-lab-ring-photo-1: var(--lab-ring-photo-1);
+  --color-lab-ring-photo-2: var(--lab-ring-photo-2);
+  --color-lab-ring-photo-3: var(--lab-ring-photo-3);
+  --color-lab-ring-photo-4: var(--lab-ring-photo-4);
+  --color-lab-ring-blue: var(--lab-ring-blue);
+  --color-lab-ring-ink: var(--lab-ring-ink);
+  --color-lab-ring-white: var(--lab-ring-white);
+  --color-lab-ring-pastel: var(--lab-ring-pastel);
+  --color-lab-specimen-dark: var(--lab-specimen-dark);
+  --color-lab-specimen-light: var(--lab-specimen-light);
   --color-brand-foreground: var(--brand-foreground);
   --color-brand-text: var(--brand-text);
   --color-success-text: var(--success-text);
@@ -170,6 +183,19 @@
   --code-fg: #e6e8ef;
   --code-dim: #8b90a0;
   --code-hi: #9fb0ff;
+  --lab-ring-bg-light: #eef0fb;
+  --lab-ring-bg-dark: #14172a;
+  --lab-ring-bg-brand: #1d2fd8;
+  --lab-ring-photo-1: #1e2a7a;
+  --lab-ring-photo-2: #5b4ca0;
+  --lab-ring-photo-3: #e2a46a;
+  --lab-ring-photo-4: #f6ecd9;
+  --lab-ring-blue: #1d2fd8;
+  --lab-ring-ink: #141414;
+  --lab-ring-white: #fff;
+  --lab-ring-pastel: #9fb0ff;
+  --lab-specimen-dark: #141414;
+  --lab-specimen-light: #fff;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
