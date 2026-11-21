@@ -13,6 +13,7 @@ const locales = [
     white: 'Blanco',
     background: 'Fondo',
     light: 'Claro',
+    dark: 'Oscuro',
     brand: 'Marca',
     photo: 'Foto',
     width: 'Grosor',
@@ -38,6 +39,7 @@ const locales = [
     white: 'White',
     background: 'Background',
     light: 'Light',
+    dark: 'Dark',
     brand: 'Brand',
     photo: 'Photo',
     width: 'Width',
@@ -70,6 +72,58 @@ for (const copy of locales) {
       await expect(verdict).toContainText(new RegExp(`${copy.pass}.*${copy.contrast}: 7.5:1`));
     });
 
+    test('uses specimen token colors on light and dark backgrounds without hover changes', async ({
+      page,
+    }) => {
+      const { lab } = await loadLab(page);
+      const specimen = lab.locator('[data-lab-ring-stage] [data-lab-ring-specimen]');
+      const tokens = await page.evaluate(() => {
+        const root = getComputedStyle(document.documentElement);
+        const resolve = (property: string) => {
+          const probe = document.createElement('span');
+          probe.style.color = root.getPropertyValue(property).trim();
+          document.body.append(probe);
+          const color = getComputedStyle(probe).color;
+          probe.remove();
+          return color;
+        };
+        return {
+          light: resolve('--lab-specimen-light'),
+          dark: resolve('--lab-specimen-dark'),
+        };
+      });
+      const readAppearance = () =>
+        specimen.evaluate((element) => {
+          const style = getComputedStyle(element);
+          return {
+            backgroundColor: style.backgroundColor,
+            color: style.color,
+            outline: style.outline,
+            outlineOffset: style.outlineOffset,
+            boxShadow: style.boxShadow,
+          };
+        });
+      const expectHoverUnchanged = async (expected: Awaited<ReturnType<typeof readAppearance>>) => {
+        await specimen.hover();
+        await expect.poll(readAppearance).toEqual(expected);
+      };
+
+      await expect(specimen).toHaveCSS('background-color', tokens.dark);
+      await expect(specimen).toHaveCSS('color', tokens.light);
+      const light = await readAppearance();
+      expect(light.backgroundColor).toBe(tokens.dark);
+      expect(light.color).toBe(tokens.light);
+      await expectHoverUnchanged(light);
+
+      await lab.getByRole('radio', { name: copy.dark }).click();
+      await expect(specimen).toHaveCSS('background-color', tokens.light);
+      await expect(specimen).toHaveCSS('color', tokens.dark);
+      const dark = await readAppearance();
+      expect(dark.backgroundColor).toBe(tokens.light);
+      expect(dark.color).toBe(tokens.dark);
+      await expectHoverUnchanged(dark);
+    });
+
     test('reports blue on brand as a failure', async ({ page }) => {
       const { lab, verdict } = await loadLab(page);
       await lab.getByRole('radio', { name: copy.brand }).click();
@@ -93,8 +147,11 @@ for (const copy of locales) {
 
     test('passes the double ring', async ({ page }) => {
       const { lab, verdict } = await loadLab(page);
+      const contrastRow = verdict.getByText(new RegExp(`${copy.contrast}:`)).locator('..');
+      await lab.getByRole('radio', { name: copy.brand }).click();
+      await expect(contrastRow).toContainText(copy.fail);
       await lab.getByRole('radio', { name: copy.double }).click();
-      await expect(verdict).toContainText(copy.pass);
+      await expect(contrastRow).toContainText(copy.pass);
     });
 
     test('warns when the width is below two pixels', async ({ page }) => {
@@ -124,10 +181,14 @@ for (const copy of locales) {
       await solid.focus();
       await page.keyboard.press('ArrowRight');
       await expect(lab.getByRole('radio', { name: copy.dashed })).toBeChecked();
+      await expect(code).not.toHaveText(before ?? '');
+      const afterStyle = await code.textContent();
       const width = lab.getByRole('slider', { name: copy.width });
       await width.focus();
       await page.keyboard.press('ArrowRight');
-      await expect(code).not.toHaveText(before ?? '');
+      await expect(width).toHaveAttribute('aria-valuenow', '4');
+      await expect(code).not.toHaveText(afterStyle ?? '');
+      await expect(code).toContainText('focus-visible:outline-4');
     });
   });
 }

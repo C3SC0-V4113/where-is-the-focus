@@ -23,12 +23,6 @@
     outline: var(--lab-ring-width) solid var(--lab-ring-color, var(--lab-ring-blue));
     outline-offset: var(--lab-ring-offset);
     box-shadow: none;
-    background: var(--lab-specimen-light);
-    color: var(--lab-specimen-dark);
-  }
-  [data-lab-ring-stage][data-bg='light'] [data-lab-ring-specimen] {
-    background: var(--lab-specimen-dark);
-    color: var(--lab-specimen-light);
   }
   [data-lab-ring-specimen][data-ring-color='blue'] {
     --lab-ring-color: var(--lab-ring-blue);
