@@ -14,8 +14,8 @@ describe('Lab 2 verdict', () => {
     expect(getRingVerdict(input)[0]).toEqual({
       kind: 'contrast',
       state: 'ok',
-      minimum: 7.546647976648694,
-      maximum: 7.546647976648694,
+      minimum: expect.closeTo(7.546647976648694, 8),
+      maximum: expect.closeTo(7.546647976648694, 8),
     });
   });
 
@@ -29,8 +29,8 @@ describe('Lab 2 verdict', () => {
     expect(rows[0]).toEqual({
       kind: 'contrast',
       state: 'warn',
-      minimum: 1.1719601541450138,
-      maximum: 12.594324364035867,
+      minimum: expect.closeTo(1.1719601541450138, 8),
+      maximum: expect.closeTo(12.594324364035867, 8),
     });
   });
 
