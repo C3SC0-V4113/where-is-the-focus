@@ -105,7 +105,7 @@ const RingStage = memo(function RingStage({
       data-lab-ring-stage
     >
       <Button
-        className="h-auto rounded-lg border-0 !bg-lab-specimen-light px-6 py-3.5 text-base font-semibold !text-lab-specimen-dark hover:!bg-lab-specimen-light in-data-[bg=light]:!bg-lab-specimen-dark in-data-[bg=light]:!text-lab-specimen-light in-data-[bg=light]:hover:!bg-lab-specimen-dark"
+        className="h-auto rounded-lg border-0 bg-lab-specimen-light px-6 py-3.5 text-base font-semibold text-lab-specimen-dark hover:bg-lab-specimen-light in-data-[bg=light]:bg-lab-specimen-dark in-data-[bg=light]:text-lab-specimen-light in-data-[bg=light]:hover:bg-lab-specimen-dark"
         data-lab-ring-specimen
         data-ring-style={ringStyle}
         data-ring-color={color}
