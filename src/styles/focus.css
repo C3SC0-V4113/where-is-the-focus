@@ -1,4 +1,66 @@
 @layer components {
+  [data-lab-ring-stage][data-bg='light'] {
+    background: var(--lab-ring-bg-light);
+  }
+  [data-lab-ring-stage][data-bg='dark'] {
+    background: var(--lab-ring-bg-dark);
+  }
+  [data-lab-ring-stage][data-bg='brand'] {
+    background: var(--lab-ring-bg-brand);
+  }
+  [data-lab-ring-stage][data-bg='photo'] {
+    background: linear-gradient(
+      135deg,
+      var(--lab-ring-photo-1) 0%,
+      var(--lab-ring-photo-2) 35%,
+      var(--lab-ring-photo-3) 70%,
+      var(--lab-ring-photo-4) 100%
+    );
+  }
+  [data-lab-ring-specimen] {
+    --lab-ring-width: 3px;
+    --lab-ring-offset: 3px;
+    outline: var(--lab-ring-width) solid var(--lab-ring-color, var(--lab-ring-blue));
+    outline-offset: var(--lab-ring-offset);
+    box-shadow: none;
+  }
+  [data-lab-ring-specimen][data-ring-color='blue'] {
+    --lab-ring-color: var(--lab-ring-blue);
+  }
+  [data-lab-ring-specimen][data-ring-color='ink'] {
+    --lab-ring-color: var(--lab-ring-ink);
+  }
+  [data-lab-ring-specimen][data-ring-color='white'] {
+    --lab-ring-color: var(--lab-ring-white);
+  }
+  [data-lab-ring-specimen][data-ring-color='pastel'] {
+    --lab-ring-color: var(--lab-ring-pastel);
+  }
+  [data-lab-ring-specimen][data-ring-style='dashed'] {
+    outline-style: dashed;
+  }
+  [data-lab-ring-specimen][data-ring-style='dotted'] {
+    outline-style: dotted;
+  }
+  [data-lab-ring-specimen][data-ring-style='double'] {
+    outline: 2px solid transparent;
+    outline-offset: 0;
+    box-shadow:
+      0 0 0 var(--lab-ring-offset) var(--lab-ring-white),
+      0 0 0 calc(var(--lab-ring-offset) + var(--lab-ring-width)) var(--lab-ring-ink);
+  }
+  [data-lab-ring-note] {
+    background: rgb(0 0 0 / 45%);
+    color: var(--lab-specimen-light);
+  }
+  [data-lab-ring-stage][data-bg='light'] [data-lab-ring-note] {
+    background: rgb(255 255 255 / 70%);
+    color: var(--lab-specimen-dark);
+  }
+  [data-lab-ring-range] {
+    grid-template-columns: 7ch minmax(0, 1fr) 4ch;
+  }
+
   .arg :not(pre) > code {
     border: 1px solid var(--border);
     border-radius: 5px;

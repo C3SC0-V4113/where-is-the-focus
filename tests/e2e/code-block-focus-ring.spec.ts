@@ -221,18 +221,17 @@ async function verifyCodeBlockKeyboardFocus(
   browserName: string,
   section: Locator,
   labels: (typeof locales)[number],
-  forcedColors: boolean
+  forcedColors: boolean,
+  codeBlock: Locator = section.locator('[data-slot="code-block"]').first()
 ) {
   const previousLink = section.getByRole('link').last();
-  const tablist = section.getByRole('tablist', { name: labels.language, exact: true });
+  const tablist = codeBlock.getByRole('tablist', { name: labels.language, exact: true });
   const cssTab = tablist.getByRole('tab', { name: 'CSS', exact: true });
   const tailwindTab = tablist.getByRole('tab', { name: 'Tailwind', exact: true });
-  const copyButton = section.getByRole('button', { name: labels.copy, exact: true });
-  const hydratedIsland = section
-    .locator('astro-island:not([ssr])')
-    .filter({ has: page.locator('[data-slot="code-block"]') });
+  const copyButton = codeBlock.getByRole('button', { name: labels.copy, exact: true });
+  const hydratedIsland = codeBlock.locator('xpath=ancestor::astro-island[not(@ssr)]');
 
-  await section.locator('[data-slot="code-block"]').first().scrollIntoViewIfNeeded();
+  await codeBlock.scrollIntoViewIfNeeded();
   await expect(hydratedIsland).toHaveCount(1);
   await expect(cssTab).toHaveAttribute('aria-selected', 'true');
   await previousLink.focus();
@@ -277,13 +276,13 @@ async function verifyCodeBlockKeyboardFocus(
   }
   await expectFocusRingNotClipped(copyButton);
 
-  const expectedCode = await section
+  const expectedCode = await codeBlock
     .getByRole('tabpanel', { name: 'CSS', exact: true })
     .evaluate((panel) => panel.textContent ?? '');
   await verifyCopyWhenClipboardIsSupported(
     page,
     browserName,
-    section,
+    codeBlock,
     labels.copied,
     expectedCode,
     forcedColors
@@ -357,7 +356,15 @@ for (const locale of locales) {
         locale,
         false
       );
-      await verifyCodeBlockKeyboardFocus(page, browserName, page.locator('#anillo'), locale, false);
+      const ring = page.locator('#anillo');
+      await verifyCodeBlockKeyboardFocus(
+        page,
+        browserName,
+        ring,
+        locale,
+        false,
+        ring.getByTestId('code-example-block').last()
+      );
     });
   }
 
@@ -385,7 +392,15 @@ for (const locale of locales) {
         locale,
         true
       );
-      await verifyCodeBlockKeyboardFocus(page, browserName, page.locator('#anillo'), locale, true);
+      const ring = page.locator('#anillo');
+      await verifyCodeBlockKeyboardFocus(
+        page,
+        browserName,
+        ring,
+        locale,
+        true,
+        ring.getByTestId('code-example-block').last()
+      );
     });
   }
 }
